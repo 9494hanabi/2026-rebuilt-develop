@@ -1,0 +1,21 @@
+[
+  {
+    "type": "java",
+    "name": "jar (in project YAGSL_drive-main)",
+    "extensions": [
+      {
+        "name": "Sim GUI",
+        "libName": "/Users/suzukiakiramuki/Hanabi/2026-develop/YAGSL_drive-main/build/jni/release/libhalsim_gui.dylib",
+        "defaultEnabled": true
+      },
+      {
+        "name": "Use Real DriverStation",
+        "libName": "/Users/suzukiakiramuki/Hanabi/2026-develop/YAGSL_drive-main/build/jni/release/libhalsim_ds_socket.dylib",
+        "defaultEnabled": false
+      }
+    ],
+    "environment": {},
+    "libraryDir": "/Users/suzukiakiramuki/Hanabi/2026-develop/YAGSL_drive-main/build/jni/release",
+    "mainClassName": "frc.robot.Main"
+  }
+]
