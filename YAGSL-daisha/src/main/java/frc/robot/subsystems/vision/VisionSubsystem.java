@@ -1,12 +1,12 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.vision;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import swervelib.SwerveDrive;
-import frc.robot.lib.LimelightHelpers;
-import frc.robot.util.Constants;
+import frc.robot.lib.util.Constants.VisionConstants;
+import frc.robot.lib.limelight.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
   private final SwerveDrive swerveDrive;
-  private final String limelightlName = Constants.VisionConstans.limeligtName;
+  private final String limelightlName = VisionConstants.limelightName;
 
   public VisionSubsystem(SwerveDrive swerve) {
     this.swerveDrive = swerve;
