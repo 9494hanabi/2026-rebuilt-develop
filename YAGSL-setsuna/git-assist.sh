@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ALLOW_COMMIT_BRANCH_REGEX="^(develop|hinata-develop|feature/|fix/|hotfix/)"
+PROTECT_MAIN_BRANCH="Y"     # Y: forbid commit/push/merge on main only
 
 # =========================
 # git-assist.sh (SETSUNA-ONLY)
@@ -515,10 +515,9 @@ do_commit_and_push() {
     die "中断しました。"
   fi
 
-  # --- guard: prevent commit/push on protected branches (e.g., main) ---
-  if [[ ! "$branch_now" =~ $ALLOW_COMMIT_BRANCH_REGEX ]]; then
-    echo "🛑 保護: '${branch_now}' では commit/push を禁止しています。" >&2
-    echo "   許可: develop / hinata-develop / feature/* / fix/* / hotfix/*" >&2
+  # --- guard: only protect main ---
+  if [[ "$PROTECT_MAIN_BRANCH" == "Y" && "$branch_now" == "main" ]]; then
+    echo "🛑 保護: 'main' では commit/push を禁止しています。" >&2
     die "ブランチを切り替えてから再実行してね。"
   fi
 
@@ -607,6 +606,12 @@ do_commit_and_push() {
 do_merge() {
   need_git_repo
   guard_not_in_daisha
+
+  # --- guard: only protect main ---
+  if [[ "$PROTECT_MAIN_BRANCH" == "Y" && "$(current_branch)" == "main" ]]; then
+    echo "🛑 保護: 'main' では merge を禁止しています。" >&2
+    die "ブランチを切り替えてから再実行してね。"
+  fi
 
   echo "" >&2
   echo "🔀 Merge を開始します。" >&2
