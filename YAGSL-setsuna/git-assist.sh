@@ -6,6 +6,7 @@ set -euo pipefail
 # - You edit ONLY YAGSL-setsuna
 # - YAGSL-daisha is protected from commits/push and accidental edits
 # - After commit&push on setsuna, sync frc/robot into daisha
+# + branch creation / branch switch / pull target selection
 # =========================
 
 # ---------- constants ----------
@@ -18,6 +19,10 @@ PROTECT_DAISHA_STRICT="Y"    # Y: forbid running commit/merge in daisha project 
 AUTO_REVERT_DAISHA_DIRTY="N" # Y: if daisha has local changes, auto reset+clean (DANGEROUS)
 AUTO_SYNC_AFTER_PUSH="Y"     # Y: after setsuna commit&push, sync to daisha
 ASK_BEFORE_SYNC="Y"          # Y: ask before syncing
+
+# Branch/Pull behavior
+PULL_MODE_DEFAULT="ff-only"  # ff-only | rebase | merge
+ALLOW_BRANCH_OPS_IN_DAISHA="Y" # Y: allow switch/create/pull even in daisha (recommended). N: forbid.
 
 # ---------- helpers ----------
 die() { echo "❌ $*" >&2; exit 1; }
@@ -222,11 +227,18 @@ guard_not_in_daisha() {
   fi
 }
 
+guard_branch_ops_allowed_here() {
+  local cur
+  cur="$(detect_current_project)"
+  if [[ "$ALLOW_BRANCH_OPS_IN_DAISHA" != "Y" && "$cur" == "$DAISHA_NAME" ]]; then
+    die "保護: ${DAISHA_NAME} 側ではブランチ操作も禁止です。setsuna 側で実行してね。"
+  fi
+}
+
 # Soft guard: check DAISHA has no changes; optionally auto revert
 guard_daisha_clean_or_fix() {
   local daisha_root="$1"
   if ! git -C "$daisha_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    # still allow, but warn
     echo "⚠️ daisha 側がGitとして認識できません: $daisha_root" >&2
     return 0
   fi
@@ -266,7 +278,6 @@ sync_robot_code_setsuna_to_daisha() {
   [[ -d "$src" ]] || die "同期元が見つかりません: $src"
   mkdir -p "$(dirname "$dst")"
 
-  # protect daisha first
   guard_daisha_clean_or_fix "$daisha_root"
 
   echo "" >&2
@@ -285,7 +296,6 @@ sync_robot_code_setsuna_to_daisha() {
     echo "🗄️ Backup: $bak" >&2
   fi
 
-  # mirror sync
   rsync -a --delete "$src/" "$dst/"
   echo "✅ 同期完了" >&2
 
@@ -296,10 +306,212 @@ sync_robot_code_setsuna_to_daisha() {
   fi
 }
 
-# ---------- operations ----------
+# ---------- branch utilities ----------
+fetch_origin() {
+  git fetch origin --prune >/dev/null 2>&1 || true
+}
+
+list_local_branches() {
+  git branch --format="%(refname:short)"
+}
+
+branch_exists_local() {
+  local b="$1"
+  git show-ref --verify --quiet "refs/heads/$b"
+}
+
+branch_exists_remote() {
+  local b="$1"
+  git show-ref --verify --quiet "refs/remotes/origin/$b"
+}
+
+do_branch_create() {
+  need_git_repo
+  guard_branch_ops_allowed_here
+
+  ensure_clean_or_confirm
+  fetch_origin
+
+  echo "" >&2
+  echo "🌱 新しいブランチを作成します。" >&2
+  echo "現在: $(current_branch)" >&2
+
+  local base
+  base="$(select_one "ベースにするブランチを選んでください" "develop" "main" "今のブランチ( $(current_branch) )" "その他（手入力）" | tail -n 1 | tr -d '\r')"
+  if [[ "$base" == "今のブランチ( $(current_branch) )" ]]; then
+    base="$(current_branch)"
+  elif [[ "$base" == "その他（手入力）" ]]; then
+    base="$(prompt "ベースブランチ名" "develop")"
+  fi
+
+  local newb
+  newb="$(prompt "新しいブランチ名" "feature/xxx")"
+
+  # checkout base (local or remote)
+  if branch_exists_local "$base"; then
+    git switch "$base"
+  elif branch_exists_remote "$base"; then
+    git switch -c "$base" "origin/$base"
+  else
+    die "ベースブランチが見つかりません: $base"
+  fi
+
+  # create
+  if branch_exists_local "$newb"; then
+    die "そのブランチは既に存在します: $newb"
+  fi
+
+  git switch -c "$newb"
+  echo "✅ 作成 & 移動しました: $newb" >&2
+
+  if prompt_yn "このブランチを origin に push（-u）しますか？" "Y"; then
+    git push -u origin "$newb"
+    echo "🚀 push 完了: origin/$newb" >&2
+  fi
+}
+
+do_branch_switch() {
+  need_git_repo
+  guard_branch_ops_allowed_here
+
+  ensure_clean_or_confirm
+  fetch_origin
+
+  echo "" >&2
+  echo "🧭 ブランチを移動します。" >&2
+
+  local target
+  target="$(prompt "移動先ブランチ名（local/remoteどちらでも）" "develop")"
+
+  if branch_exists_local "$target"; then
+    git switch "$target"
+  elif branch_exists_remote "$target"; then
+    # create tracking local branch
+    git switch -c "$target" "origin/$target"
+  else
+    die "ブランチが見つかりません: $target"
+  fi
+
+  echo "✅ 現在のブランチ: $(current_branch)" >&2
+}
+
+# Pull options:
+# A) "checkoutしてそのブランチを pull" (develop/main など)
+# B) "今のブランチに origin/develop などを取り込む" (merge/rebase/ff-only)
+do_pull() {
+  need_git_repo
+  guard_branch_ops_allowed_here
+
+  ensure_clean_or_confirm
+  fetch_origin
+
+  echo "" >&2
+  echo "⬇️ Pull を開始します。" >&2
+  echo "現在: $(current_branch)" >&2
+
+  local pull_style
+  pull_style="$(select_one "どのやり方で更新しますか？" \
+    "ブランチを切り替えて pull（例: develop を pull）" \
+    "今のブランチに別ブランチを取り込む（例: develop を取り込む）" \
+    | tail -n 1 | tr -d '\r')"
+
+  local mode
+  mode="$(select_one "pull/取り込みモードを選んでください" "ff-only（安全）" "rebase（履歴を直線に）" "merge（マージコミット）" \
+    | tail -n 1 | tr -d '\r')"
+  case "$mode" in
+    ff-only* ) mode="ff-only" ;;
+    rebase*  ) mode="rebase" ;;
+    merge*   ) mode="merge" ;;
+    *        ) mode="$PULL_MODE_DEFAULT" ;;
+  esac
+
+  if [[ "$pull_style" == "ブランチを切り替えて pull（例: develop を pull）" ]]; then
+    local tgt
+    tgt="$(select_one "どのブランチを pull しますか？" "develop" "main" "その他（手入力）" | tail -n 1 | tr -d '\r')"
+    if [[ "$tgt" == "その他（手入力）" ]]; then
+      tgt="$(prompt "pull するブランチ名" "develop")"
+    fi
+
+    # switch to target
+    if branch_exists_local "$tgt"; then
+      git switch "$tgt"
+    elif branch_exists_remote "$tgt"; then
+      git switch -c "$tgt" "origin/$tgt"
+    else
+      die "ブランチが見つかりません: $tgt"
+    fi
+
+    echo "📍 現在: $(current_branch) を更新します（mode=$mode）" >&2
+    case "$mode" in
+      ff-only) git pull --ff-only ;;
+      rebase)  git pull --rebase ;;
+      merge)   git pull --no-rebase ;;
+    esac
+    echo "✅ pull 完了: $(current_branch)" >&2
+    return 0
+  fi
+
+  # "取り込む" モード
+  local src
+  src="$(select_one "どのブランチを今のブランチに取り込みますか？" "develop" "main" "その他（手入力）" | tail -n 1 | tr -d '\r')"
+  if [[ "$src" == "その他（手入力）" ]]; then
+    src="$(prompt "取り込むブランチ名" "develop")"
+  fi
+
+  # ensure origin/<src> exists
+  if ! branch_exists_remote "$src"; then
+    # maybe only local exists
+    if ! branch_exists_local "$src"; then
+      die "取り込み元ブランチが見つかりません: $src"
+    fi
+  fi
+
+  local cur
+  cur="$(current_branch)"
+  echo "🧲 取り込み: $cur <- $src（mode=$mode）" >&2
+
+  case "$mode" in
+    ff-only)
+      # fast-forward only possible when current is behind src (rare for "取り込み")
+      # We'll attempt merge --ff-only from origin/src
+      if branch_exists_remote "$src"; then
+        git merge --ff-only "origin/$src" || die "ff-only できませんでした。rebase/merge を選んでね。"
+      else
+        git merge --ff-only "$src" || die "ff-only できませんでした。rebase/merge を選んでね。"
+      fi
+      ;;
+    rebase)
+      if branch_exists_remote "$src"; then
+        git rebase "origin/$src"
+      else
+        git rebase "$src"
+      fi
+      ;;
+    merge)
+      if branch_exists_remote "$src"; then
+        git merge --no-ff "origin/$src"
+      else
+        git merge --no-ff "$src"
+      fi
+      ;;
+  esac
+
+  echo "✅ 取り込み完了: $cur" >&2
+}
+
+# ---------- existing operations ----------
 do_commit_and_push() {
   need_git_repo
   guard_not_in_daisha
+
+    # --- safety gate: confirm branch before doing anything ---
+  local branch_now
+  branch_now="$(current_branch)"
+  echo "" >&2
+  echo "🧭 現在のブランチは '${branch_now}' です。" >&2
+  if ! prompt_yn "このブランチでコミット&プッシュを実行しても良いですか？" "N"; then
+    die "中断しました。"
+  fi
 
   echo "" >&2
   echo "🧾 Commit & Push を開始します。" >&2
@@ -350,7 +562,6 @@ do_commit_and_push() {
 
   echo "✅ 完了: commit & push" >&2
 
-  # optional git tag
   if prompt_yn "Gitのタグ (git tag -a) も作りますか？" "N"; then
     local tname tmsg
     tname="$(prompt "タグ名" "例: v0.3.0")"
@@ -360,7 +571,6 @@ do_commit_and_push() {
     echo "🏷️ タグ作成＆push: $tname" >&2
   fi
 
-  # auto sync setsuna -> daisha
   if [[ "$AUTO_SYNC_AFTER_PUSH" == "Y" ]]; then
     local root setsuna_dir daisha_dir
     root="$(repo_root)"
@@ -394,7 +604,7 @@ do_merge() {
   echo "現在のブランチ(マージ先): $(current_branch)" >&2
 
   ensure_clean_or_confirm
-  git fetch origin --prune
+  fetch_origin
 
   echo "" >&2
   echo "📚 ローカルブランチ:" >&2
@@ -428,19 +638,6 @@ do_merge() {
   fi
 }
 
-do_pull() {
-  need_git_repo
-  # pull は daisha でも許可するか悩むけど、
-  # 「編集しない」だけなら pull はOKにするのが自然。
-  # もし pull も禁止したいなら次の行を有効化:
-  # guard_not_in_daisha
-
-  ensure_clean_or_confirm
-  echo "（安全のため --ff-only）" >&2
-  git pull --ff-only || die "fast-forward できませんでした。fetchして状況確認してください。"
-  echo "✅ pull 完了" >&2
-}
-
 # ---------- main ----------
 main() {
   need_git_repo
@@ -451,12 +648,20 @@ main() {
   echo "Branch: $(current_branch)" >&2
 
   local op
-  op="$(select_one "やりたいことを教えて下さい。" "コミット&プッシュ" "マージ" "プル" | tail -n 1 | tr -d '\r')"
+  op="$(select_one "やりたいことを教えて下さい。" \
+    "コミット&プッシュ" \
+    "マージ" \
+    "プル（選択式）" \
+    "新しいブランチの作成" \
+    "ブランチの移動" \
+    | tail -n 1 | tr -d '\r')"
 
   case "$op" in
     "コミット&プッシュ") do_commit_and_push ;;
     "マージ") do_merge ;;
-    "プル") do_pull ;;
+    "プル（選択式）") do_pull ;;
+    "新しいブランチの作成") do_branch_create ;;
+    "ブランチの移動") do_branch_switch ;;
     *) die "不明な操作です: $op" ;;
   esac
 }
