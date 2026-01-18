@@ -1,0 +1,5 @@
+.DS_Store
+.gradle/
+YAGSL-daisha/
+.git-assist-backup/
+**/.git-assist-backup/
