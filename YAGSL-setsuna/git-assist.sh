@@ -619,7 +619,7 @@ do_merge() {
 
   ensure_clean_or_confirm
   fetch_origin
-
+ 
   echo "" >&2
   echo "📚 ローカルブランチ:" >&2
   git branch --format="%(refname:short)" | sed 's/^/  - /' >&2
