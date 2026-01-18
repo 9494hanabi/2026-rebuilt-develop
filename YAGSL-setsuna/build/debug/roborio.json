@@ -1,9 +1,0 @@
-[
-  {
-    "type": "java",
-    "name": "frcJava",
-    "port": 8349,
-    "target": "10.94.94.2",
-    "project": "YAGSL_drive-main"
-  }
-]

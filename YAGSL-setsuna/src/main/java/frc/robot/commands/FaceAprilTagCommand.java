@@ -52,29 +52,61 @@ public class FaceAprilTagCommand extends Command {
 
     @Override
     public void execute() {
-        double[] t = table.getEntry("targetpose_robotspace").getDoubleArray(new double[6]);
-        boolean tv = table.getEntry("tv").getDouble(0) == 1;
+        // ターゲットが見えてるか
+        boolean tv = table.getEntry("tv").getDouble(0) == 1.0; // 1なら有効  [oai_citation:4‡docs.limelightvision.io](https://docs.limelightvision.io/docs/docs-limelight/apis/complete-networktables-api?utm_source=chatgpt.com)
 
-        if (tv) {
-            double x = t[0]; // 前方向[m]（ロボット座標）
-            double y = t[1]; // 左方向[m]
-
-            // 目標：タグの手前 stopDist で止まりたいなら x - stopDist を誤差にする
-            // double stopDist = 0.8; // 80cm手前で止まる例
-            double ex = x;
-            double ey = -y;
-
-            double kP = 1.2; // (m/s) / m
-            double vx = MathUtil.clamp(kP * ex, -1.5, 1.5);
-            double vy = MathUtil.clamp(kP * ey, -1.5, 1.5);
-
-            // タグの方向を向きたいなら、tx（角度）や atan2 でomegaを作る（ここは例）
-            double headingErr = Math.atan2(y, x); // rad
-            double kPtheta = 2.0;
-            double omega = MathUtil.clamp(kPtheta * headingErr, -2.5, 2.5);
-
-            swerve.setChassisSpeeds(new ChassisSpeeds(vx, vy, omega));
+        if (!tv) {
+            // 見えてない時は停止（前回指令が残らないように）
+            swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
+            return;
         }
+
+        // AprilTagの3D位置（ロボット座標）
+        // targetpose_robotspace = [tx, ty, tz, pitch, yaw, roll] (meters, degrees)  [oai_citation:5‡docs.limelightvision.io](https://docs.limelightvision.io/docs/docs-limelight/apis/complete-networktables-api?utm_source=chatgpt.com)
+        double[] t = table.getEntry("targetpose_robotspace").getDoubleArray(new double[6]);
+
+        double tagX_fwd_m   = t[0]; // 前方向 + (m)
+        double tagY_right_m = t[1]; // 右方向 + (m)  ← Limelight座標
+
+        // WPILibのvyは「左+」なので反転（右+ -> 左+）  [oai_citation:6‡FIRST Robotics Competition Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/intro-and-chassis-speeds.html?utm_source=chatgpt.com)
+        double tagY_left_m = -tagY_right_m;
+
+        // =========================
+        // 1) 並進（タグの手前で止める）
+        // =========================
+        double ex = tagX_fwd_m; // 前後誤差
+        double ey = tagY_left_m;// 左右誤差
+
+        double kPxy = 1.2;          // (m/s)/m
+        double vMax = 1.5;          // m/s
+
+        double vx = MathUtil.clamp(kPxy * ex, -vMax, vMax);
+        double vy = MathUtil.clamp(kPxy * ey, -vMax, vMax);
+
+        // 近づいたらガタガタしないように小さい誤差は0に（任意）
+        double deadband = 0.03; // 3cm
+        if (Math.abs(ex) < deadband) vx = 0.0;
+        if (Math.abs(ey) < deadband) vy = 0.0;
+
+        // =========================
+        // 2) 回転（タグに正対：tx角度を0に）
+        // =========================
+        double txDeg = table.getEntry("tx").getDouble(0.0); // 水平角ズレ(deg)  [oai_citation:7‡docs.limelightvision.io](https://docs.limelightvision.io/docs/docs-limelight/apis/complete-networktables-api?utm_source=chatgpt.com)
+        double txRad = Math.toRadians(txDeg);
+
+        double kPtheta = 3.0;       // (rad/s)/rad
+        double omegaMax = 2.5;      // rad/s
+
+        // txが右(+)なら、時計回り(omega−)で戻したいのでマイナス
+        // ChassisSpeeds: omegaはrad/s  [oai_citation:8‡FIRST Robotics Competition Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/intro-and-chassis-speeds.html?utm_source=chatgpt.com)
+        double omega = MathUtil.clamp(kPtheta * txRad, -omegaMax, omegaMax);
+
+        // 角度も小さければ止める（任意）
+        double thetaDeadbandRad = Math.toRadians(1.0);
+        if (Math.abs(txRad) < thetaDeadbandRad) omega = 0.0;
+
+        // 出力：vx=前, vy=左, omega=角速度  [oai_citation:9‡FIRST Robotics Competition Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/intro-and-chassis-speeds.html?utm_source=chatgpt.com)
+        swerve.setChassisSpeeds(new ChassisSpeeds(vx, vy, omega));
     }
 
     @Override
