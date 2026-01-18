@@ -86,8 +86,11 @@ map_scope() {
   case "$s" in
     ドライブ) echo "drive" ;;
     ビジョン) echo "vision" ;;
+    オート) echo "auto" ;;
+    タレット) echo "talet" ;;
     シューター) echo "shooter" ;;
     インテーク) echo "intake" ;;
+    クライム) echo "clime" ;;
     その他の機能) echo "misc" ;;
     *) echo "misc" ;;
   esac
