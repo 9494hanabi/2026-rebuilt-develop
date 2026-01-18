@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ALLOW_COMMIT_BRANCH_REGEX="^(develop|hinata-develop|feature/|fix/|hotfix/)"
+
 # =========================
 # git-assist.sh (SETSUNA-ONLY)
 # - You edit ONLY YAGSL-setsuna
@@ -288,7 +290,7 @@ sync_robot_code_setsuna_to_daisha() {
   if prompt_yn "同期前にバックアップを作りますか？" "Y"; then
     local ts bak
     ts="$(date +"%Y%m%d_%H%M%S")"
-    bak="$daisha_root/.git-assist-backup/$ts/$REL_ROBOT_DIR"
+    bak="$HOME/.git-assist-backup/$(basename "$(repo_root)")/$DAISHA_NAME/$ts/$REL_ROBOT_DIR"
     mkdir -p "$bak"
     if [[ -d "$dst" ]]; then
       rsync -a "$dst/" "$bak/"
@@ -511,6 +513,13 @@ do_commit_and_push() {
   echo "🧭 現在のブランチは '${branch_now}' です。" >&2
   if ! prompt_yn "このブランチでコミット&プッシュを実行しても良いですか？" "N"; then
     die "中断しました。"
+  fi
+
+  # --- guard: prevent commit/push on protected branches (e.g., main) ---
+  if [[ ! "$branch_now" =~ $ALLOW_COMMIT_BRANCH_REGEX ]]; then
+    echo "🛑 保護: '${branch_now}' では commit/push を禁止しています。" >&2
+    echo "   許可: develop / hinata-develop / feature/* / fix/* / hotfix/*" >&2
+    die "ブランチを切り替えてから再実行してね。"
   fi
 
   echo "" >&2
