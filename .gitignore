@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Gradle / Java
+.gradle/
+build/
+out/
+bin/
+*.class
+
+# Node
+node_modules/
+
+# your tool backups
+.git-assist-backup/
+
+# local-only project (if intended)
+YAGSL-daisha/
