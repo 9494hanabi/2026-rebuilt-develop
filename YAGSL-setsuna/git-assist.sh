@@ -180,23 +180,19 @@ contains_robot_dir() {
 resolve_project_root_with_robot() {
   local base="$1"
 
+  # まず素直にチェック
   if contains_robot_dir "$base"; then
     echo "$base"; return 0
   fi
 
-  local bn
-  bn="$(basename "$base")"
-  if [[ -d "$base/$bn" ]] && contains_robot_dir "$base/$bn"; then
-    echo "$base/$bn"; return 0
+  # base以下のどこかに REL_ROBOT_DIR があれば見つける（深さ制限は適当に）
+  local hit
+  hit="$(find "$base" -maxdepth 6 -type d -path "*/$REL_ROBOT_DIR" -print -quit 2>/dev/null || true)"
+  if [[ -n "$hit" ]]; then
+    # ".../<project-root>/$REL_ROBOT_DIR" の <project-root> を返す
+    echo "${hit%/$REL_ROBOT_DIR}"
+    return 0
   fi
-
-  local d
-  for d in "$base"/*; do
-    [[ -d "$d" ]] || continue
-    if contains_robot_dir "$d"; then
-      echo "$d"; return 0
-    fi
-  done
 
   echo ""
   return 1
