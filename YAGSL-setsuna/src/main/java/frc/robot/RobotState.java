@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
-// import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.Logger;
 
 // ======================================================================================
 // Editer : ひなた
@@ -258,19 +258,19 @@ public class RobotState {
     //         return ledState.get();
     //     }
 
-    private Optional<Double> getMaxAbsoluteInRnage(
-                ConcurrentTimeInterpolatableBuffer<Dobule> buffer, double minTime, double maxTime) {
+    private Optional<Double> getMaxAbsValueInRange(
+            ConcurrentTimeInterpolatableBuffer<Double> buffer, double minTime, double maxTime) {
         var submap = buffer.getInternalBuffer().subMap(minTime, maxTime).values();
         var max = submap.stream().max(Double::compare);
         var min = submap.stream().min(Double::compare);
         if (max.isEmpty() || min.isEmpty()) return Optional.empty();
-        if (Math.abs(max.get()) >= Math.abs(min.get()) return max);
+        if (Math.abs(max.get()) >= Math.abs(min.get())) return max;
         else return min;
     }
 
     public Optional<Double> getMaxAbsDriveYawAngularVelocityInRnage(
             double minTime, double maxTime) {
-        if (Robot.isReal()) return getMaxAbsValueInRnage(driveYawAngularVelocity, minTime, maxTime);
+        if (Robot.isReal()) return getMaxAbsValueInRange(driveYawAngularVelocity, minTime, maxTime);
         return Optional.of(measuredRobotRelativeChassisSpeeds.get().omegaRadiansPerSecond);
     }
 
@@ -304,12 +304,121 @@ public class RobotState {
     }
 
     public void updateLogger() {
-        if (this.driverYawAngularVelocity.getInternalBuffer().lastEntry() != null) {
+        // AdvantageKitへの集約ログ出力
+        if (this.driveYawAngularVelocity.getInternalBuffer().lastEntry() != null) {
             Logger.recordOutput(
-                "RobotState/YwaAngularVelocity",
-                this.driveYawAngularVelocity.getInternalBuffer().lastEntry().getValue()
-            );
+                    "RobotState/YawAngularVelocity",
+                    this.driveYawAngularVelocity.getInternalBuffer().lastEntry().getValue());
         }
-        if (this.)
+        if (this.driveRollAngularVelocity.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/RollAngularVelocity",
+                    this.driveRollAngularVelocity.getInternalBuffer().lastEntry().getValue());
+        }
+        if (this.drivePitchAngularVelocity.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/PitchAngularVelocity",
+                    this.drivePitchAngularVelocity.getInternalBuffer().lastEntry().getValue());
+        }
+        if (this.drivePitchRads.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/PitchRads",
+                    this.drivePitchRads.getInternalBuffer().lastEntry().getValue());
+        }
+        if (this.driveRollRads.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/RollRads",
+                    this.driveRollRads.getInternalBuffer().lastEntry().getValue());
+        }
+        if (this.accelX.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/AccelX", this.accelX.getInternalBuffer().lastEntry().getValue());
+        }
+        if (this.accelY.getInternalBuffer().lastEntry() != null) {
+            Logger.recordOutput(
+                    "RobotState/AccelY", this.accelY.getInternalBuffer().lastEntry().getValue());
+        }
+        Logger.recordOutput(
+                "RobotState/DesiredChassisSpeedFieldFrame",
+                getLatestDesiredFieldRelativeChassisSpeed());
+        Logger.recordOutput(
+                "RobotState/DesiredChassisSpeedRobotFrame",
+                getLatestDesiredRobotRelativeChassisSpeeds());
+        Logger.recordOutput(
+                "RobotState/MeasuredChassisSpeedFieldFrame",
+                getLatestMeasuredFieldRelativeChassisSpeeds());
+        Logger.recordOutput(
+                "RobotState/FusedChassisSpeedFieldFrame",
+                getLatestFusedFieldRelativeChassisSpeed());
+
+        // 機構状態のログ
+        // Logger.recordOutput("RobotState/ElevatorHeightMeters", getElevatorHeightMeters());
+        // Logger.recordOutput("RobotState/WristRadians", getWristRadians());
+        // Logger.recordOutput("RobotState/IntakeRollerRotations", getIntakeRollerRotations());
+        // Logger.recordOutput("RobotState/CoralRollerRotations", getClawRollerRotations());
+    }
+
+    // ビジョンで優先的に見るタグID
+    private final AtomicReference<Optional<Integer>> exclusiveTag = 
+            new AtomicReference<>(Optional.empty());
+    
+
+    // --- 機構状態 (センサー/制御値) --- 
+    // private final AtomicReference<Dobule> taletYawAngularRad = new AtomicReference(0.0);
+
+    // --- 機構状態のセッター ---
+    // public void setClimberRollerRotations(double rotations) {
+    //     talletAimRotations.set(rotations);
+    // }
+
+    // 優先順位の高いタグのセッター
+    public void setExclusiveTag(int id) {
+        exclusiveTag.set(Optional.of(id));
+    }
+
+    // セットしたタグのクリアラー
+    public void clearExclusiveTag() {
+        exclusiveTag.set(Optional.empty());
+    }
+
+    // 優先タグのゲッター
+    public Optional<Integer> getExclusiveTag() {
+        return exclusiveTag.get();
+    }
+
+    // 目標ターゲット座標のセッター
+    public void setTrajectoryTargetPose(Pose2d pose) {
+        trajectoryTargetPose = Optional.of(pose);
+    }
+
+    // 目標ターゲット座標のゲッター
+    public Optional<Pose2d> getTrajectoryTargetPose() {
+        return trajectoryTargetPose;
+    }
+
+    // 現在地のセッター
+    public void setTrajectoryCurrentPose(Pose2d pose) {
+        trajectoryCurrentPose = Optional.of(pose);
+    }
+
+    // 現在地のゲッター
+    public Optional<Pose2d> getTrajectoryCurrentPose() {
+        return trajectoryCurrentPose;
+    }
+
+    // ピッチのゲッター
+    public double getDrivePitchRadians() {
+        if (this.drivePitchRads.getInternalBuffer().lastEntry() != null) {
+            return drivePitchRads.getInternalBuffer().lastEntry().getValue();
+        }
+        return 0.0;
+    }
+
+    // ロールのゲッター
+    public double getDriveRollRadians() {
+        if (this.driveRollRads.getInternalBuffer().lastEntry() != null) {
+            return driveRollRads.getInternalBuffer().lastEntry().getValue();
+        }
+        return 0.0;
     }
 }
