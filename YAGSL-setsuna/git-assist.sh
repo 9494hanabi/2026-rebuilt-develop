@@ -8,7 +8,7 @@ PROTECT_MAIN_BRANCH="Y"     # Y: forbid commit/push/merge on main only
 # - You edit ONLY YAGSL-setsuna
 # - YAGSL-daisha is protected from commits/push and accidental edits
 # - After commit&push on setsuna, sync frc/robot into daisha
-# + branch creation / branch switch / pull target selection
+#  branch creation / branch switch / pull target selection
 # =========================
 
 # ---------- constants ----------
@@ -18,7 +18,7 @@ DAISHA_NAME="YAGSL-daisha"
 
 # Protection toggles
 PROTECT_DAISHA_STRICT="Y"    # Y: forbid running commit/merge in daisha project root
-AUTO_REVERT_DAISHA_DIRTY="N" # Y: if daisha has local changes, auto reset+clean (DANGEROUS)
+AUTO_REVERT_DAISHA_DIRTY="N" # Y: if daisha has local changes, auto resetclean (DANGEROUS)
 AUTO_SYNC_AFTER_PUSH="Y"     # Y: after setsuna commit&push, sync to daisha
 ASK_BEFORE_SYNC="Y"          # Y: ask before syncing
 
@@ -159,13 +159,13 @@ build_commit_message() {
   local subject="${type}(${scope}): ${feature_name} - ${detail} [${status}]"
 
   local body=""
-  body+="Operation: ${op}\n"
-  body+="Category: ${action}\n"
-  body+="Feature: ${feature_name}\n"
-  body+="Change: ${edit_kind}\n"
-  body+="Status: ${stability}\n"
+  body="Operation: ${op}\n"
+  body="Category: ${action}\n"
+  body="Feature: ${feature_name}\n"
+  body="Change: ${edit_kind}\n"
+  body="Status: ${stability}\n"
   if [[ -n "$tag_line" ]]; then
-    body+="${tag_line}\n"
+    body="${tag_line}\n"
   fi
 
   echo -e "${subject}\n\n${body}"
@@ -242,14 +242,14 @@ guard_daisha_clean_or_fix() {
   fi
 
   local st
-  st="$(git -C "$daisha_root" status --porcelain || true)"
+  st="$(git -C "$daisha_root" status --porcelain -- . || true)"
   if [[ -z "$st" ]]; then
     return 0
   fi
 
   echo "" >&2
   echo "🛡️ 保護: ${DAISHA_NAME} に変更が入っています（本来は編集しない想定）" >&2
-  git -C "$daisha_root" status --short >&2
+  git -C "$daisha_root" status --short -- . >&2
 
   if [[ "$AUTO_REVERT_DAISHA_DIRTY" == "Y" ]]; then
     echo "⚠️ AUTO_REVERT_DAISHA_DIRTY=Y のため、daisha を強制的に元に戻します。" >&2
@@ -285,7 +285,7 @@ sync_robot_code_setsuna_to_daisha() {
 
   if prompt_yn "同期前にバックアップを作りますか？" "Y"; then
     local ts bak
-    ts="$(date +"%Y%m%d_%H%M%S")"
+    ts="$(date -j -f "%s" "$(date +%s)" +"%Y%m%d_%H%M%S")"
     bak="$HOME/.git-assist-backup/$(basename "$(repo_root)")/$DAISHA_NAME/$ts/$REL_ROBOT_DIR"
     mkdir -p "$bak"
     if [[ -d "$dst" ]]; then
@@ -550,7 +550,7 @@ do_commit_and_push() {
     die "中断しました。"
   fi
 
-  git commit -m "$(echo "$msg" | head -n 1)" -m "$(echo "$msg" | tail -n +3)"
+  git commit -m "$(echo "$msg" | head -n 1)" -m "$(echo "$msg" | tail -n 3)"
 
   local branch
   branch="$(current_branch)"
@@ -647,6 +647,69 @@ do_merge() {
     fi
   fi
 }
+find_project_dir_by_scan() {
+  local repo="$1"
+  local want="$2"  # "setsuna" or "daisha" を想定
+  local hit=""
+
+  # 直下のディレクトリを走査して、名前に want を含むものを探す（大文字小文字無視）
+  while IFS= read -r d; do
+    local bn
+    bn="$(basename "$d")"
+    if [[ "${bn,,}" == *"${want,,}"* ]]; then
+      hit="$d"
+      break
+    fi
+  done < <(find "$repo" -maxdepth 1 -mindepth 1 -type d -print)
+
+  [[ -n "$hit" ]] || { echo ""; return 1; }
+
+  # setsuna は robot dir が必要（同期元）
+  if [[ "${want,,}" == "setsuna" ]]; then
+    resolve_project_root_with_robot "$hit" || { echo ""; return 1; }
+    return 0
+  fi
+
+  # daisha はフォルダがあればOK（同期先は mkdir -p で作れる）
+  echo "$hit"
+}
+find_project_dir_loose() {
+  local repo="$1"
+  local name="$2"
+  local candidate="$repo/$name"
+  [[ -d "$candidate" ]] || { echo ""; return 1; }
+  echo "$candidate"
+}
+# ---------- manual sync operation ----------
+do_sync_to_daisha() {
+  need_git_repo
+  guard_not_in_daisha
+
+  echo "" >&2
+  echo "🔁 台車(daisha)に同期します（${SETSUNA_NAME} -> ${DAISHA_NAME}）" >&2
+
+  local root setsuna_dir daisha_dir
+  root="$(repo_root)"
+
+  setsuna_dir="$(find_project_dir_by_scan "$root" "setsuna" || true)"
+  daisha_dir="$(find_project_dir_by_scan "$root" "daisha" || true)"
+
+  if [[ -z "${setsuna_dir:-}" ]]; then
+    echo "🧭 ヒント: repo直下に 'setsuna' を含むフォルダがあるか確認してね:" >&2
+    ls -1 "$root" >&2 || true
+    die "同期元(setsuna)が見つかりません（$REL_ROBOT_DIR が存在する必要があります）"
+  fi
+
+  echo "   setsuna: $setsuna_dir" >&2
+  echo "   daisha : $daisha_dir" >&2
+  echo "   dir    : $REL_ROBOT_DIR" >&2
+
+  if ! prompt_yn "今すぐ同期しますか？" "Y"; then
+    die "中断しました。"
+  fi
+
+  sync_robot_code_setsuna_to_daisha "$setsuna_dir" "$daisha_dir"
+}
 
 # ---------- main ----------
 main() {
@@ -662,6 +725,7 @@ main() {
     "コミット&プッシュ" \
     "マージ" \
     "プル（選択式）" \
+    "台車に同期（setsuna -> daisha）" \
     "新しいブランチの作成" \
     "ブランチの移動" \
     | tail -n 1 | tr -d '\r')"
@@ -670,6 +734,7 @@ main() {
     "コミット&プッシュ") do_commit_and_push ;;
     "マージ") do_merge ;;
     "プル（選択式）") do_pull ;;
+    "台車に同期（setsuna -> daisha）") do_sync_to_daisha ;;
     "新しいブランチの作成") do_branch_create ;;
     "ブランチの移動") do_branch_switch ;;
     *) die "不明な操作です: $op" ;;
