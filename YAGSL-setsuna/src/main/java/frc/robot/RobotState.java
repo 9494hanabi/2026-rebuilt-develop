@@ -183,6 +183,7 @@ public class RobotState {
         this.measuredFieldRelativeChassisSpeeds.set(measuredFieldRelativeSpeeds);
         this.fusedFieldRelativeChassisSpeeds.set(fusedFieldRelativeSpeeds);
     }
+    
 
     public Map.Entry<Double, Pose2d> getLatestFieldToRobot() {
         return fieldToRobot.getLatest();
