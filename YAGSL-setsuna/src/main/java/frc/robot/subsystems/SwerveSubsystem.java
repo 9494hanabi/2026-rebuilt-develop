@@ -5,6 +5,13 @@
 package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meter;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.lib.limelight.LimelightHelpers;
@@ -21,8 +28,11 @@ import java.util.function.Supplier;
 
 import com.studica.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveDrive;
 // import swervelib.SwerveInputStream;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,6 +47,15 @@ public class SwerveSubsystem extends SubsystemBase {
   SwerveDrive  swerveDrive;
 
   public SwerveSubsystem() {
+    // YAGSLのテレメトリを詳細表示モードにする（デバッグ用の情報を多く出す設定）
+    /*＝＝＝＝＝＝＝＝＝＝＝まじ大事＝＝＝＝＝＝＝＝＝＝
+    *この下にある SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+    *は大会になったら絶対に消すことまじで大事
+    *めっちゃデータを送るから消さないとロボットが遅くなる。
+    *消す時は SwerveDriveTelemetry.verbosity = TelemetryVerbosity.NONE;　にする
+    */
+    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+
     try
     {
       swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maxSpeed,
@@ -49,7 +68,84 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       throw new RuntimeException(e);
     }
+    setupPathPlanner();
   }
+
+  public void setupPathPlanner()
+  {
+    // GUI設定からRobotConfigを読み込みます。
+    // これを定数ファイルに保存すべきです
+    RobotConfig config;
+    try
+    {
+      config = RobotConfig.fromGUISettings();
+
+      final boolean enableFeedforward = true;
+      // AutoBuilder を最後に設定する
+      AutoBuilder.configure(
+          swerveDrive::getPose,
+          // ロボットポーズ提供元
+          swerveDrive::resetOdometry,
+          // 走行距離計のリセット方法（車両に開始姿勢がある場合に呼び出されます）
+          swerveDrive::getRobotVelocity,
+          // シャーシ速度の供給元。ロボット相対でなければならない
+          (speedsRobotRelative, moduleFeedForwards) -> {
+            if (enableFeedforward)
+            {
+              swerveDrive.drive(
+                  speedsRobotRelative,
+                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                  moduleFeedForwards.linearForces()
+                               );
+            } else
+            {
+              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+            }
+          },
+          // ROBOT RELATIVE ChassisSpeeds に基づいてロボットを駆動するメソッド。オプションで個々のモジュールのフィードフォワードを出力可能。
+          new PPHolonomicDriveController(
+              // PPHolonomicControllerは、ホロノミック駆動系向けの組み込みパス追従制御器です
+              new PIDConstants(5.0, 0.0, 0.0),
+              // PID定数
+              new PIDConstants(5.0, 0.0, 0.0)
+              // 回転PID定数
+          ),
+          config,
+          // The robot configuration
+          () -> {
+            // 赤アライアンス向けに経路を反転させるタイミングを制御するブール値の提供元
+            // これにより、追跡中の経路がフィールドの赤アライアンスへ反転する。
+            // 起点（オリジン）は青アライアンスに残る
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent())
+            {
+              return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+          },
+          this
+          // このサブシステムを参照して要件を設定する
+                           );
+    } catch (Exception e)
+    {
+      // 必要に応じて例外を処理する
+      e.printStackTrace();
+    }
+    //PathPlannerの経路探索をプリロード
+    // カスタム経路探索を使用する場合はこの行の前に追加
+    PathfindingCommand.warmupCommand().schedule();
+  }
+
+  //イベント付きのパスフォロワーを取得する。
+  // @param PathPlannerAuto(〜〜〜) 〜〜〜はPathPlannerの.atuoのパス名。
+
+  public Command getAutonomousCommand(String pathName)
+  {
+    // AutoBuilderを使用してパス追跡コマンドを作成します。これによりイベントマーカーもトリガーされます。
+    return new PathPlannerAuto(pathName);
+  }
+  //===========PathPlannreの設定終わり==============
 
   /**
    * Example command factory method.

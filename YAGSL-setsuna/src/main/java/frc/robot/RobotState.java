@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.IntSupplier;
+import java.util.function.IntSupplier; 
 
 import org.littletonrobotics.junction.Logger;
 
@@ -183,6 +183,7 @@ public class RobotState {
         this.measuredFieldRelativeChassisSpeeds.set(measuredFieldRelativeSpeeds);
         this.fusedFieldRelativeChassisSpeeds.set(fusedFieldRelativeSpeeds);
     }
+    
 
     public Map.Entry<Double, Pose2d> getLatestFieldToRobot() {
         return fieldToRobot.getLatest();
