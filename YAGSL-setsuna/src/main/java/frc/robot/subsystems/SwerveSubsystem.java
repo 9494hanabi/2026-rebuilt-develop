@@ -38,6 +38,10 @@ import swervelib.SwerveDrive;
 import edu.wpi.first.math.geometry.Rotation2d;
 // import edu.wpi.first.math.util.Units;
 
+// === 担当者 ===
+// はるた
+//
+
 public class SwerveSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI);

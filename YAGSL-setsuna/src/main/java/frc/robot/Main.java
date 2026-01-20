@@ -55,6 +55,10 @@
  * 「FRCコミュニティーとTeam 9494が、革新の火種を絶やさず発展し続けることを願って。」
  */
 
+// === 担当者 ===
+// はるた
+//
+
 package frc.robot;
 import edu.wpi.first.wpilibj.RobotBase;
 public final class Main {

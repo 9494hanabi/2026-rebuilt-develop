@@ -18,6 +18,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
+
+// === 担当者 ===
+// ひなた
+//
+
 public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem();
   private final CommandXboxController m_driverController =
