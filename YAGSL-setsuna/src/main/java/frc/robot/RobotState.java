@@ -18,11 +18,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier; 
 
-// import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.Logger;
 
-
-
-
+// ======================================================================================
+// Editer : ひなた
+//
 
 public class RobotState {
     // 参照のためのバッファ長
