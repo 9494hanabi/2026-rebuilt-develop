@@ -24,6 +24,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     // ② MegaTag2の推定値（wpiblue）を取得
     var mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightlName);
+    if (mt2 == null) {
+        return;
+    }
 
     // ③ タグが見えてる時だけYAGSLへ融合
     if (mt2.tagCount > 0) {
