@@ -20,8 +20,8 @@ import java.util.function.IntSupplier;
 
 import org.littletonrobotics.junction.Logger;
 
-// ======================================================================================
-// Editer : ひなた
+// === 担当者 ===
+// ひなた
 //
 
 public class RobotState {

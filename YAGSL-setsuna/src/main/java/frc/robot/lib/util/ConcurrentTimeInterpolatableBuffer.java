@@ -13,6 +13,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 // 任意の型のセンサ計測値を時系列順に保存するための機能を提供しているクラス。
 // 
 
+// === 担当者 ===
+// ひなた
+//
+
 public class ConcurrentTimeInterpolatableBuffer<T> {
 
     // m_ はメンバ変数(オブジェクト破棄まで維持される変数)であることを示す。
