@@ -502,7 +502,7 @@ do_pull() {
 
   local cur
   cur="$(current_branch)"
-  echo "🧲 取り込み: $cur <- $src（mode=$mode）" >&2
+  echo "🧲 取り込み: ${cur} <- ${src}（mode=${mode}）" >&2
 
   case "$mode" in
     ff-only)
