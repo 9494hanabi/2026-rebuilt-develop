@@ -157,6 +157,6 @@ public class RobotState {
 
     public void addDriveMotionMeasurements() {
         double timestamp;
-        double angularRollRads
+        double angularRollRads;
     }
 }
