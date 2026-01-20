@@ -45,6 +45,42 @@ has_changes() {
   [[ -n "$(git status --porcelain)" ]]
 }
 
+ensure_no_generated_artifacts() {
+  local -a bad=()
+  local line status path
+  while IFS= read -r line; do
+    status="${line:0:2}"
+    path="${line:3}"
+    if [[ "$path" == *" -> "* ]]; then
+      path="${path##* -> }"
+    fi
+    if [[ "$path" == bin/* || "$path" == build/* || "$path" == *.class ]]; then
+      if [[ "$status" == *D* ]]; then
+        continue
+      fi
+      bad+=("$status $path")
+    fi
+  done < <(git status --porcelain)
+
+  if ((${#bad[@]} > 0)); then
+    echo "🛑 生成物/バイナリが変更に含まれています:" >&2
+    printf "   %s\n" "${bad[@]}" >&2
+    echo "   対処: 生成物を削除するか、追跡解除してから再実行してね。" >&2
+    return 1
+  fi
+  return 0
+}
+
+cleanup_generated_artifacts() {
+  # Remove common build outputs before commit to avoid binary diffs.
+  if [[ -d "bin" ]]; then
+    rm -rf "bin"
+  fi
+  if [[ -d "build" ]]; then
+    rm -rf "build"
+  fi
+}
+
 prompt() {
   local msg="$1"
   local default="${2:-}"
@@ -525,6 +561,12 @@ do_commit_and_push() {
   if ! has_changes; then
     echo "✅ 変更がありません。コミット不要です。" >&2
     return 0
+  fi
+
+  # --- cleanup & guard: remove generated artifacts, then block if still present ---
+  cleanup_generated_artifacts
+  if ! ensure_no_generated_artifacts; then
+    die "生成物が含まれているため中断しました。削除/除外してから再実行してね。"
   fi
 
   git status --short >&2
