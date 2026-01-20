@@ -12,10 +12,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 // はるた
 //
 
-public final class Autos {
+public final class AutoCommand {
   /** Example static factory for an autonomous command. */
 
-  private Autos() {
+  private AutoCommand() {
     throw new UnsupportedOperationException("This is a utility class!");
   }
 }
