@@ -3,3 +3,7 @@
 YAGSL-daisha/
 .git-assist-backup/
 **/.git-assist-backup/
+
+# WPILib sim GUI / DS configs (local-only)
+**/simgui-ds.json
+**/simgui.json
