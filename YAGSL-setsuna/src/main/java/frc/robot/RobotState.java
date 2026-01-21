@@ -2,6 +2,7 @@ package frc.robot;
 
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.lib.util.ConcurrentTimeInterpolatableBuffer;
+import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.MathHelpers;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -421,5 +423,28 @@ public class RobotState {
             return driveRollRads.getInternalBuffer().lastEntry().getValue();
         }
         return 0.0;
+    }
+
+    // モード未実装のため、割愛
+    // 
+    // モードが実装された場合は controllboard/ModalControls.javaを実装せよ
+    //
+    // public void logControllerMode() {
+    //     // モード切替の追跡用ログ
+    //     Logger.recordOutput("Controller Mode", ModalControls.getInstance().getMode().toString());
+    // }
+
+    public static boolean onOpponentSide(boolean isRedAlliance, Pose2d pose) {
+        // フィールド中央ラインを越えたかで相手側を判定
+        return (isRedAlliance
+                        && pose.getTranslation().getX()
+                                < FieldConstants.fieldLengthMeter / 2 - FieldConstants.kMidlineBufferMeter)
+                || (!isRedAlliance
+                        && pose.getTranslation().getX()
+                                > FieldConstants.fieldLengthMeter / 2 + FieldConstants.kMidlineBufferMeter);
+    }
+
+    public boolean onOpponentSide() {
+        return onOpponentSide(this.isRedAlliance(), this.getLatestFieldToRobot().getValue());
     }
 }

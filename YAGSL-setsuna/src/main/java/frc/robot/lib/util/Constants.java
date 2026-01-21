@@ -22,6 +22,8 @@ public final class Constants {
   }
 
   public static class FieldConstants {
+    public static final double fieldLengthMeter = 16.54;
+    public static final double kMidlineBufferMeter = 5.0;
   }
 
   public static class SemiAutoConstants {
