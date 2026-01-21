@@ -730,6 +730,14 @@ do_commit_and_push() {
   echo "✅ 完了: commit & push" >&2
 
   if prompt_yn "Gitのタグ (git tag -a) も作りますか？" "N"; then
+    echo "" >&2
+    echo "🏷️ 既存のタグ一覧:" >&2
+    if git tag --list | grep -q .; then
+      git tag --list | sort >&2
+    else
+      echo "（タグはまだありません）" >&2
+    fi
+    echo "" >&2
     local tname tmsg
     tname="$(prompt "タグ名" "例: v0.3.0")"
     tmsg="$(prompt "タグの説明" "release")"
