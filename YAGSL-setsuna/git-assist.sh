@@ -45,6 +45,109 @@ has_changes() {
   [[ -n "$(git status --porcelain)" ]]
 }
 
+has_staged_changes() {
+  [[ -n "$(git diff --cached --name-only)" ]]
+}
+
+list_unstaged_files() {
+  local line status path
+  while IFS= read -r line; do
+    status="${line:0:2}"
+    path="${line:3}"
+    if [[ "$path" == *" -> "* ]]; then
+      path="${path##* -> }"
+    fi
+    if [[ "${status:1:1}" != " " ]]; then
+      echo "$path"
+    fi
+  done < <(git status --porcelain)
+}
+
+select_unstaged_files() {
+  local -a files
+  mapfile -t files < <(list_unstaged_files)
+  if ((${#files[@]} == 0)); then
+    echo "✅ 未ステージのファイルがありません。" >&2
+    return 1
+  fi
+
+  echo "" >&2
+  echo "📄 未ステージのファイル一覧:" >&2
+  local i=1
+  for f in "${files[@]}"; do
+    printf "  %2d) %s\n" "$i" "$f" >&2
+    i=$((i + 1))
+  done
+
+  local ans ans_lc
+  while true; do
+    ans="$(prompt "ステージしたい番号を入力（例: 1 3 5 / all）")"
+    ans="${ans//,/ }"
+    if [[ -z "${ans// /}" ]]; then
+      echo "番号を入力してね。" >&2
+      continue
+    fi
+
+    ans_lc="${ans,,}"
+    if [[ "$ans_lc" == "all" || "$ans_lc" == "a" ]]; then
+      printf "%s\n" "${files[@]}"
+      return 0
+    fi
+
+    local -a selected=()
+    local -A seen=()
+    local ok="Y"
+    local tok idx
+    for tok in $ans; do
+      if [[ "$tok" =~ ^[0-9]+$ ]]; then
+        idx=$((tok - 1))
+        if (( idx >= 0 && idx < ${#files[@]} )); then
+          if [[ -z "${seen[$idx]+x}" ]]; then
+            selected+=("${files[$idx]}")
+            seen[$idx]=1
+          fi
+        else
+          echo "範囲外の番号: $tok" >&2
+          ok="N"
+          break
+        fi
+      else
+        echo "無効な入力: $tok" >&2
+        ok="N"
+        break
+      fi
+    done
+
+    if [[ "$ok" == "Y" && ${#selected[@]} -gt 0 ]]; then
+      printf "%s\n" "${selected[@]}"
+      return 0
+    fi
+  done
+}
+
+stage_selected_unstaged() {
+  local -a targets
+  mapfile -t targets < <(select_unstaged_files || true)
+  if ((${#targets[@]} == 0)); then
+    return 1
+  fi
+
+  echo "" >&2
+  echo "📌 ステージするファイル:" >&2
+  printf "  - %s\n" "${targets[@]}" >&2
+  echo "" >&2
+
+  if ! prompt_yn "このファイルをステージしますか？" "Y"; then
+    die "中断しました。"
+  fi
+
+  local root
+  root="$(repo_root)"
+  if ! git -C "$root" add -- "${targets[@]}"; then
+    die "git add に失敗しました。パスを確認してね。"
+  fi
+}
+
 ensure_no_generated_artifacts() {
   local -a bad=()
   local line status path
@@ -572,11 +675,29 @@ do_commit_and_push() {
   git status --short >&2
   echo "" >&2
 
-  if prompt_yn "git add -A (全変更をステージ) しますか？" "Y"; then
-    git add -A
-  else
-    die "中断しました。（手動で git add してから再実行してね）"
-  fi
+  local stage_mode
+  stage_mode="$(select_one "ステージ方法を選んでください。" \
+    "全変更をステージ (git add -A)" \
+    "未ステージから選んでステージ" \
+    "中断" \
+    | tail -n 1 | tr -d '\r')"
+
+  case "$stage_mode" in
+    "全変更をステージ (git add -A)")
+      git add -A
+      ;;
+    "未ステージから選んでステージ")
+      if has_staged_changes; then
+        echo "ℹ️ すでにステージ済みの変更もコミット対象になります。" >&2
+      fi
+      if ! stage_selected_unstaged; then
+        die "未ステージのファイルがありません。"
+      fi
+      ;;
+    "中断")
+      die "中断しました。"
+      ;;
+  esac
 
   local msg
   msg="$(build_commit_message "commit-push")"
