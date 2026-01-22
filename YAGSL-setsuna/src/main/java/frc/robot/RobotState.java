@@ -271,7 +271,7 @@ public class RobotState {
         else return min;
     }
 
-    public Optional<Double> getMaxAbsDriveYawAngularVelocityInRnage(
+    public Optional<Double> getMaxAbsDriveYawAngularVelocityInRange(
             double minTime, double maxTime) {
         if (Robot.isReal()) return getMaxAbsValueInRange(driveYawAngularVelocity, minTime, maxTime);
         return Optional.of(measuredRobotRelativeChassisSpeeds.get().omegaRadiansPerSecond);

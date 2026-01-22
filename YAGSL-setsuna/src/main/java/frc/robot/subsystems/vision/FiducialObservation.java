@@ -11,9 +11,18 @@ import java.util.Objects;
 // ひなた
 //
 
+// memo
 // public record
 // - データを保持するための不変なクラスを簡単に定義するためのもの。
 // - ゲッターなどが標準で提供される。
+//
+// 機能
+// - データの保持
+// - LimeLightのrawデータをFiducialObservation型に変換
+// - Struct 
+//     - ByteBuffer <-> FiducialObservation間で効率的にやりとりするための定義。
+//
+
 public record FiducialObservation(int id, double txnc, double tync, double ambiguity, double area)
         implements StructSerializable {
 
