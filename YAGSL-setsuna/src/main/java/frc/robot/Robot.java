@@ -50,6 +50,14 @@ public class Robot extends TimedRobot {
     //始まる時にダッシュボードで選択する → m_autoSelectedに代入
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
+
+    //getAutonomousCommand()が返してきたコマンドを、そのまま schedule する
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+    // schedule the autonomous command (example)
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
+    }
   }
 
   // Periodic：エネイブル中に約20msごとに繰り返し呼ばれる関数
@@ -71,6 +79,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+
+    // ・このコードは、テレオペが始まったときに自律が確実に止まるようにするもの
+    // ・自律を「他のコマンドに割り込まれるまで」動かし続けたいなら、この行を消すかコメントアウトする
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
