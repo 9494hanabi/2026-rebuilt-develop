@@ -12,13 +12,13 @@ public interface VisionIO {
     class VisionIOInputs {
         public static class CameraInputs {
             public boolean seesTarget;
-            public FiducialObservation[] fiducialObservation;
+            public FiducialObservation[] fiducialObservations;
             public MegatagPoseEstimate megatagPoseEstimate;
             public MegatagPoseEstimate megatag2PoseEstimate;
             public int megatag2Count;
             public int megatagCount;
             public Pose3d pose3d;
-            public double[] standardDevision = 
+            public double[] standardDeviations = 
                     new double[12];
                     // [MT1x, MT1y, MT1z, MT1roll, MT1pitch, MT1Yaw, MT2x, Mt2y, MT2roll, MT2pitch, MT2yaw]
         }

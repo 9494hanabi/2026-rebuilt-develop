@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import swervelib.SwerveInputStream;
 
 // === 担当者 ===
-// ひなた
+// はるた
 //
 
 public class RobotContainer {

@@ -189,3 +189,4 @@ compile_commands.json
 # WPILib sim GUI (local-only)
 simgui-ds.json
 simgui.json
+.DS_Store
