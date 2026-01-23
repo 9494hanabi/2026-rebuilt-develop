@@ -38,6 +38,9 @@ import swervelib.SwerveDrive;
 import edu.wpi.first.math.geometry.Rotation2d;
 // import edu.wpi.first.math.util.Units;
 
+// 254系
+import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
+
 // === 担当者 ===
 // はるた
 //
@@ -219,5 +222,13 @@ public class SwerveSubsystem extends SubsystemBase {
   // SwerveSubsystem に追加
   public void setChassisSpeeds(ChassisSpeeds speeds) {
     swerveDrive.setChassisSpeeds(speeds);
+  }
+
+  public void addVisionMeasurement(VisionFieldPoseEstimate est) {
+    // YAGSLのPoseEstimatorへ注入
+    swerveDrive.addVisionMeasurement(
+      est.getVisionRobotPoseMeters(),
+      est.getTimestampSeconds()
+    );
   }
 }
