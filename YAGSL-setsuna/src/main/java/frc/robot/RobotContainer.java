@@ -5,7 +5,7 @@ package frc.robot;
 import frc.robot.commands.FaceAprilTagCommand;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.vision.VisionSubsystem;
+
 
 import frc.robot.lib.util.Constants.OperatorConstants;
 
@@ -21,14 +21,38 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
 
+// 254系
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
+import frc.robot.subsystems.vision.VisionSubsystem;
+
 // === 担当者 ===
 // ひなた
 //
 
 public class RobotContainer {
+  // 254要素
+  private final AtomicReference<SwerveSubsystem> swerveRef = new AtomicReference();
+
+  private final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer =
+    (VisionFieldPoseEstimate estimate) -> {
+      var swerve = swerveRef.get();
+      if (swerve != null) {
+        swerve.addVisionMeasurement(estimate);
+      }
+    };
+  
+  private final RobotState robotState = new RobotState(visionEstimateConsumer);
+
   private final SwerveSubsystem drivebase = new SwerveSubsystem();
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  
+  private final VisionSubsystem visionSubsystem = 
+      new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
 
   //AutoSetting
   //これを書き換えて選択できるようにしていく Robot.java と連携
@@ -44,6 +68,7 @@ public class RobotContainer {
 
 
   public RobotContainer() {
+    swerveRef.set(drivebase);
     DriverStation.silenceJoystickConnectionWarning(true);
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
