@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 // import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 
 import java.io.File;
 import java.util.function.Supplier;
@@ -30,6 +31,7 @@ import com.studica.frc.AHRS;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -40,9 +42,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 // 254系
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
+import frc.robot.RobotState;
 
 // === 担当者 ===
-// はるた
+// ひなた
 //
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -52,8 +55,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(),"swerve");
   SwerveDrive  swerveDrive;
+  private final SwerveDriveOdometry odometry;
 
-  public SwerveSubsystem() {
+  private final RobotState robotState;
+
+  public SwerveSubsystem(RobotState robotState) {
     // YAGSLのテレメトリを詳細表示モードにする（デバッグ用の情報を多く出す設定）
     /*＝＝＝＝＝＝＝＝＝＝＝まじ大事＝＝＝＝＝＝＝＝＝＝
     *この下にある SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -63,21 +69,28 @@ public class SwerveSubsystem extends SubsystemBase {
     */
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
+    // ステートのイニシャライズ
+    this.robotState = robotState;
+
     try
     {
       swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maxSpeed,
                                                                   new Pose2d(new Translation2d(Meter.of(1),
                                                                                               Meter.of(4)),
                                                                             Rotation2d.fromDegrees(0)));
-      // Alternative method if you don't want to supply the conversion factor via JSON files.
-      // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
     } catch (Exception e)
     {
       throw new RuntimeException(e);
     }
+    odometry = new SwerveDriveOdometry(
+        swerveDrive.kinematics,
+        swerveDrive.getYaw(),
+        swerveDrive.getModulePositions(),
+        swerveDrive.getPose());
     setupPathPlanner();
   }
 
+  // ====================================Planner========================================
   public void setupPathPlanner()
   {
     // GUI設定からRobotConfigを読み込みます。
@@ -146,7 +159,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //イベント付きのパスフォロワーを取得する。
   // @param PathPlannerAuto(〜〜〜) 〜〜〜はPathPlannerの.atuoのパス名。
-
+  // ====================================Autonomous=========================================
   public Command getAutonomousCommand(String pathName)
   {
     // AutoBuilderを使用してパス追跡コマンドを作成します。これによりイベントマーカーもトリガーされます。
@@ -154,52 +167,29 @@ public class SwerveSubsystem extends SubsystemBase {
   }
   //===========PathPlannreの設定終わり==============
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
+
   public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          /* one-time action goes here */
         });
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
+
   public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
     return false;
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-        // 1) まずはオドメトリ更新（毎周期必須）
-    // poseEstimator.update(navx.getRotation2d(), getModulePositions());
-
-    // 2) MegaTag2用にYawをLimelightへ毎周期送る
-    double yawDeg = navx.getRotation2d().getDegrees();
-    LimelightHelpers.SetRobotOrientation("limelight", yawDeg, 0, 0, 0, 0, 0);
-
-    // 3) MegaTag2取得 → 有効なら融合
-    var mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight"); // SetRobotOrientation後に呼ぶ  [oai_citation:5‡Limelight Vision](https://limelightlib-wpijava-reference.limelightvision.io/frc/robot/LimelightHelpers.html?utm_source=chatgpt.com)
-    if (mt2 != null && mt2.tagCount > 0) {
-      if (mt2.tagCount > 0) {
-        swerveDrive.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
-      }
-    }
+    double ts = Timer.getFPGATimestamp();
+    Pose2d pose = getSwerveDrive().getPose();
+    Pose2d odomPose = odometry.update(swerveDrive.getYaw(), swerveDrive.getModulePositions());
+    robotState.addOdometryMeasurement(ts, pose);
+    robotState.addOdometryOnlyMeasurement(ts, odomPose);
   }
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
   }
 
   public SwerveDrive getSwerveDrive() {
@@ -228,7 +218,8 @@ public class SwerveSubsystem extends SubsystemBase {
     // YAGSLのPoseEstimatorへ注入
     swerveDrive.addVisionMeasurement(
       est.getVisionRobotPoseMeters(),
-      est.getTimestampSeconds()
+      est.getTimestampSeconds(),
+      est.getVisionMeasurementsStdDevs()
     );
   }
 }

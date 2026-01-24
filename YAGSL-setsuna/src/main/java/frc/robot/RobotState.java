@@ -38,6 +38,7 @@ public class RobotState {
     public RobotState(Consumer<VisionFieldPoseEstimate> visionEstimateConsumer) {
         this.visionEstimateConsumer = visionEstimateConsumer;
         fieldToRobot.addSample(0.0, MathHelpers.kPose2dZero);
+        fieldToRobotOdom.addSample(0.0, MathHelpers.kPose2dZero);
         driveYawAngularVelocity.addSample(0.0, 0.0);
 
         // 機構のポジションを将来的にここに記述する。
@@ -46,6 +47,10 @@ public class RobotState {
     // ---- 走行状態 ----
     // ロボット姿勢の履歴
     private final ConcurrentTimeInterpolatableBuffer<Pose2d> fieldToRobot = 
+            ConcurrentTimeInterpolatableBuffer.createBuffer(LOOKBACK_TIME_SEC);
+
+    // オドメトリのみのロボット姿勢（Vision非混入）
+    private final ConcurrentTimeInterpolatableBuffer<Pose2d> fieldToRobotOdom =
             ConcurrentTimeInterpolatableBuffer.createBuffer(LOOKBACK_TIME_SEC);
     
     // ロボット座標系速度
@@ -143,6 +148,10 @@ public class RobotState {
         fieldToRobot.addSample(timestamp, pose);
     }
 
+    public void addOdometryOnlyMeasurement(double timestamp, Pose2d pose) {
+        fieldToRobotOdom.addSample(timestamp, pose);
+    }
+
     // イテレーション(periodicなど)のカウンタ
     public void incrementIterationCount() {
         iteration.incrementAndGet();
@@ -223,6 +232,10 @@ public class RobotState {
 
     public Optional<Pose2d> getFieldToRobot(double timestamp) {
         return fieldToRobot.getSample(timestamp);
+    }
+
+    public Optional<Pose2d> getFieldToRobotOdom(double timestamp) {
+        return fieldToRobotOdom.getSample(timestamp);
     }
 
     public ChassisSpeeds getLatestMeasuredFieldRelativeChassisSpeeds() {

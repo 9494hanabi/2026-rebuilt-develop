@@ -25,7 +25,6 @@ import swervelib.SwerveInputStream;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -47,20 +46,20 @@ public class RobotContainer {
   
   private final RobotState robotState = new RobotState(visionEstimateConsumer);
 
-  private final SwerveSubsystem drivebase = new SwerveSubsystem();
+  private final SwerveSubsystem drivebase = new SwerveSubsystem(robotState);
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   
   private final VisionSubsystem visionSubsystem = 
       new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
 
-  //AutoSetting
-  //これを書き換えて選択できるようにしていく Robot.java と連携
-  private final Command m_simpleAuto = new DriveDistance(
-        AutoConstants.kAutoDriveDistanceInches,
-        AutoConstants.kAutoDriveSpeed,m_robotDrive);
+  // //AutoSetting
+  // //これを書き換えて選択できるようにしていく Robot.java と連携
+  // private final Command m_simpleAuto = new DriveDistance(
+  //       AutoConstants.kAutoDriveDistanceInches,
+  //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
   
-  private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
+  // private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
 
   //自律コマンド用の SendableChooser スマートダッシュボードで選択できるようにしているクラス
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -74,10 +73,10 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
 
-    // Autoダッシュボード設定
-    // Add commands to the autonomous command chooser
-    m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
-    m_chooser.addOption("Complex Auto", m_complexAuto);
+    // // Autoダッシュボード設定
+    // // Add commands to the autonomous command chooser
+    // m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
+    // m_chooser.addOption("Complex Auto", m_complexAuto);
   }
 
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(), //ここで、左スティックの割り当てをしている。下にある値を変えると遅くなったりする（絶対値１が最大）。上下、左右の入力

@@ -13,7 +13,7 @@ public class VisionIOHardwareLimelight implements VisionIO {
     NetworkTable tableA =
         NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightATableName);
     NetworkTable tableB =
-        NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightATableName);
+        NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightBTableName);
     RobotState robotState;
     AtomicReference<VisionIOInputs> latestInputs = new AtomicReference<>(new VisionIOInputs());
     int imuMode = 1;
@@ -59,7 +59,7 @@ public class VisionIOHardwareLimelight implements VisionIO {
     @Override
     public void readInputs(VisionIOInputs inputs) {
         readCameraData(tableA, inputs.cameraA, VisionConstants.kLimelightATableName);
-        readCameraData(tableB, inputs.cameraB, VisionConstants.kLimelightATableName);
+        readCameraData(tableB, inputs.cameraB, VisionConstants.kLimelightBTableName);
         latestInputs.set(inputs);
     }
 
