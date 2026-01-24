@@ -61,10 +61,13 @@ public class VisionSubsystem extends SubsystemBase {
         // B = O -> b
         // a_T_b = B - A (A -> B)
         // (回転も含む計算)
-        Transform2d a_T_b = 
-                state.getFieldToRobot(b.getTimestampSeconds())
-                        .get()
-                        .minus(state.getFieldToRobot(a.getTimestampSeconds()).get());
+        var maybePoseA = state.getFieldToRobotOdom(a.getTimestampSeconds());
+        var maybePoseB = state.getFieldToRobotOdom(b.getTimestampSeconds());
+        if (maybePoseA.isEmpty() || maybePoseB.isEmpty()) {
+            return b;
+        }
+        Transform2d a_T_b =
+                maybePoseB.get().minus(maybePoseA.get());
         
         
         Pose2d poseA = a.getVisionRobotPoseMeters();
@@ -295,7 +298,7 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         // タイムスタンプ時点でのロボットの姿勢を格納している。
-        var priorPose = state.getFieldToRobot(poseEstimate.timestampSeconds());
+        var priorPose = state.getFieldToRobotOdom(poseEstimate.timestampSeconds());
 
         // priorPoseのエンプティを拾っている。
         if (priorPose.isEmpty()) {
@@ -369,7 +372,7 @@ public class VisionSubsystem extends SubsystemBase {
             }
 
             // ヨー角の確認に必要なタグの最小面積で弾く
-            var priorPose = state.getFieldToRobot(poseEstimate.timestampSeconds());
+            var priorPose = state.getFieldToRobotOdom(poseEstimate.timestampSeconds());
             if (poseEstimate.avgTagArea() < VisionConstants.kTagAreaThresholdForYawCheck
                     && priorPose.isPresent()) {
                 double yawDiff = 
@@ -409,7 +412,7 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         // ポーズのログ
-        var loggedPose = state.getFieldToRobot(poseEstimate.timestampSeconds());
+        var loggedPose = state.getFieldToRobotOdom(poseEstimate.timestampSeconds());
         if (loggedPose.isEmpty()) {
             return Optional.empty();
         }

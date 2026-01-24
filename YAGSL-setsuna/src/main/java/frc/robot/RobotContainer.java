@@ -5,7 +5,7 @@ package frc.robot;
 import frc.robot.commands.FaceAprilTagCommand;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.vision.VisionSubsystem;
+
 
 import frc.robot.lib.util.Constants.OperatorConstants;
 
@@ -21,14 +21,35 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
 
+// 254系
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
+import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
+import frc.robot.subsystems.vision.VisionSubsystem;
+
 // === 担当者 ===
 // ひなた
 //
 
 public class RobotContainer {
-  private final SwerveSubsystem drivebase = new SwerveSubsystem();
+  // 254要素
+  private final AtomicReference<SwerveSubsystem> swerveRef = new AtomicReference();
+
+  private final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer =
+    (VisionFieldPoseEstimate estimate) -> {
+      var swerve = swerveRef.get();
+      if (swerve != null) {
+        swerve.addVisionMeasurement(estimate);
+      }
+    };
+  
+  private final RobotState robotState = new RobotState(visionEstimateConsumer);
+
+  private final SwerveSubsystem drivebase = new SwerveSubsystem(robotState);
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+<<<<<<< HEAD
 
   //AutoSetting
   //これを書き換えて選択できるようにしていく Robot.java と連携
@@ -36,6 +57,18 @@ public class RobotContainer {
   //       AutoConstants.kAutoDriveDistanceInches,
   //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
   
+=======
+  
+  private final VisionSubsystem visionSubsystem = 
+      new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
+
+  // //AutoSetting
+  // //これを書き換えて選択できるようにしていく Robot.java と連携
+  // private final Command m_simpleAuto = new DriveDistance(
+  //       AutoConstants.kAutoDriveDistanceInches,
+  //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
+  
+>>>>>>> origin/develop
   // private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
 
   //自律コマンド用の SendableChooser スマートダッシュボードで選択できるようにしているクラス
@@ -44,13 +77,19 @@ public class RobotContainer {
 
 
   public RobotContainer() {
+    swerveRef.set(drivebase);
     DriverStation.silenceJoystickConnectionWarning(true);
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
 
+<<<<<<< HEAD
     // Autoダッシュボード設定
     // Add commands to the autonomous command chooser
+=======
+    // // Autoダッシュボード設定
+    // // Add commands to the autonomous command chooser
+>>>>>>> origin/develop
     // m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     // m_chooser.addOption("Complex Auto", m_complexAuto);
   }

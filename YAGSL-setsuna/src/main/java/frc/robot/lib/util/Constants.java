@@ -44,11 +44,11 @@ public final class Constants {
     public static final String kLimelightATableName = "limelight-left";                               // カメラAのNetworkTables名
     public static final double kRobotToCameraAForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラAの前方向オフセット[m]
     public static final double kRobotToCameraASide = Units.inchesToMeters(-11.9269);                  // ロボット中心からカメラAの横方向オフセット[m]
-    public static final Rotation2d kRobotToCameraAYawOffset = Rotation2d.fromDegrees(0.0);    // カメラAのYawオフセット
+    public static final Rotation2d kCameraAYawOffset = Rotation2d.fromDegrees(0.0);    // カメラAのYawオフセット
     public static final Transform2d kRobotToCameraA =                                                 // ロボット座標系からカメラA座標系への変換
             new Transform2d(
                     new Translation2d(kRobotToCameraAForward, kRobotToCameraASide),
-                    kRobotToCameraAYawOffset);
+                    kCameraAYawOffset);
     
     // Camera B (Right-side camera)
     public static final double kCameraBPitchDegrees = 20.0;                                           // カメラBのピッチ角[deg]
