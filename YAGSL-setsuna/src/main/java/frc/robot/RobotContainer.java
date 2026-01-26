@@ -33,6 +33,15 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase;
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+<<<<<<< HEAD
+
+  //AutoSetting
+  //これを書き換えて選択できるようにしていく Robot.java と連携
+  // private final Command m_simpleAuto = new DriveDistance(
+  //       AutoConstants.kAutoDriveDistanceInches,
+  //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
+  
+=======
   
   private final VisionSubsystem visionSubsystem;
 
@@ -42,6 +51,7 @@ public class RobotContainer {
   //       AutoConstants.kAutoDriveDistanceInches,
   //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
   
+>>>>>>> origin/develop
   // private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
 
   //自律コマンド用の SendableChooser スマートダッシュボードで選択できるようにしているクラス
@@ -82,8 +92,13 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
 
+<<<<<<< HEAD
+    // Autoダッシュボード設定
+    // Add commands to the autonomous command chooser
+=======
     // // Autoダッシュボード設定
     // // Add commands to the autonomous command chooser
+>>>>>>> origin/develop
     // m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     // m_chooser.addOption("Complex Auto", m_complexAuto);
   }
