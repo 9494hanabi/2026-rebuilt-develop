@@ -31,17 +31,22 @@ public class RobotState {
     public static final double LOOKBACK_TIME_SEC = 1.0;
 
     // ビジョン推定を外部へ引き渡すコールバック
-    private final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer;
+    private Consumer<VisionFieldPoseEstimate> visionEstimateConsumer = estimate -> {};
 
     // TimeStampを初期化
     // メソッドの副作用(変数更新)を目的とするインターフェース"Consumer"を利用している。
-    public RobotState(Consumer<VisionFieldPoseEstimate> visionEstimateConsumer) {
-        this.visionEstimateConsumer = visionEstimateConsumer;
+    public RobotState() {
         fieldToRobot.addSample(0.0, MathHelpers.kPose2dZero);
         fieldToRobotOdom.addSample(0.0, MathHelpers.kPose2dZero);
         driveYawAngularVelocity.addSample(0.0, 0.0);
 
         // 機構のポジションを将来的にここに記述する。
+    }
+
+    // メソッドの副作用(変数更新)を目的とするインターフェース"Consumer"を利用している。
+    public RobotState(Consumer<VisionFieldPoseEstimate> visionEstimateConsumer) {
+        this();
+        setVisionEstimateConsumer(visionEstimateConsumer);
     }
 
     // ---- 走行状態 ----
@@ -304,6 +309,11 @@ public class RobotState {
         lastUsedMegatagTimestamp = megatagEstimate.getTimestampSeconds();
         lastUsedMegatagPose = megatagEstimate.getVisionRobotPoseMeters();
         visionEstimateConsumer.accept(megatagEstimate);
+    }
+
+    public void setVisionEstimateConsumer(Consumer<VisionFieldPoseEstimate> visionEstimateConsumer) {
+        this.visionEstimateConsumer =
+                visionEstimateConsumer == null ? estimate -> {} : visionEstimateConsumer;
     }
 
     public double lastUsedMegatagTimestamp() {

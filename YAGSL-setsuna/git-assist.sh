@@ -13,6 +13,10 @@ PROTECT_MAIN_BRANCH="Y"     # Y: forbid commit/push/merge on main only
 
 # ---------- constants ----------
 REL_ROBOT_DIR="src/main/java/frc/robot"
+REL_DEPLOY_DIR="src/main/deploy"
+JSON_MANAGED_DIR="deploy-json"
+JSON_SETSUNA_DIR="${JSON_MANAGED_DIR}/setsuna"
+JSON_DAISHA_DIR="${JSON_MANAGED_DIR}/daisha"
 SETSUNA_NAME="YAGSL-setsuna"
 DAISHA_NAME="YAGSL-daisha"
 
@@ -411,6 +415,8 @@ sync_robot_code_setsuna_to_daisha() {
 
   local src="$setsuna_root/$REL_ROBOT_DIR"
   local dst="$daisha_root/$REL_ROBOT_DIR"
+  local json_src="$setsuna_root/$JSON_DAISHA_DIR"
+  local json_dst="$daisha_root/$REL_DEPLOY_DIR"
 
   [[ -d "$src" ]] || die "同期元が見つかりません: $src"
   mkdir -p "$(dirname "$dst")"
@@ -435,6 +441,30 @@ sync_robot_code_setsuna_to_daisha() {
 
   rsync -a --delete "$src/" "$dst/"
   echo "✅ 同期完了" >&2
+
+  if [[ -d "$json_src" ]]; then
+    echo "" >&2
+    echo "🔁 deploy JSON 同期: ${SETSUNA_NAME} -> ${DAISHA_NAME}" >&2
+    echo "   FROM: $json_src" >&2
+    echo "   TO  : $json_dst" >&2
+
+    if prompt_yn "deploy JSON のバックアップを作りますか？" "Y"; then
+      local ts_json bak_json
+      ts_json="$(date -j -f "%s" "$(date +%s)" +"%Y%m%d_%H%M%S")"
+      bak_json="$HOME/.git-assist-backup/$(basename "$(repo_root)")/$DAISHA_NAME/$ts_json/$REL_DEPLOY_DIR"
+      mkdir -p "$bak_json"
+      if [[ -d "$json_dst" ]]; then
+        rsync -a "$json_dst/" "$bak_json/"
+      fi
+      echo "🗄️ Backup: $bak_json" >&2
+    fi
+
+    mkdir -p "$json_dst"
+    rsync -a --delete "$json_src/" "$json_dst/"
+    echo "✅ deploy JSON 同期完了" >&2
+  else
+    echo "ℹ️ deploy JSON 管理ディレクトリが見つからないためスキップ: $json_src" >&2
+  fi
 
   if git -C "$daisha_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "" >&2

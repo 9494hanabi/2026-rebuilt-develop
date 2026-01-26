@@ -7,6 +7,7 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.SwerveSubsystem;
 import static frc.robot.lib.util.Constants.SemiAutoConstants.*;
+import frc.robot.lib.util.Constants.VisionConstants;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -22,7 +23,7 @@ public class FaceAprilTagCommand extends Command {
     private final SwerveSubsystem swerve;
 
     private final NetworkTable table =
-    NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableInstance.getDefault().getTable(VisionConstants.kFaceAprilTagTableName);
 
     public FaceAprilTagCommand(
         SwerveSubsystem swerve

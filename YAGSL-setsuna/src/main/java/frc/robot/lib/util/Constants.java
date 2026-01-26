@@ -41,7 +41,7 @@ public final class Constants {
     public static final double kCameraAPitchDegrees = 20.0; // カメラAのピッチ角[deg]
     public static final double kCameraApitchRads = Units.degreesToRadians(kCameraAPitchDegrees);      // カメラAのピッチ角[rad]
     public static final double kCameraAHeightOffGroundMeters = Units.inchesToMeters(8.3787);  // カメラAの地上高[m]
-    public static final String kLimelightATableName = "limelight-left";                               // カメラAのNetworkTables名
+    public static final String kLimelightATableName = "limelight-LeftBack";                           // カメラAのNetworkTables名
     public static final double kRobotToCameraAForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラAの前方向オフセット[m]
     public static final double kRobotToCameraASide = Units.inchesToMeters(-11.9269);                  // ロボット中心からカメラAの横方向オフセット[m]
     public static final Rotation2d kCameraAYawOffset = Rotation2d.fromDegrees(0.0);    // カメラAのYawオフセット
@@ -54,7 +54,8 @@ public final class Constants {
     public static final double kCameraBPitchDegrees = 20.0;                                           // カメラBのピッチ角[deg]
     public static final double kCameraBPitchRads = Units.degreesToRadians(kCameraBPitchDegrees);      // カメラBのピッチ角[rad]
     public static final double kCameraBHeightOffGroundMeters = Units.inchesToMeters(8.3787);  // カメラBの地上高[m]
-    public static final String kLimelightBTableName = "limelight-right";                              // カメラBのNetworkTables名
+    public static final String kLimelightBTableName = "limelight-RightFront";                         // カメラBのNetworkTables名
+    public static final String kFaceAprilTagTableName = kLimelightBTableName;                          // FaceAprilTag用
     public static final double kRobotToCameraBForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラBの前方向オフセット[m]
     public static final double kRobotToCameraBSide = Units.inchesToMeters(11.9269);            // ロボット中心からカメラBの横方向オフセット[m]
     public static final Rotation2d kCameraBYawOffset = Rotation2d.fromDegrees(0.0);           // カメラBのYawオフセット

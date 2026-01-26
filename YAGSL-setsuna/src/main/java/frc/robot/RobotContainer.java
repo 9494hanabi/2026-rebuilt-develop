@@ -13,45 +13,28 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
 
 // 254系
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
+
 
 // === 担当者 ===
 // ひなた
 //
 
 public class RobotContainer {
-  // 254要素
-  private final AtomicReference<SwerveSubsystem> swerveRef = new AtomicReference();
-
-  private final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer =
-    (VisionFieldPoseEstimate estimate) -> {
-      var swerve = swerveRef.get();
-      if (swerve != null) {
-        swerve.addVisionMeasurement(estimate);
-      }
-    };
-  
-  private final RobotState robotState = new RobotState(visionEstimateConsumer);
-
-  private final SwerveSubsystem drivebase = new SwerveSubsystem(robotState);
+  private final RobotState robotState;
+  private final SwerveSubsystem drivebase;
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   
-  private final VisionSubsystem visionSubsystem = 
-      new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
+  private final VisionSubsystem visionSubsystem;
 
   // //AutoSetting
   // //これを書き換えて選択できるようにしていく Robot.java と連携
@@ -66,9 +49,35 @@ public class RobotContainer {
 
 
 
+  private final SwerveInputStream driveAngularVelocity;
+  private final SwerveInputStream driveDriectAngle;
+  private final Command driveFieldorientedDriectAngle;
+  private final Command driveFieldOrentedAngularVelocity;
+
   public RobotContainer() {
-    swerveRef.set(drivebase);
+    robotState = new RobotState();
+    drivebase = new SwerveSubsystem(robotState);
+    robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
+    visionSubsystem = new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
+
     DriverStation.silenceJoystickConnectionWarning(true);
+    driveAngularVelocity = SwerveInputStream.of(
+            drivebase.getSwerveDrive(),
+            () -> m_driverController.getLeftY() * -1,
+            () -> m_driverController.getLeftX() * -1)
+        .withControllerRotationAxis(m_driverController::getRightX)
+        .deadband(OperatorConstants.DEADBAND)
+        .scaleTranslation(0.8)
+        .allianceRelativeControl(true);
+
+    driveDriectAngle = driveAngularVelocity
+        .copy()
+        .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
+        .headingWhile(true);
+
+    driveFieldorientedDriectAngle = drivebase.driveFieldOriented(driveDriectAngle);
+    driveFieldOrentedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
@@ -78,22 +87,6 @@ public class RobotContainer {
     // m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     // m_chooser.addOption("Complex Auto", m_complexAuto);
   }
-
-  SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(), //ここで、左スティックの割り当てをしている。下にある値を変えると遅くなったりする（絶対値１が最大）。上下、左右の入力
-                                                                () -> m_driverController.getLeftY() * -1,
-                                                                () -> m_driverController.getLeftX() * -1)
-                                                                .withControllerRotationAxis(m_driverController::getRightX)
-                                                                .deadband(OperatorConstants.DEADBAND)
-                                                                .scaleTranslation(0.8) // 速度のスケーリング係数
-                                                                .allianceRelativeControl(true);
-
-  SwerveInputStream driveDriectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_driverController::getRightX,
-                                                                                             m_driverController::getRightY)
-                                                                                           .headingWhile(true);
-
-  Command driveFieldorientedDriectAngle = drivebase.driveFieldOriented(driveDriectAngle);
-
-  Command driveFieldOrentedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
   private void configureBindings() {
     m_driverController.b().whileTrue(
