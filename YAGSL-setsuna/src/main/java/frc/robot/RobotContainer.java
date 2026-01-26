@@ -3,6 +3,8 @@ package frc.robot;
 // import frc.robot.commands.Autos;
 // import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.FaceAprilTagCommand;
+import frc.robot.commands.DriveOnTagCommand;
+import frc.robot.commands.DriveWhileFieldPoseValidCommand;
 
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -90,7 +92,13 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_driverController.b().whileTrue(
-      new FaceAprilTagCommand(drivebase)
+      new FaceAprilTagCommand(drivebase, robotState)
+    );
+    m_driverController.a().whileTrue(
+      new DriveOnTagCommand(drivebase)
+    );
+    m_driverController.x().whileTrue(
+      new DriveWhileFieldPoseValidCommand(drivebase, robotState, driveAngularVelocity)
     );
   }
    public Command getAutonomousCommand() {

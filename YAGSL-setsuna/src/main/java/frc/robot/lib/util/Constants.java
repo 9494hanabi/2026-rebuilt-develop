@@ -41,7 +41,7 @@ public final class Constants {
     public static final double kCameraAPitchDegrees = 20.0; // カメラAのピッチ角[deg]
     public static final double kCameraApitchRads = Units.degreesToRadians(kCameraAPitchDegrees);      // カメラAのピッチ角[rad]
     public static final double kCameraAHeightOffGroundMeters = Units.inchesToMeters(8.3787);  // カメラAの地上高[m]
-    public static final String kLimelightATableName = "limelight-LeftBack";                           // カメラAのNetworkTables名
+    public static final String kLimelightATableName = "limelight-lb";                           // カメラAのNetworkTables名
     public static final double kRobotToCameraAForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラAの前方向オフセット[m]
     public static final double kRobotToCameraASide = Units.inchesToMeters(-11.9269);                  // ロボット中心からカメラAの横方向オフセット[m]
     public static final Rotation2d kCameraAYawOffset = Rotation2d.fromDegrees(0.0);    // カメラAのYawオフセット
@@ -54,7 +54,7 @@ public final class Constants {
     public static final double kCameraBPitchDegrees = 20.0;                                           // カメラBのピッチ角[deg]
     public static final double kCameraBPitchRads = Units.degreesToRadians(kCameraBPitchDegrees);      // カメラBのピッチ角[rad]
     public static final double kCameraBHeightOffGroundMeters = Units.inchesToMeters(8.3787);  // カメラBの地上高[m]
-    public static final String kLimelightBTableName = "limelight-RightFront";                         // カメラBのNetworkTables名
+    public static final String kLimelightBTableName = "limelight-rf";                         // カメラBのNetworkTables名
     public static final String kFaceAprilTagTableName = kLimelightBTableName;                          // FaceAprilTag用
     public static final double kRobotToCameraBForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラBの前方向オフセット[m]
     public static final double kRobotToCameraBSide = Units.inchesToMeters(11.9269);            // ロボット中心からカメラBの横方向オフセット[m]
@@ -73,6 +73,8 @@ public final class Constants {
     public static final double kDefaultNormThreshold = 1.0;             // 平行移動ベクトルのノルム閾値
     public static final double kMinAmbiguityToFlip = 0.08;              // 反転判定に使う最小曖昧度
 
+    public static final double kFieldPoseValidTimeoutSec = 0.5;         // 絶対座標を有効とみなす時間[s]
+
     public static final double kCameraHorizontalFOVDegrees = 81.0; // カメラの水平視野角[deg]
     public static final double kCameraVerticalFOVDegrees = 55.0;   // カメラの垂直視野角[deg]
     public static final int kCameraImageWidth = 1280; // カメラ画像の幅[pixel]
@@ -82,6 +84,9 @@ public final class Constants {
 
     // NetworkTables constants
     public static final String kBoundingBoxTableName = "BoundingBoxes"; // バウンディングボックスのテーブル名
+
+    // FaceAprilTag: タグからのターゲット座標系オフセット (Interest Offset と整合)
+    public static final Transform2d kFaceAprilTagTargetOffset = new Transform2d();
   }
 
   public static class FieldConstants {
@@ -108,6 +113,9 @@ public final class Constants {
     public static final double planeDeadbandMeter = 0.03; // 位置誤差のデッドバンド[m]
     public static final double thetaDeadbandDeg = 1; // 角度誤差のデッドバンド[deg]
     public static final double thetaDeadbandRad = Math.toRadians(thetaDeadbandDeg); // 角度誤差のデッドバンド[rad]
+
+    // タグ検出時に一定方向へ進む速度
+    public static final double kDriveOnTagSpeedMetersPerSec = 1.0;
     
   }
   public static final double maxSpeed  = Units.feetToMeters(4.5); // 最大走行速度[m/s]
