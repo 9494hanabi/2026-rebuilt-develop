@@ -11,17 +11,31 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveOnTagCommand extends Command {
     private final SwerveSubsystem swerve;
-    private final NetworkTable table =
-        NetworkTableInstance.getDefault().getTable(VisionConstants.kFaceAprilTagTableName);
+    private final NetworkTable tableA;
+    private final NetworkTable tableB;
 
     public DriveOnTagCommand(SwerveSubsystem swerve) {
+        this(swerve, VisionConstants.kLimelightATableName, VisionConstants.kLimelightBTableName);
+    }
+
+    public DriveOnTagCommand(SwerveSubsystem swerve, String limelightTableName) {
+        this(swerve, limelightTableName, null);
+    }
+
+    public DriveOnTagCommand(SwerveSubsystem swerve, String limelightTableNameA, String limelightTableNameB) {
         this.swerve = swerve;
+        this.tableA = NetworkTableInstance.getDefault().getTable(limelightTableNameA);
+        this.tableB = limelightTableNameB == null
+                ? null
+                : NetworkTableInstance.getDefault().getTable(limelightTableNameB);
         addRequirements(swerve);
     }
 
     @Override
     public void execute() {
-        boolean tv = table.getEntry("tv").getDouble(0) == 1.0;
+        boolean tvA = tableA.getEntry("tv").getBoolean(false);
+        boolean tvB = tableB != null && tableB.getEntry("tv").getBoolean(false);
+        boolean tv = tvA || tvB;
         if (tv) {
             swerve.setChassisSpeeds(
                 new ChassisSpeeds(SemiAutoConstants.kDriveOnTagSpeedMetersPerSec, 0.0, 0.0));

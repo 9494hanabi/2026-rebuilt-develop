@@ -11,9 +11,8 @@ import static frc.robot.lib.util.Constants.VisionConstants.kFaceAprilTagTargetOf
 import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.RobotState;
+import frc.robot.lib.time.RobotTime;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,19 +30,35 @@ import java.util.Optional;
 public class FaceAprilTagCommand extends Command {
     private final SwerveSubsystem swerve;
     private final RobotState state;
+    private final int targetTagId;
 
-    private final NetworkTable table =
-    NetworkTableInstance.getDefault().getTable(VisionConstants.kFaceAprilTagTableName);
-
-    private Optional<Pose2d> lastTargetPose = Optional.empty();
+    private Optional<Pose2d> targetPose = Optional.empty();
 
     public FaceAprilTagCommand(
         SwerveSubsystem swerve,
         RobotState state
     ) {
+        this(swerve, state, 1);
+    }
+
+    public FaceAprilTagCommand(
+        SwerveSubsystem swerve,
+        RobotState state,
+        int targetTagId
+    ) {
         this.swerve = swerve;
         this.state = state;
+        this.targetTagId = targetTagId;
         addRequirements(swerve);
+    }
+
+    private boolean hasFreshFieldPose() {
+        double lastTs = state.lastUsedMegatagTimestamp();
+        if (lastTs <= 0.0) {
+            return false;
+        }
+        double now = RobotTime.getTimestampSeconds();
+        return (now - lastTs) <= VisionConstants.kFieldPoseValidTimeoutSec;
     }
 
     @Override
@@ -58,44 +73,41 @@ public class FaceAprilTagCommand extends Command {
         Logger.recordOutput("FaceAprilTag/FieldLayoutTagIds", tagIds);
         Logger.recordOutput("FaceAprilTag/FieldLayoutFieldLength", FieldConstants.kAprilTagLayout.getFieldLength());
         Logger.recordOutput("FaceAprilTag/FieldLayoutFieldWidth", FieldConstants.kAprilTagLayout.getFieldWidth());
+
+        Logger.recordOutput("FaceAprilTag/TargetTagId", targetTagId);
+        var maybeFieldToTag = FieldConstants.kAprilTagLayout.getTagPose(targetTagId);
+        Logger.recordOutput("FaceAprilTag/TagPosePresent", maybeFieldToTag.isPresent());
+        if (maybeFieldToTag.isPresent()) {
+            Pose2d fieldToTag = maybeFieldToTag.get().toPose2d();
+            Pose2d fieldToTarget = fieldToTag.transformBy(kFaceAprilTagTargetOffset);
+            targetPose = Optional.of(fieldToTarget);
+            Logger.recordOutput("FaceAprilTag/FieldToTarget", fieldToTarget);
+        } else {
+            targetPose = Optional.empty();
+        }
     }
 
     @Override
     public void execute() {
-        // === 新方式: 絶対座標でタグに向かう ===
-        // 1) 見えたタグID(tid)から FieldLayout で「タグの絶対座標」を取得
+        // === 絶対座標でタグ1に向かう ===
+        // 1) FieldLayout でタグ1の絶対座標を取得
         // 2) interestoffset と一致させたオフセット(kFaceAprilTagTargetOffset)を加えて目標座標を作る
-        // 3) RobotState の最新姿勢との差分を「フィールド座標の誤差」として扱う
+        // 3) RobotState の融合姿勢との差分を「フィールド座標の誤差」として扱う
         // 4) 誤差から field-relative 速度を作り、ロボット座標系へ変換して出力
-        double tvRaw = table.getEntry("tv").getDouble(0);
-        boolean tv = tvRaw == 1.0; // 1なら有効
-        Logger.recordOutput("FaceAprilTag/tv", tv);
-        Logger.recordOutput("FaceAprilTag/tvRaw", tvRaw);
-        Logger.recordOutput("FaceAprilTag/pipeline", table.getEntry("pipeline").getDouble(-1));
-        if (tv) {
-            double tidRaw = table.getEntry("tid").getDouble(-1);
-            int tagId = (int) Math.round(tidRaw);
-            Logger.recordOutput("FaceAprilTag/tid", tagId);
-            Logger.recordOutput("FaceAprilTag/tidRaw", tidRaw);
-            if (tagId >= 0) {
-                var maybeFieldToTag = FieldConstants.kAprilTagLayout.getTagPose(tagId);
-                Logger.recordOutput("FaceAprilTag/TagPosePresent", maybeFieldToTag.isPresent());
-                if (maybeFieldToTag.isPresent()) {
-                    Pose2d fieldToTag = maybeFieldToTag.get().toPose2d();
-                    Pose2d fieldToTarget = fieldToTag.transformBy(kFaceAprilTagTargetOffset);
-                    lastTargetPose = Optional.of(fieldToTarget);
-                    Logger.recordOutput("FaceAprilTag/FieldToTarget", fieldToTarget);
-                }
-            }
-        }
-
-        if (lastTargetPose.isEmpty()) {
+        if (targetPose.isEmpty()) {
             // まだタグの座標が確定していない場合は停止
             Logger.recordOutput("FaceAprilTag/HasTargetPose", false);
             swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
             return;
         }
         Logger.recordOutput("FaceAprilTag/HasTargetPose", true);
+
+        boolean hasPose = hasFreshFieldPose();
+        Logger.recordOutput("FaceAprilTag/HasFreshFieldPose", hasPose);
+        if (!hasPose) {
+            swerve.setChassisSpeeds(new ChassisSpeeds(0, 0, 0));
+            return;
+        }
 
         var latestFieldToRobot = state.getLatestFieldToRobot();
         if (latestFieldToRobot == null) {
@@ -106,38 +118,37 @@ public class FaceAprilTagCommand extends Command {
         Logger.recordOutput("FaceAprilTag/HasFieldPose", true);
 
         Pose2d fieldToRobot = latestFieldToRobot.getValue();
-        Pose2d fieldToTarget = lastTargetPose.get();
+        Pose2d fieldToTarget = targetPose.get();
         Logger.recordOutput("FaceAprilTag/FieldToRobot", fieldToRobot);
 
         // =========================
         // 1) 並進（フィールド座標系の目標へ）
         // =========================
         Translation2d fieldError = fieldToTarget.getTranslation().minus(fieldToRobot.getTranslation());
-        double forwardErrorwithTargetMeter = fieldError.getX();
-        double leftErrorwithTargetMeter = fieldError.getY();
+        double forwardErrorWithTargetMeter = fieldError.getX();
+        double leftErrorWithTargetMeter = fieldError.getY();
         Logger.recordOutput("FaceAprilTag/FieldError", fieldError);
 
-        double velocity_x = MathUtil.clamp(translationGain * forwardErrorwithTargetMeter, -velocityMaximum, velocityMaximum);
-        double velocity_y = MathUtil.clamp(translationGain * leftErrorwithTargetMeter, -velocityMaximum, velocityMaximum);
+        double velocity_x = MathUtil.clamp(translationGain * forwardErrorWithTargetMeter, -velocityMaximum, velocityMaximum);
+        double velocity_y = MathUtil.clamp(translationGain * leftErrorWithTargetMeter, -velocityMaximum, velocityMaximum);
 
-        if (Math.abs(forwardErrorwithTargetMeter) < planeDeadbandMeter) velocity_x = 0.0;
-        if (Math.abs(leftErrorwithTargetMeter) < planeDeadbandMeter) velocity_y = 0.0;
+        if (Math.abs(forwardErrorWithTargetMeter) < planeDeadbandMeter) velocity_x = 0.0;
+        if (Math.abs(leftErrorWithTargetMeter) < planeDeadbandMeter) velocity_y = 0.0;
 
         // =========================
         // 2) 回転（タグ方向に正対）
         // =========================
-        double angularErrorwithTargetRad = 0.0;
+        double angularErrorWithTargetRad = 0.0;
         if (fieldError.getNorm() >= planeDeadbandMeter) {
             Rotation2d desiredHeading = new Rotation2d(fieldError.getX(), fieldError.getY());
-            angularErrorwithTargetRad = MathUtil.angleModulus(
+            angularErrorWithTargetRad = MathUtil.angleModulus(
                 desiredHeading.minus(fieldToRobot.getRotation()).getRadians());
         }
 
-        // ChassisSpeeds: omegaはrad/s  [oai_citation:8‡FIRST Robotics Competition Documentation](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/intro-and-chassis-speeds.html?utm_source=chatgpt.com)
-        double omega = MathUtil.clamp(angularGain * angularErrorwithTargetRad, -omegaMaximum, omegaMaximum);
+        double omega = MathUtil.clamp(angularGain * angularErrorWithTargetRad, -omegaMaximum, omegaMaximum);
 
-        if (Math.abs(angularErrorwithTargetRad) < thetaDeadbandRad) omega = 0.0;
-        Logger.recordOutput("FaceAprilTag/AngularErrorRad", angularErrorwithTargetRad);
+        if (Math.abs(angularErrorWithTargetRad) < thetaDeadbandRad) omega = 0.0;
+        Logger.recordOutput("FaceAprilTag/AngularErrorRad", angularErrorWithTargetRad);
         Logger.recordOutput("FaceAprilTag/Omega", omega);
         Logger.recordOutput("FaceAprilTag/VelocityX", velocity_x);
         Logger.recordOutput("FaceAprilTag/VelocityY", velocity_y);

@@ -1,7 +1,5 @@
 package frc.robot;
 
-// import frc.robot.commands.Autos;
-// import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.FaceAprilTagCommand;
 import frc.robot.commands.DriveOnTagCommand;
 import frc.robot.commands.DriveWhileFieldPoseValidCommand;
@@ -10,6 +8,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 
 import frc.robot.lib.util.Constants.OperatorConstants;
+import frc.robot.lib.util.Constants.VisionConstants;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -37,22 +36,14 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
 
-  // //AutoSetting
-  // //これを書き換えて選択できるようにしていく Robot.java と連携
-  // private final Command m_simpleAuto = new DriveDistance(
-  //       AutoConstants.kAutoDriveDistanceInches,
-  //       AutoConstants.kAutoDriveSpeed,m_robotDrive);
-  // private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
-
-  //自律コマンド用の SendableChooser スマートダッシュボードで選択できるようにしているクラス
   SendableChooser<Command> m_chooser = new SendableChooser<>();
 
 
 
   private final SwerveInputStream driveAngularVelocity;
-  private final SwerveInputStream driveDriectAngle;
-  private final Command driveFieldorientedDriectAngle;
-  private final Command driveFieldOrentedAngularVelocity;
+  private final SwerveInputStream driveDirectAngle;
+  private final Command driveFieldOrientedDirectAngle;
+  private final Command driveFieldOrientedAngularVelocity;
 
   public RobotContainer() {
     robotState = new RobotState();
@@ -70,24 +61,17 @@ public class RobotContainer {
         .scaleTranslation(0.8)
         .allianceRelativeControl(true);
 
-    driveDriectAngle = driveAngularVelocity
+    driveDirectAngle = driveAngularVelocity
         .copy()
         .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
         .headingWhile(true);
 
-    driveFieldorientedDriectAngle = drivebase.driveFieldOriented(driveDriectAngle);
-    driveFieldOrentedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
+    driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
     configureBindings();
-    drivebase.setDefaultCommand(driveFieldOrentedAngularVelocity);
+    drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
     NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
-
-    // Autoダッシュボード設定
-    // Add commands to the autonomous command chooser
-    // // Autoダッシュボード設定
-    // // Add commands to the autonomous command chooser
-    // m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
-    // m_chooser.addOption("Complex Auto", m_complexAuto);
   }
 
   private void configureBindings() {
@@ -97,15 +81,15 @@ public class RobotContainer {
     m_driverController.a().whileTrue(
       new DriveOnTagCommand(drivebase)
     );
+    m_driverController.y().whileTrue(
+      new DriveOnTagCommand(drivebase, VisionConstants.kLimelightATableName)
+    );
     m_driverController.x().whileTrue(
       new DriveWhileFieldPoseValidCommand(drivebase, robotState, driveAngularVelocity)
     );
   }
-   public Command getAutonomousCommand() {
-    // ダッシュボードで選択したコマンドを実行する役割
-    return m_chooser.getSelected();
 
-    // // ここに.autoの名前を入力する
-    // return drivebase.getAutonomousCommand("New Auto");
+  public Command getAutonomousCommand() {
+    return m_chooser.getSelected();
   }
 }

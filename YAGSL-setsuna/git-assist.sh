@@ -912,6 +912,48 @@ do_sync_to_daisha() {
   sync_robot_code_setsuna_to_daisha "$setsuna_dir" "$daisha_dir"
 }
 
+# ---------- deploy-json -> swerve sync ----------
+do_sync_swerve_json_to_deploy() {
+  need_git_repo
+  guard_not_in_daisha
+
+  local root setsuna_dir
+  root="$(repo_root)"
+  setsuna_dir="$(find_project_dir_by_scan "$root" "setsuna" || true)"
+  if [[ -z "${setsuna_dir:-}" ]]; then
+    setsuna_dir="$root"
+  fi
+
+  local json_src="$setsuna_dir/$JSON_SETSUNA_DIR/swerve"
+  local json_dst="$setsuna_dir/$REL_DEPLOY_DIR/swerve"
+
+  [[ -d "$json_src" ]] || die "同期元が見つかりません: $json_src"
+
+  echo "" >&2
+  echo "🔁 deploy-json(swerve) を deploy に同期します。" >&2
+  echo "   FROM: $json_src" >&2
+  echo "   TO  : $json_dst" >&2
+
+  if ! prompt_yn "今すぐ同期しますか？" "Y"; then
+    die "中断しました。"
+  fi
+
+  if prompt_yn "同期前にバックアップを作りますか？" "Y"; then
+    local ts bak
+    ts="$(date -j -f "%s" "$(date +%s)" +"%Y%m%d_%H%M%S")"
+    bak="$HOME/.git-assist-backup/$(basename "$(repo_root)")/$SETSUNA_NAME/$ts/$REL_DEPLOY_DIR/swerve"
+    mkdir -p "$bak"
+    if [[ -d "$json_dst" ]]; then
+      rsync -a "$json_dst/" "$bak/"
+    fi
+    echo "🗄️ Backup: $bak" >&2
+  fi
+
+  mkdir -p "$json_dst"
+  rsync -a --delete "$json_src/" "$json_dst/"
+  echo "✅ deploy-json(swerve) の同期完了" >&2
+}
+
 # ---------- main ----------
 main() {
   need_git_repo
@@ -927,6 +969,7 @@ main() {
     "マージ" \
     "プル（選択式）" \
     "台車に同期（setsuna -> daisha）" \
+    "deploy-json(swerve) を deploy に同期" \
     "新しいブランチの作成" \
     "ブランチの移動" \
     | tail -n 1 | tr -d '\r')"
@@ -936,6 +979,7 @@ main() {
     "マージ") do_merge ;;
     "プル（選択式）") do_pull ;;
     "台車に同期（setsuna -> daisha）") do_sync_to_daisha ;;
+    "deploy-json(swerve) を deploy に同期") do_sync_swerve_json_to_deploy ;;
     "新しいブランチの作成") do_branch_create ;;
     "ブランチの移動") do_branch_switch ;;
     *) die "不明な操作です: $op" ;;
