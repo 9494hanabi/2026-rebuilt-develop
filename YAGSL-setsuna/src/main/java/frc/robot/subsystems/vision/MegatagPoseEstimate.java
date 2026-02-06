@@ -46,12 +46,18 @@ public record MegatagPoseEstimate(
                 fiducialIds[i] = poseEstimate.rawFiducials[i].id;
             }
         }
+        double quality = 1.0;
+        if (fiducialIds.length == 1 && poseEstimate.rawFiducials.length > 0) {
+            quality = 1.0 - poseEstimate.rawFiducials[0].ambiguity;
+        } else if (fiducialIds.length == 0) {
+            quality = 0.0;
+        }
         return new MegatagPoseEstimate(
             fieldToRobot,
             poseEstimate.timestampSeconds,
             poseEstimate.latency,
             poseEstimate.avgTagArea,
-            fiducialIds.length > 1 ? 1.0 : 1.0 - poseEstimate.rawFiducials[0].ambiguity,
+            quality,
             fiducialIds);
     }
 

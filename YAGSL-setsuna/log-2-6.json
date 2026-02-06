@@ -1,0 +1,632 @@
+[
+    {
+        "messageType": 2,
+        "timestamp": -0.00006103515625,
+        "seqNumber": 71,
+        "line": "********** Robot program starting **********"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.02642822265625,
+        "seqNumber": 72,
+        "line": "NT: Listening on NT3 port 1735, NT4 port 5810"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.51806640625,
+        "seqNumber": 73,
+        "line": "Instantiating NavX on roboRIO MXP Port."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.5205078125,
+        "seqNumber": 74,
+        "line": "NavX: Library for FRC"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.52410888671875,
+        "seqNumber": 75,
+        "line": "NavX: Connected."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.5272216796875,
+        "seqNumber": 76,
+        "line": "NavX: Board Type 50 (navX2-MXP (Gen 2))"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.5289306640625,
+        "seqNumber": 77,
+        "line": "NavX: firmware version 4.0.447"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.53021240234375,
+        "seqNumber": 78,
+        "line": "NavX: startup initialization and startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.53973388671875,
+        "seqNumber": 79,
+        "line": "NavX: onboard startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.5416259765625,
+        "seqNumber": 80,
+        "line": "NavX: Yaw angle auto-reset to 0.0 due to startup calibration."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.4306640625,
+        "seqNumber": 81,
+        "line": "NT: Got a NT4 connection from 10.94.94.11 port 54256"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.43231201171875,
+        "seqNumber": 82,
+        "line": "NT: Got a NT4 connection from 10.94.94.22 port 50922"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.43701171875,
+        "seqNumber": 83,
+        "line": "NT: CONNECTED NT4 client 'limelight-rf@1' (from 10.94.94.11:54256)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.44158935546875,
+        "seqNumber": 84,
+        "line": "NT: CONNECTED NT4 client 'limelight-lb@2' (from 10.94.94.22:50922)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.44293212890625,
+        "seqNumber": 85,
+        "line": "NT: DISCONNECTED NT4 client 'limelight-lb@2' (from 10.94.94.22:50922): remote end closed connection"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 1.447998046875,
+        "seqNumber": 86,
+        "line": "NT: NT4 socket error: operation canceled"
+    },
+    {
+        "timestamp": 4.13983154296875,
+        "seqNumber": 87,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "StatusLogger: It is not recommended to log to RoboRIO internal storage. Plug in a flash drive.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.14068603515625,
+        "seqNumber": 88,
+        "line": "StatusLogger: Logging REVLOG to '/home/lvuser/logs/REV_TBD_9e5f5cfb88e2d2f0.revlog'"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.142578125,
+        "seqNumber": 89,
+        "line": "StatusLogger: Renamed REVLOG from 'REV_TBD_9e5f5cfb88e2d2f0.revlog' to 'REV_20260206_073841.revlog' at '/home/lvuser/logs/REV_20260206_073841.revlog'"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.6435546875,
+        "seqNumber": 90,
+        "line": "Instantiating NavX on roboRIO MXP Port."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.6456298828125,
+        "seqNumber": 91,
+        "line": "NavX: Library for FRC"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.665283203125,
+        "seqNumber": 92,
+        "line": "NavX: Connected."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.66571044921875,
+        "seqNumber": 93,
+        "line": "NavX: Board Type 50 (navX2-MXP (Gen 2))"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.666015625,
+        "seqNumber": 94,
+        "line": "NavX: firmware version 4.0.447"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.666259765625,
+        "seqNumber": 95,
+        "line": "NavX: startup initialization and startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.66656494140625,
+        "seqNumber": 96,
+        "line": "NavX: onboard startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.66680908203125,
+        "seqNumber": 97,
+        "line": "NavX: Yaw angle auto-reset to 0.0 due to startup calibration."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.44366455078125,
+        "seqNumber": 98,
+        "line": "java.io.FileNotFoundException: /home/lvuser/deploy/pathplanner/settings.json (No such file or directory)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.4520263671875,
+        "seqNumber": 99,
+        "line": "\tat java.base/java.io.FileInputStream.open0(Native Method)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.45269775390625,
+        "seqNumber": 100,
+        "line": "\tat java.base/java.io.FileInputStream.open(Unknown Source)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.4544677734375,
+        "seqNumber": 101,
+        "line": "\tat java.base/java.io.FileInputStream.<init>(Unknown Source)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.454833984375,
+        "seqNumber": 102,
+        "line": "\tat java.base/java.io.FileReader.<init>(Unknown Source)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.4559326171875,
+        "seqNumber": 103,
+        "line": "\tat com.pathplanner.lib.config.RobotConfig.fromGUISettings(RobotConfig.java:266)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.45635986328125,
+        "seqNumber": 104,
+        "line": "\tat frc.robot.subsystems.SwerveSubsystem.setupPathPlanner(SwerveSubsystem.java:101)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.45770263671875,
+        "seqNumber": 105,
+        "line": "\tat frc.robot.subsystems.SwerveSubsystem.<init>(SwerveSubsystem.java:90)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.45892333984375,
+        "seqNumber": 106,
+        "line": "\tat frc.robot.RobotContainer.<init>(RobotContainer.java:53)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.45928955078125,
+        "seqNumber": 107,
+        "line": "\tat frc.robot.Robot.<init>(Robot.java:25)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.46026611328125,
+        "seqNumber": 108,
+        "line": "\tat edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:387)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.46148681640625,
+        "seqNumber": 109,
+        "line": "\tat edu.wpi.first.wpilibj.RobotBase.startRobot(RobotBase.java:527)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.46343994140625,
+        "seqNumber": 110,
+        "line": "\tat frc.robot.Main.main(Main.java:67)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.15521240234375,
+        "seqNumber": 111,
+        "line": "RobotContainerfrc.robot.RobotContainer@140e5db"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.246337890625,
+        "seqNumber": 112,
+        "line": "********** Robot program startup complete **********"
+    },
+    {
+        "timestamp": 7.30316162109375,
+        "seqNumber": 113,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.30706787109375,
+        "seqNumber": 114,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.3076171875,
+        "seqNumber": 115,
+        "line": ""
+    },
+    {
+        "timestamp": 7.35498046875,
+        "seqNumber": 116,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Library initialization is complete.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.430908203125,
+        "seqNumber": 117,
+        "line": "NT: Got a NT4 connection from 10.94.94.22 port 36158"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.43389892578125,
+        "seqNumber": 118,
+        "line": "NT: CONNECTED NT4 client 'limelight-lb@2' (from 10.94.94.22:36158)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.44329833984375,
+        "seqNumber": 119,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 7.59490966796875,
+        "seqNumber": 120,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tSwerveSubsystem.periodic(): 0.014079s\n\tVisionSubsystem.periodic(): 0.123543s\n\tSequentialCommandGroup.execute(): 0.024059s\n\tbuttons.run(): 0.018179s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.5960693359375,
+        "seqNumber": 121,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tSwerveSubsystem.periodic(): 0.014079s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.5970458984375,
+        "seqNumber": 122,
+        "line": "\tVisionSubsystem.periodic(): 0.123543s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.5972900390625,
+        "seqNumber": 123,
+        "line": "\tSequentialCommandGroup.execute(): 0.024059s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.59796142578125,
+        "seqNumber": 124,
+        "line": "\tbuttons.run(): 0.018179s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.59906005859375,
+        "seqNumber": 125,
+        "line": ""
+    },
+    {
+        "timestamp": 7.676025390625,
+        "seqNumber": 126,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tSmartDashboard.updateValues(): 0.020980s\n\tdisabledInit(): 0.006845s\n\trobotPeriodic(): 0.358274s\n\tLiveWindow.updateValues(): 0.000575s\n\tShuffleboard.update(): 0.000075s\n\tdisabledPeriodic(): 0.002634s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.67828369140625,
+        "seqNumber": 127,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tSmartDashboard.updateValues(): 0.020980s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.6798095703125,
+        "seqNumber": 128,
+        "line": "\tdisabledInit(): 0.006845s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.68011474609375,
+        "seqNumber": 129,
+        "line": "\trobotPeriodic(): 0.358274s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.68060302734375,
+        "seqNumber": 130,
+        "line": "\tLiveWindow.updateValues(): 0.000575s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.68115234375,
+        "seqNumber": 131,
+        "line": "\tShuffleboard.update(): 0.000075s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.68170166015625,
+        "seqNumber": 132,
+        "line": "\tdisabledPeriodic(): 0.002634s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.68353271484375,
+        "seqNumber": 133,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.03778076171875,
+        "seqNumber": 134,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.13470458984375,
+        "seqNumber": 135,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 9.4154052734375,
+        "seqNumber": 136,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix-diagnostics] Server 2026.1.0 (Jan  7 2026, 19:24:14) running on port: 1250",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "timestamp": 9.44342041015625,
+        "seqNumber": 137,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger Started (Network: rio)",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 13.10015869140625,
+        "seqNumber": 138,
+        "line": "[PathPlanner] PathfindingCommand finished warmup"
+    },
+    {
+        "timestamp": 16.099853515625,
+        "seqNumber": 139,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.10125732421875,
+        "seqNumber": 140,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1031494140625,
+        "seqNumber": 141,
+        "line": ""
+    },
+    {
+        "timestamp": 16.11248779296875,
+        "seqNumber": 142,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tteleopPeriodic(): 0.000111s\n\tSmartDashboard.updateValues(): 0.000445s\n\trobotPeriodic(): 0.023447s\n\tLiveWindow.updateValues(): 0.000000s\n\tShuffleboard.update(): 0.000019s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1131591796875,
+        "seqNumber": 143,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tteleopPeriodic(): 0.000111s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11346435546875,
+        "seqNumber": 144,
+        "line": "\tSmartDashboard.updateValues(): 0.000445s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1138916015625,
+        "seqNumber": 145,
+        "line": "\trobotPeriodic(): 0.023447s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11444091796875,
+        "seqNumber": 146,
+        "line": "\tLiveWindow.updateValues(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11468505859375,
+        "seqNumber": 147,
+        "line": "\tShuffleboard.update(): 0.000019s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11492919921875,
+        "seqNumber": 148,
+        "line": ""
+    },
+    {
+        "timestamp": 85.12353515625,
+        "seqNumber": 149,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.12432861328125,
+        "seqNumber": 150,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.12493896484375,
+        "seqNumber": 151,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.1805419921875,
+        "seqNumber": 152,
+        "line": "Error proccessing Limelight data: Index 0 out of bounds for length 0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.181884765625,
+        "seqNumber": 153,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 85.18798828125,
+        "seqNumber": 154,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tSwerveSubsystem.periodic(): 0.000186s\n\tVisionSubsystem.periodic(): 0.079690s\n\tbuttons.run(): 0.000038s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.19146728515625,
+        "seqNumber": 155,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tSwerveSubsystem.periodic(): 0.000186s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.1922607421875,
+        "seqNumber": 156,
+        "line": "\tVisionSubsystem.periodic(): 0.079690s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.1927490234375,
+        "seqNumber": 157,
+        "line": "\tbuttons.run(): 0.000038s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.19293212890625,
+        "seqNumber": 158,
+        "line": ""
+    },
+    {
+        "timestamp": 85.2242431640625,
+        "seqNumber": 159,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tSmartDashboard.updateValues(): 0.001818s\n\trobotPeriodic(): 0.103565s\n\tLiveWindow.updateValues(): 0.000000s\n\tShuffleboard.update(): 0.000000s\n\tdisabledPeriodic(): 0.000371s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.224853515625,
+        "seqNumber": 160,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tSmartDashboard.updateValues(): 0.001818s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.22515869140625,
+        "seqNumber": 161,
+        "line": "\trobotPeriodic(): 0.103565s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.22540283203125,
+        "seqNumber": 162,
+        "line": "\tLiveWindow.updateValues(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.22564697265625,
+        "seqNumber": 163,
+        "line": "\tShuffleboard.update(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.225830078125,
+        "seqNumber": 164,
+        "line": "\tdisabledPeriodic(): 0.000371s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 85.22601318359375,
+        "seqNumber": 165,
+        "line": ""
+    }
+]

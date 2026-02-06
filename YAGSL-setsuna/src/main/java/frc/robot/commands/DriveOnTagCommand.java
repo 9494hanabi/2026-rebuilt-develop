@@ -33,8 +33,8 @@ public class DriveOnTagCommand extends Command {
 
     @Override
     public void execute() {
-        boolean tvA = tableA.getEntry("tv").getBoolean(false);
-        boolean tvB = tableB != null && tableB.getEntry("tv").getBoolean(false);
+        boolean tvA = tableA.getEntry("tv").getDouble(0.0) > 0;
+        boolean tvB = tableB != null && tableB.getEntry("tv").getDouble(0.0) > 0;
         boolean tv = tvA || tvB;
         if (tv) {
             swerve.setChassisSpeeds(

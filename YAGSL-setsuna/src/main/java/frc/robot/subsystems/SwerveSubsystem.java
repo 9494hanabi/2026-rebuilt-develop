@@ -14,9 +14,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.lib.limelight.LimelightHelpers;
 import frc.robot.lib.util.Constants;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,11 +25,10 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import java.io.File;
 import java.util.function.Supplier;
 
-import com.studica.frc.AHRS;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -49,8 +46,7 @@ import frc.robot.RobotState;
 //
 
 public class SwerveSubsystem extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
-  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI);
+  // NavXはYAGSLが内部で作成するため、手動で作成しない（二重初期化防止）
   // private SwerveDrivePoseEstimator poseEstimator;
 
   File directory = new File(Filesystem.getDeployDirectory(),"swerve");
@@ -67,7 +63,9 @@ public class SwerveSubsystem extends SubsystemBase {
     *めっちゃデータを送るから消さないとロボットが遅くなる。
     *消す時は SwerveDriveTelemetry.verbosity = TelemetryVerbosity.NONE;　にする
     */
-    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+    // パフォーマンス向上のためLOWに設定（HIGHは大量データ送信でループ遅延の原因）
+    // デバッグ時のみHIGHに戻すこと
+    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.LOW;
 
     // ステートのイニシャライズ
     this.robotState = robotState;
@@ -186,6 +184,13 @@ public class SwerveSubsystem extends SubsystemBase {
     Pose2d odomPose = odometry.update(swerveDrive.getYaw(), swerveDrive.getModulePositions());
     robotState.addOdometryMeasurement(ts, pose);
     robotState.addOdometryOnlyMeasurement(ts, odomPose);
+
+    // デバッグ用: IMU値をSmartDashboardに表示
+    // YAGSLのSwerveDrive経由でIMU値を取得（二重初期化防止）
+    var gyroRotation3d = swerveDrive.getGyroRotation3d();
+    SmartDashboard.putNumber("IMU Yaw", swerveDrive.getYaw().getDegrees());
+    SmartDashboard.putNumber("IMU Pitch", Math.toDegrees(gyroRotation3d.getY()));
+    SmartDashboard.putNumber("IMU Roll", Math.toDegrees(gyroRotation3d.getX()));
   }
 
   @Override

@@ -279,7 +279,7 @@ public class VisionSubsystem extends SubsystemBase {
             return Optional.empty();
         }
 
-        if (poseEstimate.fiducialIds().length > 1) {
+        if (poseEstimate.fiducialIds().length != 1) {
             return Optional.empty();
         }
 

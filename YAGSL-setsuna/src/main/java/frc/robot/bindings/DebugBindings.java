@@ -37,15 +37,17 @@ public class DebugBindings {
     public void configure() {
         // ===============================================
         // デバッグ用のバインディングをここに追加
-        // 例：
-        // controller.start().onTrue(Commands.runOnce(() -> {
-        //     System.out.println("Debug: Current Pose = " + drivebase.getSwerveDrive().getPose());
-        // }));
-        //
-        // controller.back().onTrue(Commands.runOnce(() -> {
-        //     vision.setUseVision(false);
-        //     System.out.println("Debug: Vision disabled");
-        // }));
         // ===============================================
+
+        // Startボタン: ジャイロをゼロリセット
+        controller.start().onTrue(Commands.runOnce(() -> {
+            drivebase.getSwerveDrive().zeroGyro();
+            System.out.println("Debug: Gyro zeroed!");
+        }));
+
+        // Backボタン: 現在のポーズを表示
+        controller.back().onTrue(Commands.runOnce(() -> {
+            System.out.println("Debug: Current Pose = " + drivebase.getSwerveDrive().getPose());
+        }));
     }
 }

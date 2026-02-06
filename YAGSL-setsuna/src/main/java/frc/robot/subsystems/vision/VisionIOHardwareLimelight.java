@@ -58,6 +58,20 @@ public class VisionIOHardwareLimelight implements VisionIO {
     // Limelight A/B それぞれのNetworkTableから値を読み取り、周期処理（periodic）側で使える最新データとして保持します。
     @Override
     public void readInputs(VisionIOInputs inputs) {
+        // MegaTag2用: ロボットのYawをLimelightに送信
+        // 注意: SetRobotOrientation()はFlush()を呼ぶためブロッキングになる
+        // NoFlush版を使ってループオーバーランを防ぐ
+        var latestPose = robotState.getLatestFieldToRobot();
+        if (latestPose != null) {
+            double yawDegrees = latestPose.getValue().getRotation().getDegrees();
+            LimelightHelpers.SetRobotOrientation_NoFlush(
+                VisionConstants.kLimelightATableName,
+                yawDegrees, 0, 0, 0, 0, 0);
+            LimelightHelpers.SetRobotOrientation_NoFlush(
+                VisionConstants.kLimelightBTableName,
+                yawDegrees, 0, 0, 0, 0, 0);
+        }
+
         readCameraData(tableA, inputs.cameraA, VisionConstants.kLimelightATableName);
         readCameraData(tableB, inputs.cameraB, VisionConstants.kLimelightBTableName);
         latestInputs.set(inputs);
@@ -76,10 +90,10 @@ public class VisionIOHardwareLimelight implements VisionIO {
 
         if (camera.seesTarget) {
             try {
+                // パフォーマンス改善: getBotPose_wpiBlueの重複呼び出しを削除
+                // getBotPoseEstimate_wpiBlueが同じNetworkTableエントリを読むため、
+                // megatagのposeから3D姿勢を生成する
                 var megatag = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
-                var robotPose3d =
-                        LimelightHelpers.toPose3D(
-                            LimelightHelpers.getBotPose_wpiBlue(limelightName));
 
                 // MegaTag（推定結果）が取れた場合は、推定姿勢・タグ数・タグ観測（rawFiducials）を詰めます。
                 if (megatag != null) {
@@ -87,11 +101,14 @@ public class VisionIOHardwareLimelight implements VisionIO {
                     camera.megatagCount = megatag.tagCount;
                     camera.fiducialObservations =
                             FiducialObservation.fromLimelight(megatag.rawFiducials);
-                }
 
-                // 3D姿勢が取れた場合は、可視化やデバッグ用の pose3d を詰めます。
-                if (robotPose3d != null) {
-                    camera.pose3d = robotPose3d;
+                    // 3D姿勢をmegatagのposeから生成（冗長なNetworkTable読み取りを回避）
+                    camera.pose3d = new edu.wpi.first.math.geometry.Pose3d(
+                        megatag.pose.getX(),
+                        megatag.pose.getY(),
+                        0.0,  // Z座標はMegaTagからは取得不可
+                        new edu.wpi.first.math.geometry.Rotation3d(
+                            0.0, 0.0, megatag.pose.getRotation().getRadians()));
                 }
 
                 // 推定の標準偏差（stddevs）を読み込みます。値が無い場合は DEFAULT_STDDEVS を使います。

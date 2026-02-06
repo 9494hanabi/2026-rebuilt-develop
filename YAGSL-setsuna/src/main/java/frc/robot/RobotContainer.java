@@ -90,7 +90,7 @@ public class RobotContainer {
     autoBindings.configure();
 
     // デバッグ用のバインディング（本番前にコメントアウト）
-    // debugBindings.configure();
+    debugBindings.configure();
   }
 
   public Command getAutonomousCommand() {
