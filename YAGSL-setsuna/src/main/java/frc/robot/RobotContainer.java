@@ -13,7 +13,9 @@ import swervelib.SwerveInputStream;
 
 // 254系
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
+import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.lib.limelight.LimelightConfig;
 
 // バインディング
 import frc.robot.bindings.DriveBindings;
@@ -52,7 +54,11 @@ public class RobotContainer {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
-    visionSubsystem = new VisionSubsystem(new VisionIOHardwareLimelight(robotState), robotState);
+    visionSubsystem = new VisionSubsystem(
+        LimelightConfig.getInstance().isAnyLimelightEnabled()
+            ? new VisionIOHardwareLimelight(robotState)
+            : new VisionIODummy(),
+        robotState);
 
     DriverStation.silenceJoystickConnectionWarning(true);
     driveAngularVelocity = SwerveInputStream.of(

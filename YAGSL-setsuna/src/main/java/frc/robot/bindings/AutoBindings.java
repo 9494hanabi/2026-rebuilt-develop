@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.SwerveSubsystem;
 
 // === 担当者 ===
-// 二年生（Autonomous担当）
+// ハルタ
 //
 // Autonomous関連のバインディングとNamedCommandsを管理するクラス
 // このファイルは二年生専用です。他の人は編集しないでください。
