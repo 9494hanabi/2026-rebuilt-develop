@@ -1,21 +1,12 @@
 package frc.robot;
 
-import frc.robot.commands.FaceAprilTagCommand;
-import frc.robot.commands.DriveOnTagCommand;
-import frc.robot.commands.DriveWhileFieldPoseValidCommand;
-
 import frc.robot.subsystems.SwerveSubsystem;
 
-
 import frc.robot.lib.util.Constants.OperatorConstants;
-import frc.robot.lib.util.Constants.VisionConstants;
-
-import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import swervelib.SwerveInputStream;
@@ -24,10 +15,19 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
+// バインディング
+import frc.robot.bindings.DriveBindings;
+import frc.robot.bindings.AutoBindings;
+import frc.robot.bindings.DebugBindings;
+
 
 // === 担当者 ===
-// ひなた
+// 共通（このファイルはできるだけ編集しない）
 //
+// バインディングは各Bindingsクラスに分離されています：
+// - DriveBindings.java: ひなた担当（ドライブ/ビジョン関連）
+// - AutoBindings.java: 二年生担当（Autonomous関連）
+// - DebugBindings.java: 誰でも（デバッグ用）
 
 public class RobotContainer {
   private final RobotState robotState;
@@ -38,12 +38,15 @@ public class RobotContainer {
 
   SendableChooser<Command> m_chooser = new SendableChooser<>();
 
-
-
   private final SwerveInputStream driveAngularVelocity;
   private final SwerveInputStream driveDirectAngle;
   private final Command driveFieldOrientedDirectAngle;
   private final Command driveFieldOrientedAngularVelocity;
+
+  // バインディングクラス
+  private final DriveBindings driveBindings;
+  private final AutoBindings autoBindings;
+  private final DebugBindings debugBindings;
 
   public RobotContainer() {
     robotState = new RobotState();
@@ -69,24 +72,25 @@ public class RobotContainer {
     driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
+    // バインディングクラスの初期化
+    driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
+    autoBindings = new AutoBindings(drivebase);
+    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController);
+
+    // バインディングの設定
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-    NamedCommands.registerCommand("test", Commands.print("Hello Hanabi"));
   }
 
   private void configureBindings() {
-    m_driverController.b().whileTrue(
-      new FaceAprilTagCommand(drivebase, robotState)
-    );
-    m_driverController.a().whileTrue(
-      new DriveOnTagCommand(drivebase)
-    );
-    m_driverController.y().whileTrue(
-      new DriveOnTagCommand(drivebase, VisionConstants.kLimelightATableName)
-    );
-    m_driverController.x().whileTrue(
-      new DriveWhileFieldPoseValidCommand(drivebase, robotState, driveAngularVelocity)
-    );
+    // ドライブ/ビジョン関連のバインディング（ひなた担当）
+    driveBindings.configure();
+
+    // Autonomous関連のバインディング（二年生担当）
+    autoBindings.configure();
+
+    // デバッグ用のバインディング（本番前にコメントアウト）
+    // debugBindings.configure();
   }
 
   public Command getAutonomousCommand() {
