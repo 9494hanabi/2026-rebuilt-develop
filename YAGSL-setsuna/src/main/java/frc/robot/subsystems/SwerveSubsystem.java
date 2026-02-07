@@ -41,11 +41,20 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.RobotState;
 
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+
 // === 担当者 ===
 // ひなた
 //
 
 public class SwerveSubsystem extends SubsystemBase {
+
+  // SimuGUIに反映させるためのインスタンス。
+  private final Field2d field = new Field2d();
+
+  // 起動直後のCommandScheduler overrun回避のため、ウォームアップは必要時のみ有効化する。
+  private static final boolean ENABLE_PATHFINDING_WARMUP = false;
+  private static final double DASHBOARD_UPDATE_PERIOD_SEC = 0.10;
   // NavXはYAGSLが内部で作成するため、手動で作成しない（二重初期化防止）
   // private SwerveDrivePoseEstimator poseEstimator;
 
@@ -54,6 +63,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDriveOdometry odometry;
 
   private final RobotState robotState;
+  private double lastDashboardUpdateSec = Double.NEGATIVE_INFINITY;
 
   public SwerveSubsystem(RobotState robotState) {
     // YAGSLのテレメトリを詳細表示モードにする（デバッグ用の情報を多く出す設定）
@@ -69,6 +79,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // ステートのイニシャライズ
     this.robotState = robotState;
+
+    SmartDashboard.putData("Field", field);
 
     try
     {
@@ -91,6 +103,13 @@ public class SwerveSubsystem extends SubsystemBase {
   // ====================================Planner========================================
   public void setupPathPlanner()
   {
+    File settingsFile = new File(Filesystem.getDeployDirectory(), "pathplanner/settings.json");
+    if (!settingsFile.exists()) {
+      DriverStation.reportWarning(
+          "PathPlanner settings.json が見つからないため AutoBuilder をスキップします。", false);
+      return;
+    }
+
     // GUI設定からRobotConfigを読み込みます。
     // これを定数ファイルに保存すべきです
     RobotConfig config;
@@ -147,12 +166,15 @@ public class SwerveSubsystem extends SubsystemBase {
                            );
     } catch (Exception e)
     {
-      // 必要に応じて例外を処理する
-      e.printStackTrace();
+      DriverStation.reportWarning(
+          "PathPlanner 初期化に失敗したため AutoBuilder を無効化します: " + e.getMessage(), false);
+      return;
     }
-    //PathPlannerの経路探索をプリロード
-    // カスタム経路探索を使用する場合はこの行の前に追加
-    PathfindingCommand.warmupCommand().schedule();
+    // PathPlannerの経路探索プリロードはCPU負荷が高く、
+    // 起動直後にループオーバーランを誘発するためデフォルトでは無効化。
+    if (ENABLE_PATHFINDING_WARMUP) {
+      PathfindingCommand.warmupCommand().schedule();
+    }
   }
 
   //イベント付きのパスフォロワーを取得する。
@@ -179,18 +201,45 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    field.setRobotPose(swerveDrive.getPose());
+
     double ts = Timer.getFPGATimestamp();
     Pose2d pose = getSwerveDrive().getPose();
     Pose2d odomPose = odometry.update(swerveDrive.getYaw(), swerveDrive.getModulePositions());
+    var gyroRotation3d = swerveDrive.getGyroRotation3d();
+    ChassisSpeeds measuredRobotRelativeSpeeds = swerveDrive.getRobotVelocity();
+    ChassisSpeeds measuredFieldRelativeSpeeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(
+            measuredRobotRelativeSpeeds.vxMetersPerSecond,
+            measuredRobotRelativeSpeeds.vyMetersPerSecond,
+            measuredRobotRelativeSpeeds.omegaRadiansPerSecond,
+            pose.getRotation());
+
     robotState.addOdometryMeasurement(ts, pose);
     robotState.addOdometryOnlyMeasurement(ts, odomPose);
+    robotState.addDriveMotionMeasurements(
+        ts,
+        0.0,
+        0.0,
+        measuredRobotRelativeSpeeds.omegaRadiansPerSecond,
+        gyroRotation3d.getY(),
+        gyroRotation3d.getX(),
+        0.0,
+        0.0,
+        measuredRobotRelativeSpeeds,
+        measuredFieldRelativeSpeeds,
+        measuredRobotRelativeSpeeds,
+        measuredFieldRelativeSpeeds,
+        measuredFieldRelativeSpeeds);
 
-    // デバッグ用: IMU値をSmartDashboardに表示
-    // YAGSLのSwerveDrive経由でIMU値を取得（二重初期化防止）
-    var gyroRotation3d = swerveDrive.getGyroRotation3d();
-    SmartDashboard.putNumber("IMU Yaw", swerveDrive.getYaw().getDegrees());
-    SmartDashboard.putNumber("IMU Pitch", Math.toDegrees(gyroRotation3d.getY()));
-    SmartDashboard.putNumber("IMU Roll", Math.toDegrees(gyroRotation3d.getX()));
+    // SmartDashboard更新を間引いてNT帯域とCPU負荷を抑える。
+    if (ts - lastDashboardUpdateSec >= DASHBOARD_UPDATE_PERIOD_SEC) {
+      lastDashboardUpdateSec = ts;
+      SmartDashboard.putNumber("IMU Yaw", swerveDrive.getYaw().getDegrees());
+      SmartDashboard.putNumber("IMU Pitch", Math.toDegrees(gyroRotation3d.getY()));
+      SmartDashboard.putNumber("IMU Roll", Math.toDegrees(gyroRotation3d.getX()));
+    }
   }
 
   @Override

@@ -9,8 +9,6 @@ public class VisionIODummy implements VisionIO {
 
     @Override
     public void readInputs(VisionIOInputs inputs) {
-        // 何もしない（カメラがないため）
-        inputs.cameraA.seesTarget = false;
-        inputs.cameraB.seesTarget = false;
+        inputs.cameras.clear();
     }
 }
