@@ -1,124 +1,227 @@
 package frc.robot.subsystems.vision;
 
-import frc.robot.lib.util.Constants;
-import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.RobotState;
+import frc.robot.lib.limelight.LimelightConfig;
+import frc.robot.lib.limelight.LimelightConfig.LimelightEntry;
 import frc.robot.lib.limelight.LimelightHelpers;
+import frc.robot.lib.time.RobotTime;
+import frc.robot.lib.util.Constants.VisionConstants;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TimestampedDoubleArray;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class VisionIOHardwareLimelight implements VisionIO {
-    NetworkTable tableA =
-        NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightATableName);
-    NetworkTable tableB =
-        NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightBTableName);
-    RobotState robotState;
-    AtomicReference<VisionIOInputs> latestInputs = new AtomicReference<>(new VisionIOInputs());
-    int imuMode = 1;
-
+    private static final double HEARTBEAT_TIMEOUT_SEC = 0.5;
     private static final double[] DEFAULT_STDDEVS =
             new double[VisionConstants.kExpectedStdDevArrayLength];
 
-    // このクラスを初期化します。
-    // RobotState（ロボットの状態管理）への参照を受け取り、Limelight側の設定（カメラ姿勢など）を初期化します。
+    private static class CameraHandle {
+        final String name;
+        final String tableName;
+        final NetworkTable table;
+        final Transform2d robotToCamera;
+        final double[] cameraPose;
+        final double stdDevScale;
+        final int pipeline;
+
+        double lastHeartbeat = Double.NaN;
+        double lastHeartbeatChangeSec = Double.NEGATIVE_INFINITY;
+
+        CameraHandle(LimelightEntry entry) {
+            this.name = entry.name == null ? "" : entry.name;
+            this.tableName = entry.table == null ? "" : entry.table;
+            this.table = NetworkTableInstance.getDefault().getTable(this.tableName);
+
+            double robotToCameraX = entry.robotToCamera == null ? 0.0 : entry.robotToCamera.x;
+            double robotToCameraY = entry.robotToCamera == null ? 0.0 : entry.robotToCamera.y;
+            double robotToCameraYawDeg =
+                    entry.robotToCamera == null ? 0.0 : entry.robotToCamera.yawDeg;
+            this.robotToCamera =
+                    new Transform2d(
+                            new Translation2d(robotToCameraX, robotToCameraY),
+                            Rotation2d.fromDegrees(robotToCameraYawDeg));
+
+            double cameraHeight = entry.cameraPose == null ? 0.0 : entry.cameraPose.heightMeters;
+            double cameraPitchDeg = entry.cameraPose == null ? 0.0 : entry.cameraPose.pitchDeg;
+            this.cameraPose =
+                    new double[] {
+                        robotToCameraX, robotToCameraY, cameraHeight, 0.0, cameraPitchDeg,
+                        robotToCameraYawDeg
+                    };
+
+            this.stdDevScale = entry.stdDevScale > 0.0 ? entry.stdDevScale : 1.0;
+            this.pipeline = (int) Math.round(entry.pipeline);
+        }
+    }
+
+    private final RobotState robotState;
+    private final List<CameraHandle> cameraHandles;
+    private final AtomicReference<VisionIOInputs> latestInputs =
+            new AtomicReference<>(new VisionIOInputs());
+
     public VisionIOHardwareLimelight(RobotState robotState) {
         this.robotState = robotState;
+        this.cameraHandles = buildCameraHandles();
         setLLSettings();
     }
 
-    // Limelightに対して「カメラの取り付け位置・姿勢（Robot Space）」を設定します。
-    // これによりLimelightが推定するロボット姿勢が、ロボット座標系に正しく整合するようになります。
-    private void setLLSettings() {
-        double[] cameraAPose = {
-            Constants.VisionConstants.kRobotToCameraAForward,
-            Constants.VisionConstants.kRobotToCameraASide,
-            VisionConstants.kCameraAHeightOffGroundMeters,
-            0.0,
-            VisionConstants.kCameraAPitchDegrees,
-            VisionConstants.kCameraAYawOffset.getDegrees()
-        };
-
-        tableA.getEntry("camerapose_robotspace_set").setDoubleArray(cameraAPose);
-
-        double[] cameraBPose = {
-            Constants.VisionConstants.kRobotToCameraBForward,
-            Constants.VisionConstants.kRobotToCameraBSide,
-            VisionConstants.kCameraBHeightOffGroundMeters,
-            0.0,
-            VisionConstants.kCameraBPitchDegrees,
-            VisionConstants.kCameraBYawOffset.getDegrees()
-        };
-
-        tableB.getEntry("camerapose_robotspace_set").setDoubleArray(cameraBPose);
+    private List<CameraHandle> buildCameraHandles() {
+        List<CameraHandle> handles = new ArrayList<>();
+        for (LimelightEntry entry : LimelightConfig.getInstance().getEnabledLimelights()) {
+            if (entry.table == null || entry.table.isBlank()) {
+                continue;
+            }
+            handles.add(new CameraHandle(entry));
+        }
+        return handles;
     }
 
-    // VisionIOの入力構造体（VisionIOInputs）を更新します。
-    // Limelight A/B それぞれのNetworkTableから値を読み取り、周期処理（periodic）側で使える最新データとして保持します。
+    private void setLLSettings() {
+        for (CameraHandle camera : cameraHandles) {
+            camera.table.getEntry("camerapose_robotspace_set").setDoubleArray(camera.cameraPose);
+            camera.table.getEntry("pipeline").setInteger(camera.pipeline);
+        }
+    }
+
     @Override
     public void readInputs(VisionIOInputs inputs) {
-        // MegaTag2用: ロボットのYawをLimelightに送信
-        // 注意: SetRobotOrientation()はFlush()を呼ぶためブロッキングになる
-        // NoFlush版を使ってループオーバーランを防ぐ
-        var latestPose = robotState.getLatestFieldToRobot();
-        if (latestPose != null) {
-            double yawDegrees = latestPose.getValue().getRotation().getDegrees();
-            LimelightHelpers.SetRobotOrientation_NoFlush(
-                VisionConstants.kLimelightATableName,
-                yawDegrees, 0, 0, 0, 0, 0);
-            LimelightHelpers.SetRobotOrientation_NoFlush(
-                VisionConstants.kLimelightBTableName,
-                yawDegrees, 0, 0, 0, 0, 0);
-        }
+        inputs.cameras.clear();
 
-        readCameraData(tableA, inputs.cameraA, VisionConstants.kLimelightATableName);
-        readCameraData(tableB, inputs.cameraB, VisionConstants.kLimelightBTableName);
+        var latestPose = robotState.getLatestFieldToRobot();
+        for (CameraHandle camera : cameraHandles) {
+            VisionIOInputs.CameraInputs cameraInputs = new VisionIOInputs.CameraInputs();
+            cameraInputs.name = camera.name;
+            cameraInputs.tableName = camera.tableName;
+            cameraInputs.robotToCamera = camera.robotToCamera;
+
+            if (latestPose != null) {
+                double yawDegrees = latestPose.getValue().getRotation().getDegrees();
+                LimelightHelpers.SetRobotOrientation_NoFlush(
+                        camera.tableName, yawDegrees, 0, 0, 0, 0, 0);
+            }
+
+            readCameraData(camera, cameraInputs);
+            inputs.cameras.add(cameraInputs);
+        }
         latestInputs.set(inputs);
     }
 
-    // 1台のLimelight（= 1つのNetworkTable）から観測データを読み取り、CameraInputsに詰めます。
-    // 「ターゲットが見えているか(tv)」を確認し、見えている場合のみ
-    // - BotPose 推定（MegaTag系の推定）
-    // - Fiducial（AprilTag）観測一覧
-    // - stddevs（推定のばらつき）
-    // を取り出して格納します。
-    private void readCameraData(
-        NetworkTable table, VisionIOInputs.CameraInputs camera, String limelightName) {
+    private void readCameraData(CameraHandle camera, VisionIOInputs.CameraInputs cameraInputs) {
+        cameraInputs.connected = isCameraConnected(camera);
+        cameraInputs.seesTarget = false;
+        cameraInputs.megatagPoseEstimate = null;
+        cameraInputs.megatag2PoseEstimate = null;
+        cameraInputs.megatagCount = 0;
+        cameraInputs.megatag2Count = 0;
+        cameraInputs.fiducialObservations = new FiducialObservation[0];
+        cameraInputs.pose3d = null;
+        cameraInputs.standardDeviations = DEFAULT_STDDEVS.clone();
 
-        camera.seesTarget = table.getEntry("tv").getDouble(0) == 1.0;
+        if (!cameraInputs.connected) {
+            return;
+        }
 
-        if (camera.seesTarget) {
-            try {
-                // パフォーマンス改善: getBotPose_wpiBlueの重複呼び出しを削除
-                // getBotPoseEstimate_wpiBlueが同じNetworkTableエントリを読むため、
-                // megatagのposeから3D姿勢を生成する
-                var megatag = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+        cameraInputs.seesTarget = camera.table.getEntry("tv").getDouble(0) == 1.0;
+        cameraInputs.standardDeviations =
+                scaleStdDevs(
+                        camera.table.getEntry("stddevs").getDoubleArray(DEFAULT_STDDEVS),
+                        camera.stdDevScale);
 
-                // MegaTag（推定結果）が取れた場合は、推定姿勢・タグ数・タグ観測（rawFiducials）を詰めます。
-                if (megatag != null) {
-                    camera.megatagPoseEstimate = MegatagPoseEstimate.fromLimelight(megatag);
-                    camera.megatagCount = megatag.tagCount;
-                    camera.fiducialObservations =
-                            FiducialObservation.fromLimelight(megatag.rawFiducials);
+        if (!cameraInputs.seesTarget) {
+            return;
+        }
 
-                    // 3D姿勢をmegatagのposeから生成（冗長なNetworkTable読み取りを回避）
-                    camera.pose3d = new edu.wpi.first.math.geometry.Pose3d(
-                        megatag.pose.getX(),
-                        megatag.pose.getY(),
-                        0.0,  // Z座標はMegaTagからは取得不可
-                        new edu.wpi.first.math.geometry.Rotation3d(
-                            0.0, 0.0, megatag.pose.getRotation().getRadians()));
-                }
+        try {
+            // 一度だけNetworkTableを読み取る（最適化: 2回の読み取りを1回に削減）
+            DoubleArrayEntry poseEntry =
+                    LimelightHelpers.getLimelightDoubleArrayEntry(camera.tableName, "botpose_wpiblue");
+            TimestampedDoubleArray tsValue = poseEntry.getAtomic();
+            double[] poseArray = tsValue.value;
 
-                // 推定の標準偏差（stddevs）を読み込みます。値が無い場合は DEFAULT_STDDEVS を使います。
-                camera.standardDeviations =
-                        table.getEntry("stddevs").getDoubleArray(DEFAULT_STDDEVS);
-
-            } catch (Exception e) {
-                System.err.println("Error proccessing Limelight data: " + e.getMessage());
+            if (poseArray.length < 6) {
+                return;
             }
+
+            // Pose3dを構築（Z座標チェック用）
+            cameraInputs.pose3d = LimelightHelpers.toPose3D(poseArray);
+
+            // PoseEstimateを構築（getBotPoseEstimate_wpiBlueと同等のロジック）
+            var pose2d = LimelightHelpers.toPose2D(poseArray);
+            double latency = poseArray.length > 6 ? poseArray[6] : 0;
+            int tagCount = poseArray.length > 7 ? (int) poseArray[7] : 0;
+            double tagSpan = poseArray.length > 8 ? poseArray[8] : 0;
+            double tagDist = poseArray.length > 9 ? poseArray[9] : 0;
+            double tagArea = poseArray.length > 10 ? poseArray[10] : 0;
+            double adjustedTimestamp = (tsValue.timestamp / 1000000.0) - (latency / 1000.0);
+
+            // RawFiducialsの構築
+            int valsPerFiducial = 7;
+            int expectedTotalVals = 11 + valsPerFiducial * tagCount;
+            LimelightHelpers.RawFiducial[] rawFiducials = new LimelightHelpers.RawFiducial[tagCount];
+
+            if (poseArray.length == expectedTotalVals) {
+                for (int i = 0; i < tagCount; i++) {
+                    int baseIndex = 11 + (i * valsPerFiducial);
+                    int id = (int) poseArray[baseIndex];
+                    double txnc = poseArray[baseIndex + 1];
+                    double tync = poseArray[baseIndex + 2];
+                    double ta = poseArray[baseIndex + 3];
+                    double distToCamera = poseArray[baseIndex + 4];
+                    double distToRobot = poseArray[baseIndex + 5];
+                    double ambiguity = poseArray[baseIndex + 6];
+                    rawFiducials[i] = new LimelightHelpers.RawFiducial(
+                            id, txnc, tync, ta, distToCamera, distToRobot, ambiguity);
+                }
+            }
+
+            var megatag = new LimelightHelpers.PoseEstimate(
+                    pose2d, adjustedTimestamp, latency, tagCount,
+                    tagSpan, tagDist, tagArea, rawFiducials, false);
+
+            cameraInputs.megatagPoseEstimate = MegatagPoseEstimate.fromLimelight(megatag);
+            cameraInputs.megatagCount = tagCount;
+            cameraInputs.fiducialObservations = FiducialObservation.fromLimelight(rawFiducials);
+        } catch (Exception e) {
+            System.err.println("Error processing Limelight data: " + e.getMessage());
         }
     }
 
+    private boolean isCameraConnected(CameraHandle camera) {
+        double nowSec = RobotTime.getTimestampSeconds();
+        double heartbeat = camera.table.getEntry("hb").getDouble(Double.NaN);
+        if (!Double.isNaN(heartbeat)) {
+            if (Double.isNaN(camera.lastHeartbeat)
+                    || Math.abs(heartbeat - camera.lastHeartbeat) > 1e-9) {
+                camera.lastHeartbeat = heartbeat;
+                camera.lastHeartbeatChangeSec = nowSec;
+            }
+        }
+
+        if (nowSec - camera.lastHeartbeatChangeSec <= HEARTBEAT_TIMEOUT_SEC) {
+            return true;
+        }
+
+        // Older firmware can omit heartbeat; fall back to basic key presence check.
+        double tvRaw = camera.table.getEntry("tv").getDouble(-1.0);
+        double tlRaw = camera.table.getEntry("tl").getDouble(-1.0);
+        return tvRaw >= 0.0 || tlRaw >= 0.0;
+    }
+
+    private double[] scaleStdDevs(double[] input, double scale) {
+        double[] source = input == null ? DEFAULT_STDDEVS : input;
+        double[] scaled = source.clone();
+        for (int i = 0; i < scaled.length; i++) {
+            scaled[i] *= scale;
+        }
+        return scaled;
+    }
 }

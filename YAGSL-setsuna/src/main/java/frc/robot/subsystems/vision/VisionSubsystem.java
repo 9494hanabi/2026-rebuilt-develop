@@ -15,15 +15,14 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
-import swervelib.SwerveDrive;
 import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.Constants.VisionConstants;
-import frc.robot.lib.limelight.LimelightHelpers;
 import frc.robot.RobotState;
-import frc.robot.lib.util.Constants.VisionConstants;
-import frc.robot.lib.util.MathHelpers;
 import frc.robot.lib.time.RobotTime;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,6 +31,8 @@ import org.littletonrobotics.junction.Logger;
 //
 
 public class VisionSubsystem extends SubsystemBase {
+    // デバッグ出力は負荷が高いため、通常は無効にする。
+    private static final boolean ENABLE_VERBOSE_VISION_LOGGING = false;
 
     private final VisionIO io;
     private final RobotState state;
@@ -70,7 +71,7 @@ public class VisionSubsystem extends SubsystemBase {
                 maybePoseB.get().minus(maybePoseA.get());
         
         
-        Pose2d poseA = a.getVisionRobotPoseMeters();
+        Pose2d poseA = a.getVisionRobotPoseMeters().transformBy(a_T_b);
         Pose2d poseB = b.getVisionRobotPoseMeters();
 
         // 標準偏差を元に、カメラによって推定される姿勢の分散を計算。
@@ -148,33 +149,34 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         // 入力更新と推定統合を行い、RobotStateへ反映する。
         double startTime = RobotTime.getTimestampSeconds();
-        io.readInputs(inputs);
-
-        // カメラ入力のログ
-        logCameraInputs("Vision/CameraA", inputs.cameraA);
-        logCameraInputs("Vision/CameraB", inputs.cameraB);
-
-        // ビジョン推定結果
-        var maybeMTA = processCamera(inputs.cameraA, "CameraA", VisionConstants.kRobotToCameraA);
-        var maybeMTB = processCamera(inputs.cameraB, "CameraB", VisionConstants.kRobotToCameraB);
-
-        // ビジョンを使わない時の処理を拾っている。
-        if (!useVision) {
+        if (DriverStation.isDisabled() || !useVision) {
             Logger.recordOutput("Vision/usingVision", false);
             Logger.recordOutput("Vision/exclusiveTagId", state.getExclusiveTag().orElse(-1));
-            Logger.recordOutput(
-                "Vision/latencyPeriodicSec", RobotTime.getTimestampSeconds() - startTime);
             return;
+        }
+
+        io.readInputs(inputs);
+
+        List<VisionFieldPoseEstimate> acceptedByCamera = new ArrayList<>();
+        for (var cam : inputs.cameras) {
+            String label = cam.name == null || cam.name.isBlank() ? cam.tableName : cam.name;
+            String logPrefix = "Vision/" + label;
+            logCameraInputs(logPrefix, cam);
+            processCamera(cam, label).ifPresent(acceptedByCamera::add);
         }
 
         Logger.recordOutput("Vision/usingVision", true);
 
-        // ビジョンを片方だけ採用するか、融合して採用するか決めている。
         Optional<VisionFieldPoseEstimate> accepted = Optional.empty();
-        if (maybeMTA.isPresent() != maybeMTB.isPresent()) {
-            accepted = maybeMTA.isPresent() ? maybeMTA : maybeMTB;
-        } else if (maybeMTA.isPresent() && maybeMTB.isPresent()) {
-            accepted = Optional.of(fuseEstimates(maybeMTA.get(), maybeMTB.get()));
+        if (acceptedByCamera.size() == 1) {
+            accepted = Optional.of(acceptedByCamera.get(0));
+        } else if (!acceptedByCamera.isEmpty()) {
+            acceptedByCamera.sort(Comparator.comparingDouble(VisionFieldPoseEstimate::getTimestampSeconds));
+            VisionFieldPoseEstimate fused = acceptedByCamera.get(0);
+            for (int i = 1; i < acceptedByCamera.size(); i++) {
+                fused = fuseEstimates(fused, acceptedByCamera.get(i));
+            }
+            accepted = Optional.of(fused);
         }
 
         // 推定を採用したときだけログを出力
@@ -192,33 +194,37 @@ public class VisionSubsystem extends SubsystemBase {
     // カメラ系のIOのnullを拾ってログを出力している。
     private void logCameraInputs(String prefix, VisionIO.VisionIOInputs.CameraInputs cam) {
         // カメラ入力の状態をログ/ダッシュボードに出力する。
-        Logger.recordOutput(prefix + "/SeesTarget", cam.seesTarget);
-        Logger.recordOutput(prefix + "/MegatagCount", cam.megatagCount);
-
-        if (DriverStation.isDisabled()) {
-            SmartDashboard.putBoolean(prefix + "/SeesTarget", cam.seesTarget);
-            SmartDashboard.putNumber(prefix + "MegatagCount", cam.megatagCount);
+        if (ENABLE_VERBOSE_VISION_LOGGING) {
+            Logger.recordOutput(prefix + "/Connected", cam.connected);
+            Logger.recordOutput(prefix + "/SeesTarget", cam.seesTarget);
+            Logger.recordOutput(prefix + "/MegatagCount", cam.megatagCount);
         }
 
-        if (cam.pose3d != null) {
+        if (DriverStation.isDisabled() && ENABLE_VERBOSE_VISION_LOGGING) {
+            SmartDashboard.putBoolean(prefix + "/Connected", cam.connected);
+            SmartDashboard.putBoolean(prefix + "/SeesTarget", cam.seesTarget);
+            SmartDashboard.putNumber(prefix + "/MegatagCount", cam.megatagCount);
+        }
+
+        if (cam.pose3d != null && ENABLE_VERBOSE_VISION_LOGGING) {
             Logger.recordOutput(prefix + "/Pose3d", cam.pose3d);
         }
 
-        if (cam.megatagPoseEstimate != null) {
+        if (cam.megatagPoseEstimate != null && ENABLE_VERBOSE_VISION_LOGGING) {
             Logger.recordOutput(
                 prefix + "/MegatagPoseEstimate", cam.megatagPoseEstimate.fieldToRobot());
             Logger.recordOutput(prefix + "/Quality", cam.megatagPoseEstimate.quality());
             Logger.recordOutput(prefix + "/AvgTagArea", cam.megatagPoseEstimate.avgTagArea());
         }
 
-        if (cam.fiducialObservations != null ) {
+        if (cam.fiducialObservations != null && ENABLE_VERBOSE_VISION_LOGGING) {
             Logger.recordOutput(prefix + "/FiducialCount", cam.fiducialObservations.length);
         }
     }
 
     // カメラプロセスを記述
     private Optional<VisionFieldPoseEstimate> processCamera(
-            VisionIO.VisionIOInputs.CameraInputs cam, String label, Transform2d robotToCamera) {
+            VisionIO.VisionIOInputs.CameraInputs cam, String label) {
         // 単一カメラの推定を評価して採用可能な推定のみ返す。
         String logPrefix = "Vision/" + label;
 
@@ -235,34 +241,44 @@ public class VisionSubsystem extends SubsystemBase {
                     processMegatagPoseEstimate(cam.megatagPoseEstimate, cam, logPrefix);
             
             // 観測したときだけログを出力
-            mtEstimate.ifPresent(
-                est -> 
-                        Logger.recordOutput(
-                            logPrefix + "/AcceptMegatagEstimate",
-                            est.getVisionRobotPoseMeters())); 
+            if (ENABLE_VERBOSE_VISION_LOGGING) {
+                mtEstimate.ifPresent(
+                    est -> 
+                            Logger.recordOutput(
+                                logPrefix + "/AcceptMegatagEstimate",
+                                est.getVisionRobotPoseMeters()));
+            }
             
             Optional<VisionFieldPoseEstimate> gyroEstimate =
                     fuseWithGyro(cam.megatagPoseEstimate, cam, logPrefix);
             
             // 観測したときだけログを出力
-            gyroEstimate.ifPresent(
-                est ->
-                        Logger.recordOutput(
-                            logPrefix + "/FuseWithGyroEstimate",
-                            est.getVisionRobotPoseMeters()));
+            if (ENABLE_VERBOSE_VISION_LOGGING) {
+                gyroEstimate.ifPresent(
+                    est ->
+                            Logger.recordOutput(
+                                logPrefix + "/FuseWithGyroEstimate",
+                                est.getVisionRobotPoseMeters()));
+            }
             
             // MegatagがあるときはMegatagを、無い時はGyroを使う。
             if (mtEstimate.isPresent()) {
                 estimate = mtEstimate;
-                Logger.recordOutput(logPrefix + "/AcceptMegatag", true);
-                Logger.recordOutput(logPrefix + "/AcceptGyro", false);
+                if (ENABLE_VERBOSE_VISION_LOGGING) {
+                    Logger.recordOutput(logPrefix + "/AcceptMegatag", true);
+                    Logger.recordOutput(logPrefix + "/AcceptGyro", false);
+                }
             } else if (gyroEstimate.isPresent()) {
                 estimate = gyroEstimate;
-                Logger.recordOutput(logPrefix + "/AcceptMegatag", false);
-                Logger.recordOutput(logPrefix + "/AcceptGyro", true);
+                if (ENABLE_VERBOSE_VISION_LOGGING) {
+                    Logger.recordOutput(logPrefix + "/AcceptMegatag", false);
+                    Logger.recordOutput(logPrefix + "/AcceptGyro", true);
+                }
             } else {
-                Logger.recordOutput(logPrefix + "/AcceptMegatag", false);
-                Logger.recordOutput(logPrefix + "/AcceptGyro", false);
+                if (ENABLE_VERBOSE_VISION_LOGGING) {
+                    Logger.recordOutput(logPrefix + "/AcceptMegatag", false);
+                    Logger.recordOutput(logPrefix + "/AcceptGyro", false);
+                }
             }
         }
 
@@ -284,8 +300,6 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         final double kHighYawLookbackS = 0.3;
-
-        // 使わない。
         final double kHighYawVelocityRadS = 5.0;
 
         // 不自然な推定(大きすぎるヨー角は捨てる。)
@@ -293,7 +307,7 @@ public class VisionSubsystem extends SubsystemBase {
                                 poseEstimate.timestampSeconds() - kHighYawLookbackS,
                                 poseEstimate.timestampSeconds())
                         .orElse(Double.POSITIVE_INFINITY)
-                > kHighYawLookbackS) {
+                > kHighYawVelocityRadS) {
             return Optional.empty();
         }
 
@@ -396,7 +410,7 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         // Z誤差の許容しきい値で弾く
-        if (Math.abs(cam.pose3d.getZ()) > VisionConstants.kDefaultZThreshold) {
+        if (cam.pose3d == null || Math.abs(cam.pose3d.getZ()) > VisionConstants.kDefaultZThreshold) {
             return Optional.empty();
         }
 
