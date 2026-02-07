@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 import frc.robot.lib.util.Constants.OperatorConstants;
 
@@ -34,6 +35,7 @@ import frc.robot.bindings.DebugBindings;
 public class RobotContainer {
   private final RobotState robotState;
   private final SwerveSubsystem drivebase;
+  private final TurretSubsystem turret;
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
@@ -53,6 +55,7 @@ public class RobotContainer {
   public RobotContainer() {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
+    turret = new TurretSubsystem();
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
     visionSubsystem = new VisionSubsystem(
         LimelightConfig.getInstance().isAnyLimelightEnabled()
@@ -80,7 +83,7 @@ public class RobotContainer {
 
     // バインディングクラスの初期化
     driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
-    autoBindings = new AutoBindings(drivebase);
+    autoBindings = new AutoBindings(drivebase, robotState, turret);
     debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController);
 
     // バインディングの設定
