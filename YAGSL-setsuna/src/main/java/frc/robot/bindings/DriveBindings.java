@@ -7,10 +7,7 @@ import frc.robot.RobotState;
 import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
 import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
-import frc.robot.commands.DriveOnTagCommand;
 
-import frc.robot.commands.DriveWhileFieldPoseValidCommand;
-import frc.robot.commands.FaceAprilTagCommand;
 import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -54,9 +51,6 @@ public class DriveBindings {
         );
 
         // Y: タグに向かってドライブ（Limelight A）
-        controller.y().whileTrue(
-            new DriveOnTagCommand(drivebase, robotState, VisionConstants.kLimelightATableName)
-        );
 
         // X:AprilTagに絶対ドライブ
         controller.x().whileTrue(

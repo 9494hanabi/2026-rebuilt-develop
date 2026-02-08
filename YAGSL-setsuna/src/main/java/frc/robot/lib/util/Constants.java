@@ -4,6 +4,7 @@
 
 package frc.robot.lib.util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -109,6 +110,12 @@ public final class Constants {
                 testFieldLengthMeter,
                 testFieldWidthMeter)
             : AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+    // Test Map右端(y=0)にロボット右端を合わせた初期原点条件。
+    // 右端オフセットはmodule位置(11.4in)を利用する。
+    public static final double kRobotRightEdgeOffsetMeter = Units.inchesToMeters(11.4);
+    public static final Pose2d kInitialFieldToRobotPose =
+        new Pose2d(0.0, kRobotRightEdgeOffsetMeter, Rotation2d.kZero);
   }
 
   public static class SemiAutoConstants {

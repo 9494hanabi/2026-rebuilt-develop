@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-import static edu.wpi.first.units.Units.Meter;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -16,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.lib.util.Constants;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 // import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -34,7 +32,6 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveDrive;
 // import swervelib.SwerveInputStream;
-import edu.wpi.first.math.geometry.Rotation2d;
 // import edu.wpi.first.math.util.Units;
 
 // 254系
@@ -84,10 +81,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     try
     {
-      swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maxSpeed,
-                                                                  new Pose2d(new Translation2d(Meter.of(1),
-                                                                                              Meter.of(4)),
-                                                                            Rotation2d.fromDegrees(0)));
+      swerveDrive =
+          new SwerveParser(directory)
+              .createSwerveDrive(Constants.maxSpeed, Constants.FieldConstants.kInitialFieldToRobotPose);
     } catch (Exception e)
     {
       throw new RuntimeException(e);
