@@ -1,8 +1,14 @@
 package frc.robot.bindings;
 
+import static frc.robot.lib.util.Constants.VisionConstants.kLimelightBTableName;
+
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotState;
+import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
+import frc.robot.commands.debug.vision.ObservationOKCommand;
+import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
 import frc.robot.commands.DriveOnTagCommand;
+
 import frc.robot.commands.DriveWhileFieldPoseValidCommand;
 import frc.robot.commands.FaceAprilTagCommand;
 import frc.robot.lib.util.Constants.VisionConstants;
@@ -37,24 +43,24 @@ public class DriveBindings {
      * 本番時もこのメソッドを呼び出す
      */
     public void configure() {
-        // B: AprilTagに向く
+        // B: AprilTagへ相対ドライブ
         controller.b().whileTrue(
-            new FaceAprilTagCommand(drivebase, robotState)
+            new RelativeDriveOKCommand(drivebase)
         );
 
-        // A: タグに向かってドライブ（デフォルトLimelight）
+        // A: タグが見えているなら後ろへドライブ
         controller.a().whileTrue(
-            new DriveOnTagCommand(drivebase)
+            new ObservationOKCommand(drivebase)
         );
 
         // Y: タグに向かってドライブ（Limelight A）
         controller.y().whileTrue(
-            new DriveOnTagCommand(drivebase, VisionConstants.kLimelightATableName)
+            new DriveOnTagCommand(drivebase, robotState, VisionConstants.kLimelightATableName)
         );
 
-        // X: フィールドポーズが有効な間ドライブ
+        // X:AprilTagに絶対ドライブ
         controller.x().whileTrue(
-            new DriveWhileFieldPoseValidCommand(drivebase, robotState, driveAngularVelocity)
+            new AbsoluteDriveOKCommand(drivebase, robotState)
         );
     }
 }

@@ -67,9 +67,11 @@ public final class AutoCommand {
   // Limelightでタグ検出中だけ前進する既存コマンドを、Autoイベント用に包んだもの。
   // タイムアウトと停止処理を必ず付ける。
   public static Command driveOnTagFor(
-    SwerveSubsystem drivebase, double seconds
+    SwerveSubsystem drivebase,
+    RobotState state,
+    double seconds
     ) {
-      return new DriveOnTagCommand(drivebase)
+      return new DriveOnTagCommand(drivebase, state)
       .withTimeout(seconds)
       .andThen(stopDrive(drivebase));
       }
@@ -98,7 +100,7 @@ public final class AutoCommand {
   ) {
     return Commands.sequence(
       faceTagFor(drivebase, state, tagID, alignSec),
-      driveOnTagFor(drivebase, approachSec),
+      driveOnTagFor(drivebase, state, approachSec),
       stopDrive(drivebase)
     );
   }

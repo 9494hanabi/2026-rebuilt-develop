@@ -9,12 +9,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import java.util.List;
 
 // === 担当者 ===
 // ひなた
@@ -98,7 +94,7 @@ public final class Constants {
 
     // === フィールド切り替えフラグ ===
     /** テスト用フィールドを使用するか（true: テスト用, false: 公式） */
-    public static final boolean useTestField = false;
+    public static final boolean useTestField = true;
 
     // テスト用フィールドのサイズ
     private static final double testFieldLengthMeter = 9.0;
@@ -108,23 +104,11 @@ public final class Constants {
     public static final double fieldLengthMeter = useTestField ? testFieldLengthMeter : 16.54;
 
     public static final AprilTagFieldLayout kAprilTagLayout =
-        useTestField ? createTestFieldLayout() : AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
-    /** テスト用フィールドレイアウト生成 (座標系: 青同盟側コーナーが原点) */
-    private static AprilTagFieldLayout createTestFieldLayout() {
-        // .fmapの座標を青同盟側コーナー原点に変換
-        // 元の座標はフィールド中央原点なので、(fieldLength/2, fieldWidth/2) をオフセット
-        double offsetX = testFieldLengthMeter / 2.0;  // 4.5m
-        double offsetY = testFieldWidthMeter / 2.0;   // 3.025m
-
-        List<AprilTag> tags = List.of(
-            new AprilTag(1, new Pose3d(offsetX + 4.5, offsetY + 3.025, 0.5, new Rotation3d(0, 0, Math.toRadians(135)))),
-            new AprilTag(2, new Pose3d(offsetX + 4.5, offsetY - 3.025, 0.5, new Rotation3d(0, 0, Math.toRadians(-135)))),
-            new AprilTag(3, new Pose3d(offsetX - 4.5, offsetY + 3.025, 0.5, new Rotation3d(0, 0, Math.toRadians(45)))),
-            new AprilTag(4, new Pose3d(offsetX - 4.5, offsetY - 3.025, 0.5, new Rotation3d(0, 0, Math.toRadians(-45))))
-        );
-        return new AprilTagFieldLayout(tags, testFieldLengthMeter, testFieldWidthMeter);
-    }
+        useTestField
+            ? TestFieldLayouts.createEightTagTestFieldLayout(
+                testFieldLengthMeter,
+                testFieldWidthMeter)
+            : AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   }
 
   public static class SemiAutoConstants {

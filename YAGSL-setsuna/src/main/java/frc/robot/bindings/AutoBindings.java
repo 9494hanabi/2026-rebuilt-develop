@@ -56,7 +56,7 @@ public class AutoBindings {
         // タグが見えている間だけ0.8秒前進
         NamedCommands.registerCommand(
             "llDriveOnTag0p8s",
-            AutoCommand.driveOnTagFor(drivebase, 0.8)
+            AutoCommand.driveOnTagFor(drivebase, robotState, 0.8)
         );
         // 「向く ->　進む」をまとめて一つのイベントとして実行
         NamedCommands.registerCommand(
@@ -106,7 +106,7 @@ public class AutoBindings {
         // テスト用: Limelightタグ検出時に0.7秒だけ前進（終了時は自動停止）
         NamedCommands.registerCommand(
             "llDriveOnTag0p7s", 
-            AutoCommand.driveOnTagFor(drivebase, 0.7)
+            AutoCommand.driveOnTagFor(drivebase, robotState, 0.7)
         );
         // 明示停止用マーカー（任意タイミングでブレーキ）
         NamedCommands.registerCommand(
