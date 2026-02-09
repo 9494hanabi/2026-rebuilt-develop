@@ -12,6 +12,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.lib.util.Constants;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -169,7 +170,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // PathPlannerの経路探索プリロードはCPU負荷が高く、
     // 起動直後にループオーバーランを誘発するためデフォルトでは無効化。
     if (ENABLE_PATHFINDING_WARMUP) {
-      PathfindingCommand.warmupCommand().schedule();
+      CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     }
   }
 

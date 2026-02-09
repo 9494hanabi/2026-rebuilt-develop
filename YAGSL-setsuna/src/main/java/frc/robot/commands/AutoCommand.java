@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.RobotState;
+import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
+import frc.robot.commands.debug.vision.ObservationOKCommand;
 
 // === 担当者 ===
 // はるた
@@ -71,7 +73,7 @@ public final class AutoCommand {
     RobotState state,
     double seconds
     ) {
-      return new DriveOnTagCommand(drivebase, state)
+      return new ObservationOKCommand(drivebase)
       .withTimeout(seconds)
       .andThen(stopDrive(drivebase));
       }
@@ -84,7 +86,8 @@ public final class AutoCommand {
     int tagID,
     double seconds
   ) {
-    return new FaceAprilTagCommand(drivebase, state, tagID)
+    // tagIDは呼び出し側API互換のため保持。現行実装は可視タグから最適対象を選ぶ。
+    return new AbsoluteDriveOKCommand(drivebase, state)
       .withTimeout(seconds)
       .andThen(stopDrive(drivebase));
     }
