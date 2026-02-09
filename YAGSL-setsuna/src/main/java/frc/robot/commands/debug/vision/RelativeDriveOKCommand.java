@@ -4,6 +4,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.lib.limelight.LimelightHelpers;
 import frc.robot.lib.util.Constants.VisionConstants;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -19,10 +20,22 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.MathUtil;
 
 public class RelativeDriveOKCommand extends Command{
-    private static final double kTagLockHoldSeconds = 0.25;
+    private static final double kTagLockHoldSeconds = 0.75;
+    private static final double kTranslationKi = 0.0;
+    private static final double kTranslationKd = 0.0;
+    private static final double kAngularKi = 0.0;
+    private static final double kAngularKd = 0.0;
 
     private final SwerveSubsystem swerve;
     private final DebugVisionTargetSelector targetSelector;
+
+    // PID制御
+    private final PIDController xController =
+        new PIDController(translationGain, kTranslationKi, kTranslationKd);
+    private final PIDController yController =
+        new PIDController(translationGain, kTranslationKi, kTranslationKd);
+    private final PIDController omegaController =
+        new PIDController(angularGain, kAngularKi, kAngularKd);
 
     private int lockedTagId = -1;
     private String lockedTableName = null;
@@ -43,6 +56,12 @@ public class RelativeDriveOKCommand extends Command{
         lockedTagId = -1;
         lockedTableName = null;
         lastLockSeenTimestampSec = Double.NEGATIVE_INFINITY;
+        xController.reset();
+        yController.reset();
+        omegaController.reset();
+        xController.setTolerance(planeDeadbandMeter);
+        yController.setTolerance(planeDeadbandMeter);
+        omegaController.setTolerance(thetaDeadbandRad);
     }
 
     private void lockTo(DebugVisionTargetSelector.TargetObservation observation, double nowSec) {
@@ -58,26 +77,23 @@ public class RelativeDriveOKCommand extends Command{
     }
 
     private void updateTagLock(double nowSec) {
-        var sameTagObservation =
-            lockedTagId < 0 ? java.util.Optional.<DebugVisionTargetSelector.TargetObservation>empty()
-                            : targetSelector.observationForTag(lockedTagId);
+        if (lockedTagId >= 0) {
+            var sameTagObservation = targetSelector.observationForTag(lockedTagId);
+            if (sameTagObservation.isPresent()) {
+                lockTo(sameTagObservation.get(), nowSec);
+                return;
+            }
 
-        if (sameTagObservation.isPresent()) {
-            lockTo(sameTagObservation.get(), nowSec);
-            return;
-        }
+            if ((nowSec - lastLockSeenTimestampSec) <= kTagLockHoldSeconds) {
+                return;
+            }
 
-        if (lockedTagId >= 0 && (nowSec - lastLockSeenTimestampSec) <= kTagLockHoldSeconds) {
+            clearLock();
             return;
         }
 
         var bestObservation = targetSelector.selectBestObservation();
-        if (bestObservation.isPresent()) {
-            lockTo(bestObservation.get(), nowSec);
-            return;
-        }
-
-        clearLock();
+        bestObservation.ifPresent(observation -> lockTo(observation, nowSec));
     }
 
     @Override
@@ -88,6 +104,9 @@ public class RelativeDriveOKCommand extends Command{
         ChassisSpeeds cmd = new ChassisSpeeds();
         if (lockedTagId < 0 || lockedTableName == null) {
             swerve.setChassisSpeeds(cmd);
+            xController.reset();
+            yController.reset();
+            omegaController.reset();
             return;
         }
 
@@ -105,26 +124,29 @@ public class RelativeDriveOKCommand extends Command{
         double angularErrorRad = Math.atan2(targetY, targetX);
 
         double vx = MathUtil.clamp(
-            translationGain * targetX,
+            xController.calculate(-targetX, 0.0),
             -velocityMaximum,
             velocityMaximum);
         double vy = MathUtil.clamp(
-            translationGain * targetY,
+            yController.calculate(-targetY, 0.0),
             -velocityMaximum,
             velocityMaximum);
         double omega = MathUtil.clamp(
-            angularGain * angularErrorRad,
+            omegaController.calculate(-angularErrorRad, 0.0),
             -omegaMaximum,
             omegaMaximum);
 
         if (Math.abs(targetX) < planeDeadbandMeter) {
             vx = 0.0;
+            xController.reset();
         }
         if (Math.abs(targetY) < planeDeadbandMeter) {
             vy = 0.0;
+            yController.reset();
         }
         if (Math.abs(angularErrorRad) < thetaDeadbandRad) {
             omega = 0.0;
+            omegaController.reset();
         }
 
         cmd = new ChassisSpeeds(vx, vy, omega);
@@ -135,5 +157,8 @@ public class RelativeDriveOKCommand extends Command{
     @Override
     public void end(boolean interrupted) {
         swerve.setChassisSpeeds(new ChassisSpeeds());  // 停止
+        xController.reset();
+        yController.reset();
+        omegaController.reset();
     }
 }

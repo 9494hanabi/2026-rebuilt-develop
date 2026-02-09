@@ -7,6 +7,7 @@ import frc.robot.RobotState;
 import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
 import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
+import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 
 import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -51,6 +52,9 @@ public class DriveBindings {
         );
 
         // Y: タグに向かってドライブ（Limelight A）
+        controller.y().whileTrue(
+            new SetThetaZeroCommand(drivebase, robotState)
+        );
 
         // X:AprilTagに絶対ドライブ
         controller.x().whileTrue(
