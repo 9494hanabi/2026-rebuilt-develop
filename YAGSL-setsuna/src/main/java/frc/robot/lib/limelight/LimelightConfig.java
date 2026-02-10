@@ -33,6 +33,9 @@ public class LimelightConfig {
     }
 
     public static class RobotToCamera {
+        // WPILib座標系 (Blue origin準拠):
+        // +X=forward, +Y=left, yaw+CCW
+        // Limelight RobotSpace(+Y=right)への変換はVisionIOHardwareLimelightで行う。
         public double x;
         public double y;
         public double yawDeg;

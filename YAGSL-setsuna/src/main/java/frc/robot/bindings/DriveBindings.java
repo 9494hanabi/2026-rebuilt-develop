@@ -7,6 +7,7 @@ import frc.robot.RobotState;
 import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
 import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
+import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 
 import frc.robot.lib.util.Constants.VisionConstants;
@@ -43,7 +44,7 @@ public class DriveBindings {
     public void configure() {
         // B: AprilTagへ相対ドライブ
         controller.b().whileTrue(
-            new RelativeDriveOKCommand(drivebase)
+            new RelativeDriveOKCommand(drivebase, robotState)
         );
 
         // A: タグが見えているなら後ろへドライブ
@@ -59,6 +60,11 @@ public class DriveBindings {
         // X:AprilTagに絶対ドライブ
         controller.x().whileTrue(
             new AbsoluteDriveOKCommand(drivebase, robotState)
+        );
+
+        // 上矢印（POV Up）: フィールド基準で水平移動
+        controller.povUp().whileTrue(
+            new SetDriveHorizonCommand(drivebase)
         );
     }
 }

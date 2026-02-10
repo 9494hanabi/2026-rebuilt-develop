@@ -1,7 +1,8 @@
 package frc.robot.commands.debug.vision;
 
+import frc.robot.RobotState;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.lib.limelight.LimelightHelpers;
+import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.Constants.VisionConstants;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -16,7 +17,6 @@ import static frc.robot.lib.util.Constants.SemiAutoConstants.thetaDeadbandRad;
 import static frc.robot.lib.util.Constants.SemiAutoConstants.translationGain;
 import static frc.robot.lib.util.Constants.SemiAutoConstants.velocityMaximum;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.MathUtil;
 
 public class RelativeDriveOKCommand extends Command{
@@ -27,6 +27,7 @@ public class RelativeDriveOKCommand extends Command{
     private static final double kAngularKd = 0.0;
 
     private final SwerveSubsystem swerve;
+    private final RobotState state;
     private final DebugVisionTargetSelector targetSelector;
 
     // PID制御
@@ -42,8 +43,10 @@ public class RelativeDriveOKCommand extends Command{
     private double lastLockSeenTimestampSec = Double.NEGATIVE_INFINITY;
 
     public RelativeDriveOKCommand(
-            SwerveSubsystem swerve) {
+            SwerveSubsystem swerve,
+            RobotState state) {
         this.swerve = swerve;
+        this.state = state;
         this.targetSelector =
             new DebugVisionTargetSelector(
                 VisionConstants.kLimelightATableName,
@@ -117,10 +120,20 @@ public class RelativeDriveOKCommand extends Command{
             return;
         }
 
-        Pose3d targetInBotSpace = LimelightHelpers.getTargetPose3d_RobotSpace(lockedTableName);
+        var latestFieldToRobot = state.getLatestFieldToRobot();
+        if (latestFieldToRobot == null) {
+            swerve.setChassisSpeeds(cmd);
+            return;
+        }
+        var maybeFieldToTag = FieldConstants.kAprilTagLayout.getTagPose(lockedTagId);
+        if (maybeFieldToTag.isEmpty()) {
+            swerve.setChassisSpeeds(cmd);
+            return;
+        }
 
-        double targetX = targetInBotSpace.getX();
-        double targetY = targetInBotSpace.getY();
+        var robotToTag = maybeFieldToTag.get().toPose2d().relativeTo(latestFieldToRobot.getValue());
+        double targetX = robotToTag.getX();
+        double targetY = robotToTag.getY();
         double angularErrorRad = Math.atan2(targetY, targetX);
 
         double vx = MathUtil.clamp(

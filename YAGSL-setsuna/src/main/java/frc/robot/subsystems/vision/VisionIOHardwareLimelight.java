@@ -42,20 +42,25 @@ public class VisionIOHardwareLimelight implements VisionIO {
             this.table = NetworkTableInstance.getDefault().getTable(this.tableName);
 
             double robotToCameraX = entry.robotToCamera == null ? 0.0 : entry.robotToCamera.x;
-            double robotToCameraY = entry.robotToCamera == null ? 0.0 : entry.robotToCamera.y;
-            double robotToCameraYawDeg =
+            // JSONはWPILib座標系で定義する:
+            // +X=forward, +Y=left, yaw+CCW
+            double robotToCameraYWpi = entry.robotToCamera == null ? 0.0 : entry.robotToCamera.y;
+            double robotToCameraYawDegWpi =
                     entry.robotToCamera == null ? 0.0 : entry.robotToCamera.yawDeg;
             this.robotToCamera =
                     new Transform2d(
-                            new Translation2d(robotToCameraX, robotToCameraY),
-                            Rotation2d.fromDegrees(robotToCameraYawDeg));
+                            new Translation2d(robotToCameraX, robotToCameraYWpi),
+                            Rotation2d.fromDegrees(robotToCameraYawDegWpi));
 
             double cameraHeight = entry.cameraPose == null ? 0.0 : entry.cameraPose.heightMeters;
             double cameraPitchDeg = entry.cameraPose == null ? 0.0 : entry.cameraPose.pitchDeg;
+            // Limelight RobotSpaceは+Y=rightのため符号を変換する。
+            double limelightRightMeters = -robotToCameraYWpi;
+            double limelightYawDeg = -robotToCameraYawDegWpi;
             this.cameraPose =
                     new double[] {
-                        robotToCameraX, robotToCameraY, cameraHeight, 0.0, cameraPitchDeg,
-                        robotToCameraYawDeg
+                        robotToCameraX, limelightRightMeters, cameraHeight, 0.0, cameraPitchDeg,
+                        limelightYawDeg
                     };
 
             this.stdDevScale = entry.stdDevScale > 0.0 ? entry.stdDevScale : 1.0;
