@@ -12,6 +12,11 @@ import frc.robot.RobotState;
 //
 // Autonomous関連のバインディングとNamedCommandsを管理するクラス
 // このファイルは二年生専用です。他の人は編集しないでください。
+/*
+ * このファイルはPathPlannerで作るイベントマーカーの名前を一致させる辞書的な場所
+ * これがあることでイベントを呼ぶことができる。PathPlannerはどこでイベントを発生させるか決めるだけのツール
+ * だからイベントはこっちで作らないといけない。そのイベントの動きが反映されているのがAutoCommand.java
+ */
 
 public class AutoBindings {
     private final SwerveSubsystem drivebase;
@@ -29,42 +34,35 @@ public class AutoBindings {
      * PathPlannerで使用するコマンドをここに追加
      */
     public void configure() {
-        // ---- Limelight Auto用コマンド登録 ----
-        /*
-         * 今は秒で指定しているけど、これをどのくらいの距離感になったらとかもできる。
-         * simで確認したいから秒数にしています。
-         * ---以下例プログラム--- AutoCommandに追加してね。
-         * // 例: 「タグに0.8mまで近づいたら終了」。ただし3秒で強制終了も付ける。
-         *    public static Command driveOnTagUntilDistance(
-         *    SwerveSubsystem drivebase,
-         *    RobotState state,
-         *    int tagId,
-         *    double targetDistanceMeters,
-         *    double maxSeconds
-         *    ) {
-         *        return new DriveOnTagCommand(drivebase)
-         *        .until(() -> isTagDistanceWithin(state, tagId, targetDistanceMeters))
-         *        .withTimeout(maxSeconds)
-         *        .andThen(stopDrive(drivebase));
-         *    }
-         */
-        // tagI = 1へ1.0秒だけ向く
+        /* 
+        * ==== Vision/AprilTag 関連マーカー登録 ====
+        * 方針:
+        * 1) まずは時間ベースでSim検証
+        * 2) 後で距離/状態ベース終了条件に置き換える
+        * 3) マーカー名はPathPlanner側と完全一致させる
+        */
+
+        // llFaceTag1_1p0s: AprilTag ID=1に向けて、最大1.0秒だけ機首を合わせる
         NamedCommands.registerCommand(
             "llFaceTag1_1p0s",
             AutoCommand.faceTagFor(drivebase, robotState, 1, 1.0)
         );
-        // タグが見えている間だけ0.8秒前進
+        // llDriveOnTag0p8s: タグを検出している間だけ、最大0.8秒前進する
         NamedCommands.registerCommand(
             "llDriveOnTag0p8s",
             AutoCommand.driveOnTagFor(drivebase, robotState, 0.8)
         );
-        // 「向く ->　進む」をまとめて一つのイベントとして実行
+        // llAlignAndApproachTag1: 「タグ1へ向く→寄る」を1イベントで実行する
         NamedCommands.registerCommand(
             "llAlignAndApproachTag1",
             AutoCommand.alignAndApproachTag(drivebase, robotState, 1, 1.0, 0.8)
         );
 
-        // ---- タレットのコマンド登録 ----
+        /* 
+         * ==== タレット/得点関連マーカー登録 ====
+         * 
+        */
+        // scorePrep: 得点前準備として、タグへ向いてからタレットを得点角に向ける
         NamedCommands.registerCommand(
             "scorePrep",
             Commands.sequence(
@@ -72,7 +70,7 @@ public class AutoBindings {
                 AutoCommand.turretToAngle(turret, 20.00, 1.2)
             )
         );
-
+        // scoreExecuteMock: 射出機構未実装のため、ログ出力と短い待機で疑似射出を行う
         NamedCommands.registerCommand(
             "scoreExecuteMock",
             Commands.sequence(
@@ -80,56 +78,62 @@ public class AutoBindings {
                 Commands.waitSeconds(0.20)
             )
         );
-
+        // scoreReset: 得点後にタレットを格納位置へ戻す
         NamedCommands.registerCommand(
             "scoreReset",
             AutoCommand.turretStow(turret)
         );
-
+        // scoreCycleBasic: 基本得点シーケンスを1イベントで実行する
         NamedCommands.registerCommand(
             "scoreCycleBasic",
             AutoCommand.scoreCycleBasic(drivebase, robotState, turret)
         );
 
-        // ---- PathPlannerイベントマーカー用コマンド登録 ----
-        // .auto側のイベント名と、ここで登録する名前を完全一致させること。
+        /*
+         *==== PathPlannerイベントマーカー用コマンド登録 ====
+         * 
+        */
+        // markStart: イベント発火確認のために開始ログを出力する
         NamedCommands.registerCommand(
             "markStart", 
             Commands.print("[AUTO] marker start")
         );
-
-        // テスト用: 1.0 m/sで0.6秒だけ前進
+        // driveForward0p6s: テスト用に1.0m/sで0.6秒だけ前進する
         NamedCommands.registerCommand(
             "driveForward0p6s", 
             AutoCommand.driveForwardFor(drivebase, 1.0, 0.6)
         );
-        // テスト用: Limelightタグ検出時に0.7秒だけ前進（終了時は自動停止）
+        // llDriveOnTag0p7s: テスト用にタグ検出前進を0.7秒だけ実行する
         NamedCommands.registerCommand(
             "llDriveOnTag0p7s", 
             AutoCommand.driveOnTagFor(drivebase, robotState, 0.7)
         );
-        // 明示停止用マーカー（任意タイミングでブレーキ）
+        // stopDrive: 任意タイミングでドライブを明示停止する安全用コマンド
         NamedCommands.registerCommand(
             "stopDrive", 
             AutoCommand.stopDrive(drivebase)
         );
 
-        // ---- ログ/安全停止 ----
+        /* 
+         * ==== ログ/安全停止 ====
+         * 
+        */
+        // logScoreStart: 得点シーケンス開始をログに残してデバッグしやすくする
         NamedCommands.registerCommand(
             "logScoreStart",
             AutoCommand.logMarker("score-start")
         );
-
+        // logScoreEnd: 得点シーケンス終了をログに残してデバッグしやすくする
         NamedCommands.registerCommand(
             "logScoreEnd",
             AutoCommand.logMarker("score-end")
         );
-
+        // safeStopAll: ドライブとタレットを同時に停止し、Auto終了時の安全を確保する
         NamedCommands.registerCommand(
             "safeStopAll",
             AutoCommand.safeStopAll(drivebase, turret)
         );
-
+        // scoreCycleBasicSafe: 基本得点シーケンスにタイムアウトと安全停止を追加した運用版
         NamedCommands.registerCommand(
             "scoreCycleBasicSafe",
             AutoCommand.scoreCycleBasicSafe(drivebase, robotState, turret)

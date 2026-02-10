@@ -17,21 +17,22 @@ import frc.robot.commands.debug.vision.ObservationOKCommand;
 // はるた
 //
 
+// Auto用の「使い回しコマンド」をまとめるユーティリティクラス
 public final class AutoCommand {
   private AutoCommand() {
     throw new UnsupportedOperationException("This is a utility class!");
   }
-
+  // doNothing: 何もしないコマンド（Auto未選択時などの退避用）
   public static Command doNothing() {
     return Commands.none();
   }
-
+  // stopDrive: ドライブベースを即停止させる
   public static Command stopDrive(SwerveSubsystem drivebase) {
     return Commands.runOnce(
         () -> drivebase.setChassisSpeeds(new ChassisSpeeds(0.0, 0.0, 0.0)),
         drivebase);
   }
-
+  // pathPlannerAuto: 指定Autoを実行し、開始/終了ログと最後の停止を行う
   public static Command pathPlannerAuto(SwerveSubsystem drivebase, String autoName) {
     return Commands.sequence(
         Commands.print("[AUTO] start: " + autoName),
@@ -57,7 +58,7 @@ public final class AutoCommand {
     .andThen(stopDrive(drivebase));
   }
 
-  // 前進専用のショートかっと
+  // driveForwardFor: 前進専用の簡易コマンド（vxのみ指定）
   public static Command driveForwardFor(
     SwerveSubsystem drivebase,
     double metersPerSec,
@@ -161,7 +162,7 @@ public final class AutoCommand {
       .andThen(safeStopAll(drivebase, turret));
   }
 
-// FaceAprilTagCommandを呼び出す
+  // scoreCycleBasic: 向き合わせ→タレット角度合わせ→疑似発射→格納
   // 発射機構をまだ作ってないから、simで確認するために wait して shootをprint して疑似発射
   public static Command scoreCycleBasic(
     SwerveSubsystem drivebase,
