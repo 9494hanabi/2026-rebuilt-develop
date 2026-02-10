@@ -18,7 +18,7 @@ public class SetDriveHorizonCommand extends Command {
 
     @Override
     public void execute() {
-        swerve.driveFieldOriented(new ChassisSpeeds(0.0, -1.0, 0));
+        swerve.driveFieldOriented(new ChassisSpeeds(0.0, 1.0, 0));
     }
 
     @Override

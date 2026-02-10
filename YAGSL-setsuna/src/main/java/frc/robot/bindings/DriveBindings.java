@@ -52,7 +52,7 @@ public class DriveBindings {
             new ObservationOKCommand(drivebase)
         );
 
-        // Y: タグに向かってドライブ（Limelight A）
+        // Y: 角度を0へ、
         controller.y().whileTrue(
             new SetThetaZeroCommand(drivebase, robotState)
         );

@@ -164,7 +164,7 @@ public class AbsoluteDriveOKCommand extends Command {
     ChassisSpeeds cmd =
         // 4) field-relative指令をrobot-relativeへ変換して出力する。
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            velocityX, velocityY, omega, fieldToRobot.getRotation());
+            velocityY, velocityX, omega, fieldToRobot.getRotation());
     swerve.setChassisSpeeds(cmd);
   }
 

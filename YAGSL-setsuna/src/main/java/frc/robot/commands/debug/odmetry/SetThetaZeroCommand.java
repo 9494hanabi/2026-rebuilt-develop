@@ -10,9 +10,9 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class SetThetaZeroCommand extends Command {
-    private static final double kHeadingKp = 0.001;
-    private static final double kHeadingKi = 0.001;
-    private static final double kHeadingKd = 0.001;
+    private static final double kHeadingKp = 0.1;
+    private static final double kHeadingKi = 0.1;
+    private static final double kHeadingKd = 0.1;
     private static final double kHeadingToleranceRad = Math.toRadians(1.0);
     private static final double kHeadingVelocityToleranceRadPerSec = Math.toRadians(8.0);
     private static final double kIntegralContributionLimit = 0.3;

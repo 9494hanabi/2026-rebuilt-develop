@@ -145,7 +145,7 @@ public class RelativeDriveOKCommand extends Command{
             -velocityMaximum,
             velocityMaximum);
         double omega = MathUtil.clamp(
-            omegaController.calculate(-angularErrorRad, 0.0),
+            omegaController.calculate(angularErrorRad, 0.0),
             -omegaMaximum,
             omegaMaximum);
 
@@ -162,7 +162,7 @@ public class RelativeDriveOKCommand extends Command{
             omegaController.reset();
         }
 
-        cmd = new ChassisSpeeds(vx, vy, omega);
+        cmd = new ChassisSpeeds(0, 0, 0.125);
 
         swerve.setChassisSpeeds(cmd);
     }
