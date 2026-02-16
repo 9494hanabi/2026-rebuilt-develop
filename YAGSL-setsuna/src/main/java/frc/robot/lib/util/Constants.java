@@ -13,6 +13,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 
+import java.util.Map;
+
 // === 担当者 ===
 // ひなた
 //
@@ -51,14 +53,14 @@ public final class Constants {
                     new Translation2d(kRobotToCameraAForward, kRobotToCameraASide),
                     kCameraAYawOffset);
     
-    // Camera B (Right-side camera)
-    public static final double kCameraBPitchDegrees = 20.0;                                           // カメラBのピッチ角[deg]
+    // Camera B (Front-center camera)
+    public static final double kCameraBPitchDegrees = 27.0;                                           // カメラBのピッチ角[deg]
     public static final double kCameraBPitchRads = Units.degreesToRadians(kCameraBPitchDegrees);      // カメラBのピッチ角[rad]
-    public static final double kCameraBHeightOffGroundMeters = Units.inchesToMeters(8.3787);  // カメラBの地上高[m]
-    public static final String kLimelightBTableName = "limelight-rf";                         // カメラBのNetworkTables名
+    public static final double kCameraBHeightOffGroundMeters = 0.2;                           // カメラBの地上高[m]
+    public static final String kLimelightBTableName = "limelight-fc";                         // カメラBのNetworkTables名
     public static final String kFaceAprilTagTableName = kLimelightBTableName;                          // FaceAprilTag用
-    public static final double kRobotToCameraBForward = Units.inchesToMeters(7.8757);         // ロボット中心からカメラBの前方向オフセット[m]
-    public static final double kRobotToCameraBSide = Units.inchesToMeters(11.9269);            // ロボット中心からカメラBの横方向オフセット[m]
+    public static final double kRobotToCameraBForward = 0.4275;                               // ロボット中心からカメラBの前方向オフセット[m]
+    public static final double kRobotToCameraBSide = 0.0;                                     // ロボット中心からカメラBの横方向オフセット[m]
     public static final Rotation2d kCameraBYawOffset = Rotation2d.fromDegrees(0.0);           // カメラBのYawオフセット
     public static final Transform2d kRobotToCameraB =                                                 // ロボット座標系からカメラB座標系への変換
             new Transform2d(
@@ -97,25 +99,22 @@ public final class Constants {
     /** テスト用フィールドを使用するか（true: テスト用, false: 公式） */
     public static final boolean useTestField = true;
 
-    // テスト用フィールドのサイズ
-    private static final double testFieldLengthMeter = 9.0;
-    private static final double testFieldWidthMeter = 6.05;
+    // テスト用fmap (src/main/deploy からの相対パス)
+    private static final String testFieldFmapPath = "maps/TestFieldLayouts-TestMap.fmap";
 
-    // フィールド長（使用中のフィールドに応じて設定）
-    public static final double fieldLengthMeter = useTestField ? testFieldLengthMeter : 16.54;
-
+    // 使用中のフィールドレイアウト
     public static final AprilTagFieldLayout kAprilTagLayout =
         useTestField
-            ? TestFieldLayouts.createEightTagTestFieldLayout(
-                testFieldLengthMeter,
-                testFieldWidthMeter)
+            ? FmapFieldLayoutLoader.loadFromDeploy(testFieldFmapPath)
             : AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    // Test Map右端(y=0)にロボット右端を合わせた初期原点条件。
-    // 右端オフセットはmodule位置(11.4in)を利用する。
-    public static final double kRobotRightEdgeOffsetMeter = Units.inchesToMeters(11.4);
+    // フィールドサイズはレイアウトから取得
+    public static final double fieldLengthMeter = kAprilTagLayout.getFieldLength();
+    public static final double fieldWidthMeter = kAprilTagLayout.getFieldWidth();
+
+    // 初期位置: タグ1,2,3,4側の壁中央、タグ1,2方向(+Y)を向く
     public static final Pose2d kInitialFieldToRobotPose =
-        new Pose2d(0.0, kRobotRightEdgeOffsetMeter, Rotation2d.kZero);
+        new Pose2d(9.0, 3.025, Rotation2d.fromDegrees(90.0));
   }
 
   public static class SemiAutoConstants {
@@ -139,6 +138,49 @@ public final class Constants {
     // タグ検出時に一定方向へ進む速度
     public static final double kDriveOnTagSpeedMetersPerSec = 1.0;
     
+  }
+
+  public static class PIDConstants {
+
+    // 調整の手順
+
+    // 1. まず Ki と Kd を 0 にして、Kp だけで調整する
+    //   - Kp を下げていき、振動しなくなるギリギリの値を見つける
+    //   - 目標に到達できるが、オーバーシュートしない程度
+    // 2. Kd を少しずつ上げる
+    //   - 振動を抑え、目標付近でのブレーキ効果を出す
+    //   - 上げすぎるとピクピクの原因になるので注意
+    // 3. 最後に Ki を少しだけ入れる
+    //   - 定常偏差（目標に近いけど完全に到達しない）がある場合のみ
+    //   - Ki は非常に小さい値（0.01〜0.05程度）から始める
+
+    public static final double kHeadingKp = 0.4;
+    public static final double kHeadingKd = 0.1;
+    public static final double kHeadingKi = 0;
+    
+
+    public static final double kTranslationKp = 1;
+    public static final double kTranslationKd = 0;
+    public static final double kTranslationKi = 0;
+    
+  }
+
+  public static class CommandConstants {
+    // タグID → 対応する頂点座標 (Blue Origin) + ロボットが向くべき方向
+    public static final Map<Integer, Pose2d> tagToVertexMap = Map.ofEntries(
+        // 右上コーナー (9.0, 6.05)
+        Map.entry(1, new Pose2d(9.0, 6.05, Rotation2d.fromDegrees(45.0))),
+        Map.entry(2, new Pose2d(9.0, 6.05, Rotation2d.fromDegrees(45.0))),
+        // 右下コーナー (9.0, 0.0)
+        Map.entry(3, new Pose2d(9.0, 0.0, Rotation2d.fromDegrees(135.0))),
+        Map.entry(4, new Pose2d(9.0, 0.0, Rotation2d.fromDegrees(135.0))),
+        // 左上コーナー (0.0, 6.05)
+        Map.entry(5, new Pose2d(0.0, 6.05, Rotation2d.fromDegrees(-45.0))),
+        Map.entry(6, new Pose2d(0.0, 6.05, Rotation2d.fromDegrees(-45.0))),
+        // 左下コーナー (0.0, 0.0)
+        Map.entry(7, new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(-135.0))),
+        Map.entry(8, new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(-135.0)))
+    );
   }
   public static final double maxSpeed  = Units.feetToMeters(4.5); // 最大走行速度[m/s]
 }

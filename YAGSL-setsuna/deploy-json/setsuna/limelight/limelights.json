@@ -19,7 +19,7 @@
         {
             "name": "right",
             "table": "limelight-left",
-            "enabled": false,
+            "enabled": true,
             "robotToCamera": {
                 "x": 0.00,
                 "y": 0.00,

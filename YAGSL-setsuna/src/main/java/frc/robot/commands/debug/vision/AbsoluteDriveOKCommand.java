@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotState;
+import frc.robot.lib.limelight.VisionTargetSelector;
 import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -35,7 +36,7 @@ public class AbsoluteDriveOKCommand extends Command {
 
   private final SwerveSubsystem swerve;
   private final RobotState state;
-  private final DebugVisionTargetSelector targetSelector;
+  private final VisionTargetSelector targetSelector;
 
   private Optional<Pose2d> targetPose = Optional.empty();
   private Optional<Rotation2d> targetHeading = Optional.empty();
@@ -50,7 +51,7 @@ public class AbsoluteDriveOKCommand extends Command {
       SwerveSubsystem swerve, RobotState state, String limelightTableNameA, String limelightTableNameB) {
     this.swerve = swerve;
     this.state = state;
-    this.targetSelector = new DebugVisionTargetSelector(limelightTableNameA, limelightTableNameB);
+    this.targetSelector = new VisionTargetSelector(limelightTableNameA, limelightTableNameB);
     addRequirements(swerve);
   }
 
@@ -76,7 +77,7 @@ public class AbsoluteDriveOKCommand extends Command {
     }
   }
 
-  private void lockTo(DebugVisionTargetSelector.TargetObservation observation, double nowSec) {
+  private void lockTo(VisionTargetSelector.TargetObservation observation, double nowSec) {
     int detectedTagId = observation.tagId();
     if (detectedTagId != lockedTagId) {
       lockedTagId = detectedTagId;
@@ -88,7 +89,7 @@ public class AbsoluteDriveOKCommand extends Command {
   private void updateTagLock(double nowSec) {
     var sameTagObservation =
         lockedTagId < 0
-            ? Optional.<DebugVisionTargetSelector.TargetObservation>empty()
+            ? Optional.<VisionTargetSelector.TargetObservation>empty()
             : targetSelector.observationForTag(lockedTagId);
 
     if (sameTagObservation.isPresent()) {

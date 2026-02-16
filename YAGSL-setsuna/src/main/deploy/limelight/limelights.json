@@ -2,7 +2,7 @@
     "limelights": [
         {
             "name": "left",
-            "table": "limelight-left",
+            "table": "limelight-lb",
             "enabled": false,
             "robotToCamera": {
                 "x": 0.00,
@@ -17,16 +17,16 @@
             "pipeline": 0.0
         },
         {
-            "name": "right",
-            "table": "limelight-left",
-            "enabled": false,
+            "name": "frontcenter",
+            "table": "limelight-fc",
+            "enabled": true,
             "robotToCamera": {
-                "x": 0.00,
+                "x": 0.4275,
                 "y": 0.00,
                 "yawDeg": 0.00
             },
             "cameraPose": {
-                "heightMeters": 0.00,
+                "heightMeters": 0.2,
                 "pitchDeg": 0.00
             },
             "stdDevScale": 1.0,

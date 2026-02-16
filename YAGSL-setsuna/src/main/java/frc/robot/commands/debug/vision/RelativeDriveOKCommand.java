@@ -2,6 +2,7 @@ package frc.robot.commands.debug.vision;
 
 import frc.robot.RobotState;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.lib.limelight.VisionTargetSelector;
 import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.Constants.VisionConstants;
 
@@ -28,7 +29,7 @@ public class RelativeDriveOKCommand extends Command{
 
     private final SwerveSubsystem swerve;
     private final RobotState state;
-    private final DebugVisionTargetSelector targetSelector;
+    private final VisionTargetSelector targetSelector;
 
     // PID制御
     private final PIDController xController =
@@ -48,7 +49,7 @@ public class RelativeDriveOKCommand extends Command{
         this.swerve = swerve;
         this.state = state;
         this.targetSelector =
-            new DebugVisionTargetSelector(
+            new VisionTargetSelector(
                 VisionConstants.kLimelightATableName,
                 VisionConstants.kLimelightBTableName);
         addRequirements(swerve);
@@ -67,7 +68,7 @@ public class RelativeDriveOKCommand extends Command{
         omegaController.setTolerance(thetaDeadbandRad);
     }
 
-    private void lockTo(DebugVisionTargetSelector.TargetObservation observation, double nowSec) {
+    private void lockTo(VisionTargetSelector.TargetObservation observation, double nowSec) {
         lockedTagId = observation.tagId();
         lockedTableName = observation.tableName();
         lastLockSeenTimestampSec = nowSec;
@@ -120,8 +121,8 @@ public class RelativeDriveOKCommand extends Command{
             return;
         }
 
-        var latestFieldToRobot = state.getLatestFieldToRobot();
-        if (latestFieldToRobot == null) {
+        var latest = state.getLatestFieldToRobot();
+        if (latest == null) {
             swerve.setChassisSpeeds(cmd);
             return;
         }
@@ -131,21 +132,21 @@ public class RelativeDriveOKCommand extends Command{
             return;
         }
 
-        var robotToTag = maybeFieldToTag.get().toPose2d().relativeTo(latestFieldToRobot.getValue());
-        double targetX = robotToTag.getX();
-        double targetY = robotToTag.getY();
-        double angularErrorRad = Math.atan2(targetY, targetX);
+
+        double targetX = latest.getValue().getX();
+        double targetY = latest.getValue().getY();
+        double currentHeadingRad = state.getLatestFieldToRobot().getValue().getRotation().getRadians();
 
         double vx = MathUtil.clamp(
-            xController.calculate(-targetX, 0.0),
+            xController.calculate(-targetX, 9.0),
             -velocityMaximum,
             velocityMaximum);
         double vy = MathUtil.clamp(
-            yController.calculate(-targetY, 0.0),
+            yController.calculate(-targetY, 6.05),
             -velocityMaximum,
             velocityMaximum);
         double omega = MathUtil.clamp(
-            omegaController.calculate(angularErrorRad, 0.0),
+            omegaController.calculate(currentHeadingRad, 0.125),
             -omegaMaximum,
             omegaMaximum);
 
@@ -157,12 +158,12 @@ public class RelativeDriveOKCommand extends Command{
             vy = 0.0;
             yController.reset();
         }
-        if (Math.abs(angularErrorRad) < thetaDeadbandRad) {
+        if (Math.abs(currentHeadingRad) < thetaDeadbandRad) {
             omega = 0.0;
             omegaController.reset();
         }
 
-        cmd = new ChassisSpeeds(0, 0, 0.125);
+        cmd = new ChassisSpeeds(vx, 0, omega);
 
         swerve.setChassisSpeeds(cmd);
     }

@@ -1,6 +1,7 @@
 package frc.robot.commands.debug.vision;
 
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.lib.limelight.VisionTargetSelector;
 import frc.robot.lib.util.Constants.VisionConstants;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -12,14 +13,14 @@ public class ObservationOKCommand extends Command {
     private static final double kTargetSeenHoldSeconds = 0.20;
 
     private final SwerveSubsystem swerve;
-    private final DebugVisionTargetSelector targetSelector;
+    private final VisionTargetSelector targetSelector;
     private double lastSeenTimestampSec = Double.NEGATIVE_INFINITY;
 
     public ObservationOKCommand(
             SwerveSubsystem swerve) {
         this.swerve = swerve;
         this.targetSelector =
-            new DebugVisionTargetSelector(
+            new VisionTargetSelector(
                 VisionConstants.kLimelightATableName,
                 VisionConstants.kLimelightBTableName);
         addRequirements(swerve);

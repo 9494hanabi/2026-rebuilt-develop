@@ -24,14 +24,14 @@ public final class TestFieldLayouts {
    */
   public static AprilTagFieldLayout createFromTestMapFmap() {
     List<AprilTag> tags = List.of(
-        new AprilTag(1, poseFromCenter(4.393933982822018, 3.1310660171779823, -135.0)),
-        new AprilTag(2, poseFromCenter(4.606066017177982, 2.9189339828220175, -135.0)),
-        new AprilTag(3, poseFromCenter(4.606066017177982, -2.918933982822018, 135.0)),
-        new AprilTag(4, poseFromCenter(4.393933982822018, -3.131066017177982, 135.0)),
-        new AprilTag(5, poseFromCenter(-4.606066017177982, 2.918933982822018, -45.0)),
-        new AprilTag(6, poseFromCenter(-4.393933982822018, 3.131066017177982, -45.0)),
-        new AprilTag(7, poseFromCenter(-4.393933982822018, -3.131066017177982, 45.0)),
-        new AprilTag(8, poseFromCenter(-4.606066017177982, -2.918933982822018, 45.0)));
+        new AprilTag(1, poseFromCenter(4.323223304709560, 3.201776695290440, -135.0)),
+        new AprilTag(2, poseFromCenter(4.676776695290440, 2.848223304709560, -135.0)),
+        new AprilTag(3, poseFromCenter(4.676776695290440, -2.848223304709560, 135.0)),
+        new AprilTag(4, poseFromCenter(4.323223304709560, -3.201776695290440, 135.0)),
+        new AprilTag(5, poseFromCenter(-4.323223304709560, 3.201776695290440, -45.0)),
+        new AprilTag(6, poseFromCenter(-4.676776695290440, 2.848223304709560, -45.0)),
+        new AprilTag(7, poseFromCenter(-4.676776695290440, -2.848223304709560, 45.0)),
+        new AprilTag(8, poseFromCenter(-4.323223304709560, -3.201776695290440, 45.0)));
 
     return new AprilTagFieldLayout(tags, TEST_FIELD_LENGTH_METERS, TEST_FIELD_WIDTH_METERS);
   }

@@ -8,8 +8,10 @@ import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
 import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
+import frc.robot.commands.debug.odmetry.SetDriveToZeroCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
-
+import frc.robot.commands.debug.odmetry.SetToTagCommand;
+import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -65,6 +67,21 @@ public class DriveBindings {
         // 上矢印（POV Up）: フィールド基準で水平移動
         controller.povUp().whileTrue(
             new SetDriveHorizonCommand(drivebase)
+        );
+
+        // 下矢印 : フィールド基準で0へドライブ
+        controller.povDown().whileTrue(
+            new SetDriveToZeroCommand(drivebase, robotState)
+        );
+
+        // 右矢印 : 角度も含めて0へ
+        controller.povRight().whileTrue(
+            new SetZeroCommand(drivebase, robotState)
+        );
+
+        // 左矢印 : タグを探索→ロック→頂点座標へドライブ
+        controller.povLeft().whileTrue(
+            new SetToTagCommand(drivebase, robotState)
         );
     }
 }
