@@ -14,7 +14,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.lib.util.Constants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 // import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -38,7 +37,8 @@ import swervelib.SwerveDrive;
 // 254系
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.RobotState;
-
+import frc.robot.lib.constants.Constants;
+import frc.robot.lib.constants.FieldConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 // === 担当者 ===
@@ -84,11 +84,13 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       swerveDrive =
           new SwerveParser(directory)
-              .createSwerveDrive(Constants.maxSpeed, Constants.FieldConstants.kInitialFieldToRobotPose);
+              .createSwerveDrive(Constants.maxSpeed, FieldConstants.kInitialFieldToRobotPose);
     } catch (Exception e)
     {
       throw new RuntimeException(e);
     }
+    // 起動時に初期姿勢で再同期し、ジャイロ基準のズレを抑える。
+    swerveDrive.resetOdometry(FieldConstants.kInitialFieldToRobotPose);
     odometry = new SwerveDriveOdometry(
         swerveDrive.kinematics,
         swerveDrive.getYaw(),
@@ -263,6 +265,17 @@ public class SwerveSubsystem extends SubsystemBase {
   // SwerveSubsystem に追加
   public void setChassisSpeeds(ChassisSpeeds speeds) {
     swerveDrive.setChassisSpeeds(speeds);
+  }
+
+  /**
+   * 走行系オドメトリを完全に初期化する。
+   * YAGSL本体・WPILibオドメトリ・RobotState履歴を同時に揃えてリセットする。
+   */
+  public void resetAllOdometry(Pose2d pose) {
+    Pose2d resetPose = pose == null ? Pose2d.kZero : pose;
+    swerveDrive.resetOdometry(resetPose);
+    odometry.resetPosition(swerveDrive.getYaw(), swerveDrive.getModulePositions(), resetPose);
+    robotState.resetOdometryState(Timer.getFPGATimestamp(), resetPose);
   }
 
   public void addVisionMeasurement(VisionFieldPoseEstimate est) {

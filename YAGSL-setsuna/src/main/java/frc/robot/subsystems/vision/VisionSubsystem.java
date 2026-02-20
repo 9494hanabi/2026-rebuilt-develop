@@ -14,15 +14,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-
-import frc.robot.lib.util.Constants.FieldConstants;
-import frc.robot.lib.util.Constants.VisionConstants;
 import frc.robot.RobotState;
+import frc.robot.lib.constants.FieldConstants;
+import frc.robot.lib.constants.VisionConstants;
 import frc.robot.lib.time.RobotTime;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,12 +34,43 @@ import org.littletonrobotics.junction.Logger;
 public class VisionSubsystem extends SubsystemBase {
     // デバッグ出力は負荷が高いため、通常は無効にする。
     private static final boolean ENABLE_VERBOSE_VISION_LOGGING = false;
+    private static final double kMapMismatchTranslationThresholdMeter = 0.7;
+    private static final int kMapMismatchMinStreak = 10;
+    private static final double kMapMismatchWarnIntervalSec = 1.0;
+
+    private static class MapCheckState {
+        int mismatchStreak = 0;
+        double lastWarnTimestampSec = Double.NEGATIVE_INFINITY;
+    }
 
     private final VisionIO io;
     private final RobotState state;
     private final VisionIO.VisionIOInputs inputs = new VisionIO.VisionIOInputs();
+    private final Map<String, MapCheckState> mapCheckStates = new HashMap<>();
 
     private boolean useVision = true;
+
+    private static boolean isUsingMegaTag2() {
+        return VisionConstants.useMegaTag2;
+    }
+
+    private static int getVisionXStdDevIndex() {
+        return isUsingMegaTag2()
+                ? VisionConstants.kMegatag2XStdDevIndex
+                : VisionConstants.kMegatag1XStdDevIndex;
+    }
+
+    private static int getVisionYStdDevIndex() {
+        return isUsingMegaTag2()
+                ? VisionConstants.kMegatag2YStdDevIndex
+                : VisionConstants.kMegatag1YStdDevIndex;
+    }
+
+    private static int getVisionYawStdDevIndex() {
+        return isUsingMegaTag2()
+                ? VisionConstants.kMegatag2YawStdDevIndex
+                : VisionConstants.kMegatag1YawStdDevIndex;
+    }
 
     // コンストラクタ
     public VisionSubsystem(VisionIO io, RobotState state) {
@@ -162,6 +194,7 @@ public class VisionSubsystem extends SubsystemBase {
             String label = cam.name == null || cam.name.isBlank() ? cam.tableName : cam.name;
             String logPrefix = "Vision/" + label;
             logCameraInputs(logPrefix, cam);
+            runMapConsistencyCheck(cam, label);
             processCamera(cam, label).ifPresent(acceptedByCamera::add);
         }
 
@@ -345,10 +378,25 @@ public class VisionSubsystem extends SubsystemBase {
                                                 .getTranslation()
                                                 .rotateBy(priorPose.get().getRotation())),
                         priorPose.get().getRotation());
-        
+
+        // fuseWithGyroの結果もOdomから大幅に離れている場合は棄却する。
+        // processMegatagが弾いた後にこちらが通り抜けるのを防ぐ。
+        double distFromOdomGyro = posteriorPose.getTranslation()
+                .getDistance(priorPose.get().getTranslation());
+        if (distFromOdomGyro > VisionConstants.kMaxVisionOdomDistanceMeter) {
+            System.out.printf(
+                "[VisionFilter/Gyro] REJECTED tag=%s dist=%.2fm(>%.2fm)"
+                    + " odom=(%.3f,%.3f) posterior=(%.3f,%.3f)%n",
+                java.util.Arrays.toString(poseEstimate.fiducialIds()),
+                distFromOdomGyro, VisionConstants.kMaxVisionOdomDistanceMeter,
+                priorPose.get().getX(), priorPose.get().getY(),
+                posteriorPose.getX(), posteriorPose.getY());
+            return Optional.empty();
+        }
+
         // 標準偏差
-        double xStd = cam.standardDeviations[VisionConstants.kMegatag1XStdDevIndex];
-        double yStd = cam.standardDeviations[VisionConstants.kMegatag1YStdDevIndex];
+        double xStd = cam.standardDeviations[getVisionXStdDevIndex()];
+        double yStd = cam.standardDeviations[getVisionYStdDevIndex()];
         double xyStd = Math.max(xStd, yStd);
 
         // 補正した姿勢情報からデータクラスVisionFieldPoseEstimateを作成して返り値として代入
@@ -370,8 +418,13 @@ public class VisionSubsystem extends SubsystemBase {
             return Optional.empty();
         }
 
+        // タグの面積で弾く（タグ数によらず全ケースに適用）
+        if (poseEstimate.avgTagArea() < VisionConstants.kTagMinAreaForSingleTagMegatag) {
+            return Optional.empty();
+        }
+
         // フレームに入っているIdの数で分岐
-        if (poseEstimate.fiducialIds().length < 2) {
+        if (poseEstimate.fiducialIds().length < 2 && !isUsingMegaTag2()) {
 
             for (var fiducial : cam.fiducialObservations) {
                 // 曖昧さ(ambiguity)のしきい値で弾く
@@ -380,16 +433,11 @@ public class VisionSubsystem extends SubsystemBase {
                 }
             }
 
-            // Megatagに必要な最小面積で弾く。
-            if (poseEstimate.avgTagArea() < VisionConstants.kTagMinAreaForSingleTagMegatag) {
-                return Optional.empty();
-            }
-
             // ヨー角の確認に必要なタグの最小面積で弾く
             var priorPose = state.getFieldToRobotOdom(poseEstimate.timestampSeconds());
             if (poseEstimate.avgTagArea() < VisionConstants.kTagAreaThresholdForYawCheck
                     && priorPose.isPresent()) {
-                double yawDiff = 
+                double yawDiff =
                         Math.abs(
                                 MathUtil.angleModulus(
                                         priorPose.get().getRotation().getRadians()
@@ -406,6 +454,14 @@ public class VisionSubsystem extends SubsystemBase {
         // 位置ベクトルの絶対下限で弾く
         if (poseEstimate.fieldToRobot().getTranslation().getNorm()
                 < VisionConstants.kDefaultNormThreshold) {
+            return Optional.empty();
+        }
+
+        // フィールド外の推定を弾く
+        double poseX = poseEstimate.fieldToRobot().getX();
+        double poseY = poseEstimate.fieldToRobot().getY();
+        if (poseX < 0 || poseX > FieldConstants.fieldLengthMeter
+                || poseY < 0 || poseY > FieldConstants.fieldWidthMeter) {
             return Optional.empty();
         }
 
@@ -431,14 +487,33 @@ public class VisionSubsystem extends SubsystemBase {
             return Optional.empty();
         }
 
+        // Vision推定がOdomから大幅に離れている場合は棄却する。
+        // fmapミスマッチや実タグ配置誤りによるジャンプ防止。
+        double distFromOdom = poseEstimate.fieldToRobot().getTranslation()
+                .getDistance(loggedPose.get().getTranslation());
+        if (distFromOdom > VisionConstants.kMaxVisionOdomDistanceMeter) {
+            System.out.printf(
+                "[VisionFilter] REJECTED tag=%s dist=%.2fm(>%.2fm)"
+                    + " odom=(%.3f,%.3f) vision=(%.3f,%.3f)%n",
+                java.util.Arrays.toString(poseEstimate.fiducialIds()),
+                distFromOdom, VisionConstants.kMaxVisionOdomDistanceMeter,
+                loggedPose.get().getX(), loggedPose.get().getY(),
+                poseEstimate.fieldToRobot().getX(), poseEstimate.fieldToRobot().getY());
+            return Optional.empty();
+        }
+
         // 返り値を作る
         Pose2d estimatePose = poseEstimate.fieldToRobot();
 
-        double scaleFactor = 1.0 / poseEstimate.quality();
-        double xStd = cam.standardDeviations[VisionConstants.kMegatag1XStdDevIndex] * scaleFactor;
-        double yStd = cam.standardDeviations[VisionConstants.kMegatag1YStdDevIndex] * scaleFactor;
-        double rotStd = 
-                cam.standardDeviations[VisionConstants.kMegatag1YawStdDevIndex] * scaleFactor;
+        double scaleFactor = 1.0 / Math.max(poseEstimate.quality(), 1e-3);
+        double xStd = cam.standardDeviations[getVisionXStdDevIndex()] * scaleFactor;
+        double yStd = cam.standardDeviations[getVisionYStdDevIndex()] * scaleFactor;
+        double rotStd =
+                cam.standardDeviations[getVisionYawStdDevIndex()] * scaleFactor;
+        if (isUsingMegaTag2()) {
+            // MT2はrobot yaw前提のため、姿勢融合では回頭をほぼ信用しない。
+            rotStd = Math.max(rotStd, VisionConstants.kLargeVariance);
+        }
         
         double xyStd = Math.max(xStd, yStd);
         Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStd, xyStd, rotStd);
@@ -449,6 +524,104 @@ public class VisionSubsystem extends SubsystemBase {
                     poseEstimate.timestampSeconds(),
                     visionStdDevs,
                     poseEstimate.fiducialIds().length));
+    }
+
+    private void runMapConsistencyCheck(VisionIO.VisionIOInputs.CameraInputs cam, String label) {
+        String logPrefix = "Vision/" + label + "/MapCheck";
+        MapCheckState checkState = mapCheckStates.computeIfAbsent(label, unused -> new MapCheckState());
+
+        if (!cam.seesTarget
+                || cam.megatagPoseEstimate == null
+                || cam.primaryTagId < 0
+                || cam.botPoseTargetSpace == null) {
+            Logger.recordOutput(logPrefix + "/Valid", false);
+            checkState.mismatchStreak = 0;
+            return;
+        }
+
+        var maybeExpectedFieldToTag3d = FieldConstants.kAprilTagLayout.getTagPose(cam.primaryTagId);
+        if (maybeExpectedFieldToTag3d.isEmpty()) {
+            Logger.recordOutput(logPrefix + "/Valid", false);
+            return;
+        }
+
+        Pose2d fieldToRobot = cam.megatagPoseEstimate.fieldToRobot();
+        Transform2d targetSpaceTransform = new Transform2d(
+                cam.botPoseTargetSpace.getTranslation(),
+                cam.botPoseTargetSpace.getRotation());
+        Pose2d expectedFieldToTag = maybeExpectedFieldToTag3d.get().toPose2d();
+
+        // botpose_targetspace の向き定義差に備えて両解釈を試し、誤差の小さい方を採用する。
+        Pose2d inferredFieldToTagAsRobotToTag = fieldToRobot.transformBy(targetSpaceTransform);
+        Pose2d inferredFieldToTagAsTagToRobot = fieldToRobot.transformBy(targetSpaceTransform.inverse());
+
+        double errAsRobotToTag =
+                inferredFieldToTagAsRobotToTag.getTranslation()
+                        .getDistance(expectedFieldToTag.getTranslation());
+        double errAsTagToRobot =
+                inferredFieldToTagAsTagToRobot.getTranslation()
+                        .getDistance(expectedFieldToTag.getTranslation());
+
+        Pose2d inferredFieldToTag;
+        String interpretation;
+        double translationErrorMeter;
+        if (errAsRobotToTag <= errAsTagToRobot) {
+            inferredFieldToTag = inferredFieldToTagAsRobotToTag;
+            interpretation = "robotToTag";
+            translationErrorMeter = errAsRobotToTag;
+        } else {
+            inferredFieldToTag = inferredFieldToTagAsTagToRobot;
+            interpretation = "tagToRobot";
+            translationErrorMeter = errAsTagToRobot;
+        }
+
+        double yawErrorDeg =
+                Math.abs(
+                        Units.radiansToDegrees(
+                                MathUtil.angleModulus(
+                                        inferredFieldToTag.getRotation().getRadians()
+                                                - expectedFieldToTag.getRotation().getRadians())));
+
+        boolean mismatch = translationErrorMeter > kMapMismatchTranslationThresholdMeter;
+        if (mismatch) {
+            checkState.mismatchStreak++;
+        } else {
+            checkState.mismatchStreak = 0;
+        }
+
+        Logger.recordOutput(logPrefix + "/Valid", true);
+        Logger.recordOutput(logPrefix + "/TagId", cam.primaryTagId);
+        Logger.recordOutput(logPrefix + "/Interpretation", interpretation);
+        Logger.recordOutput(logPrefix + "/ExpectedFieldToTag", expectedFieldToTag);
+        Logger.recordOutput(logPrefix + "/InferredFieldToTag", inferredFieldToTag);
+        Logger.recordOutput(logPrefix + "/TranslationErrorMeter", translationErrorMeter);
+        Logger.recordOutput(logPrefix + "/YawErrorDeg", yawErrorDeg);
+        Logger.recordOutput(logPrefix + "/Mismatch", mismatch);
+        Logger.recordOutput(logPrefix + "/MismatchStreak", checkState.mismatchStreak);
+
+        double nowSec = RobotTime.getTimestampSeconds();
+        if (mismatch && checkState.mismatchStreak >= kMapMismatchMinStreak
+                && nowSec - checkState.lastWarnTimestampSec >= kMapMismatchWarnIntervalSec) {
+            checkState.lastWarnTimestampSec = nowSec;
+            DriverStation.reportError(
+                    String.format(
+                            "[VisionMapCheck] camera=%s tag=%d mismatch err=%.2fm yaw=%.1fdeg"
+                                    + " expected=(%.2f, %.2f, %.1fdeg)"
+                                    + " inferred=(%.2f, %.2f, %.1fdeg)"
+                                    + " interpretation=%s",
+                            label,
+                            cam.primaryTagId,
+                            translationErrorMeter,
+                            yawErrorDeg,
+                            expectedFieldToTag.getX(),
+                            expectedFieldToTag.getY(),
+                            expectedFieldToTag.getRotation().getDegrees(),
+                            inferredFieldToTag.getX(),
+                            inferredFieldToTag.getY(),
+                            inferredFieldToTag.getRotation().getDegrees(),
+                            interpretation),
+                    false);
+        }
     }
 
     public void setUseVision(boolean useVision) {

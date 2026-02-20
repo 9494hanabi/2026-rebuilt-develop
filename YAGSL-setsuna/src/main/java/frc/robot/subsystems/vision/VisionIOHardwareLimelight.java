@@ -1,28 +1,32 @@
 package frc.robot.subsystems.vision;
 
 import frc.robot.RobotState;
+import frc.robot.lib.constants.VisionConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 import frc.robot.lib.limelight.LimelightConfig.LimelightEntry;
 import frc.robot.lib.limelight.LimelightHelpers;
 import frc.robot.lib.time.RobotTime;
-import frc.robot.lib.util.Constants.VisionConstants;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class VisionIOHardwareLimelight implements VisionIO {
     private static final double HEARTBEAT_TIMEOUT_SEC = 0.5;
-    private static final double[] DEFAULT_STDDEVS =
-            new double[VisionConstants.kExpectedStdDevArrayLength];
+    private static final double[] DEFAULT_STDDEVS;
+    static {
+        DEFAULT_STDDEVS = new double[VisionConstants.kExpectedStdDevArrayLength];
+        Arrays.fill(DEFAULT_STDDEVS, 1.0);
+    }
 
     private static class CameraHandle {
         final String name;
@@ -93,7 +97,7 @@ public class VisionIOHardwareLimelight implements VisionIO {
     private void setLLSettings() {
         for (CameraHandle camera : cameraHandles) {
             // cameraPoseはLimelight Web UIで設定するため、コードからの上書きは行わない
-            camera.table.getEntry("pipeline").setInteger(camera.pipeline);
+            camera.table.getEntry("pipeline").setDouble(camera.pipeline);
         }
     }
 
@@ -101,21 +105,27 @@ public class VisionIOHardwareLimelight implements VisionIO {
     public void readInputs(VisionIOInputs inputs) {
         inputs.cameras.clear();
 
-        var latestPose = robotState.getLatestFieldToRobot();
+        // ビジョン融合済みではなくオドメトリのみのyawを使用してフィードバックループを防ぐ
+        var latestOdomPose = robotState.getFieldToRobotOdom(RobotTime.getTimestampSeconds());
+        boolean sentRobotOrientation = false;
         for (CameraHandle camera : cameraHandles) {
             VisionIOInputs.CameraInputs cameraInputs = new VisionIOInputs.CameraInputs();
             cameraInputs.name = camera.name;
             cameraInputs.tableName = camera.tableName;
             cameraInputs.robotToCamera = camera.robotToCamera;
 
-            if (latestPose != null) {
-                double yawDegrees = latestPose.getValue().getRotation().getDegrees();
+            if (latestOdomPose.isPresent()) {
+                double yawDegrees = latestOdomPose.get().getRotation().getDegrees();
                 LimelightHelpers.SetRobotOrientation_NoFlush(
                         camera.tableName, yawDegrees, 0, 0, 0, 0, 0);
+                sentRobotOrientation = true;
             }
 
             readCameraData(camera, cameraInputs);
             inputs.cameras.add(cameraInputs);
+        }
+        if (VisionConstants.useMegaTag2 && sentRobotOrientation) {
+            NetworkTableInstance.getDefault().flush();
         }
         latestInputs.set(inputs);
     }
@@ -129,6 +139,8 @@ public class VisionIOHardwareLimelight implements VisionIO {
         cameraInputs.megatag2Count = 0;
         cameraInputs.fiducialObservations = new FiducialObservation[0];
         cameraInputs.pose3d = null;
+        cameraInputs.primaryTagId = -1;
+        cameraInputs.botPoseTargetSpace = null;
         cameraInputs.standardDeviations = DEFAULT_STDDEVS.clone();
 
         if (!cameraInputs.connected) {
@@ -147,8 +159,11 @@ public class VisionIOHardwareLimelight implements VisionIO {
 
         try {
             // 一度だけNetworkTableを読み取る（最適化: 2回の読み取りを1回に削減）
+            // useMegaTag2=trueのときはMT2キー(botpose_orb_wpiblue)を使用する
+            boolean isMegaTag2 = VisionConstants.useMegaTag2;
+            String poseKey = isMegaTag2 ? "botpose_orb_wpiblue" : "botpose_wpiblue";
             DoubleArrayEntry poseEntry =
-                    LimelightHelpers.getLimelightDoubleArrayEntry(camera.tableName, "botpose_wpiblue");
+                    LimelightHelpers.getLimelightDoubleArrayEntry(camera.tableName, poseKey);
             TimestampedDoubleArray tsValue = poseEntry.getAtomic();
             double[] poseArray = tsValue.value;
 
@@ -190,11 +205,31 @@ public class VisionIOHardwareLimelight implements VisionIO {
 
             var megatag = new LimelightHelpers.PoseEstimate(
                     pose2d, adjustedTimestamp, latency, tagCount,
-                    tagSpan, tagDist, tagArea, rawFiducials, false);
+                    tagSpan, tagDist, tagArea, rawFiducials, isMegaTag2);
 
             cameraInputs.megatagPoseEstimate = MegatagPoseEstimate.fromLimelight(megatag);
             cameraInputs.megatagCount = tagCount;
+            if (isMegaTag2) {
+                cameraInputs.megatag2PoseEstimate = cameraInputs.megatagPoseEstimate;
+                cameraInputs.megatag2Count = tagCount;
+            }
             cameraInputs.fiducialObservations = FiducialObservation.fromLimelight(rawFiducials);
+            if (tagCount > 0 && rawFiducials[0] != null) {
+                cameraInputs.primaryTagId = rawFiducials[0].id;
+            } else {
+                cameraInputs.primaryTagId = (int) camera.table.getEntry("tid").getDouble(-1.0);
+            }
+
+            double[] botPoseTargetSpaceArray =
+                    camera.table.getEntry("botpose_targetspace").getDoubleArray(new double[0]);
+            if (botPoseTargetSpaceArray.length >= 6) {
+                Pose2d botPoseTargetSpace = LimelightHelpers.toPose2D(botPoseTargetSpaceArray);
+                if (Double.isFinite(botPoseTargetSpace.getX())
+                        && Double.isFinite(botPoseTargetSpace.getY())
+                        && Double.isFinite(botPoseTargetSpace.getRotation().getRadians())) {
+                    cameraInputs.botPoseTargetSpace = botPoseTargetSpace;
+                }
+            }
         } catch (Exception e) {
             System.err.println("Error processing Limelight data: " + e.getMessage());
         }

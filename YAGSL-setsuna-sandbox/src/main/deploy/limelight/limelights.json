@@ -1,0 +1,52 @@
+{
+    "limelights": [
+        {
+            "name": "left",
+            "table": "limelight-lb",
+            "enabled": false,
+            "robotToCamera": {
+                "x": 0.00,
+                "y": 0.00,
+                "yawDeg": 0.00
+            },
+            "cameraPose": {
+                "heightMeters": 0.00,
+                "pitchDeg": 0.00
+            },
+            "stdDevScale": 1.0,
+            "pipeline": 0.0
+        },
+        {
+            "name": "frontcenter",
+            "table": "limelight-fc",
+            "enabled": true,
+            "robotToCamera": {
+                "x": 0.4275,
+                "y": 0.00,
+                "yawDeg": 0.00
+            },
+            "cameraPose": {
+                "heightMeters": 0.2,
+                "pitchDeg": 0.00
+            },
+            "stdDevScale": 1.0,
+            "pipeline": 0.0
+        },
+        {
+            "name": "talet",
+            "table": "limelight-left",
+            "enabled": false,
+            "robotToCamera": {
+                "x": 0.00,
+                "y": 0.00,
+                "yawDeg": 0.00
+            },
+            "cameraPose": {
+                "heightMeters": 0.00,
+                "pitchDeg": 0.00
+            },
+            "stdDevScale": 1.0,
+            "pipeline": 0.0
+        }
+    ]
+}

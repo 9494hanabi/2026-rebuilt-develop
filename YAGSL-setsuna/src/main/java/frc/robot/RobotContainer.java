@@ -2,9 +2,6 @@ package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
-
-import frc.robot.lib.util.Constants.OperatorConstants;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,10 +13,11 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.lib.constants.Constants.OperatorConstants;
 import frc.robot.lib.limelight.LimelightConfig;
-
 // バインディング
 import frc.robot.bindings.DriveBindings;
+import frc.robot.commands.debug.safety.ClearOdometryAndLockStopCommand;
 import frc.robot.bindings.AutoBindings;
 import frc.robot.bindings.DebugBindings;
 
@@ -46,6 +44,7 @@ public class RobotContainer {
   private final SwerveInputStream driveDirectAngle;
   private final Command driveFieldOrientedDirectAngle;
   private final Command driveFieldOrientedAngularVelocity;
+  private final Command startupOdometryLockCommand;
 
   // バインディングクラス
   private final DriveBindings driveBindings;
@@ -89,6 +88,7 @@ public class RobotContainer {
     // バインディングの設定
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
+    startupOdometryLockCommand = new ClearOdometryAndLockStopCommand(drivebase);
   }
 
   private void configureBindings() {
@@ -104,5 +104,9 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return m_chooser.getSelected();
+  }
+
+  public Command getStartupOdometryLockCommand() {
+    return startupOdometryLockCommand;
   }
 }

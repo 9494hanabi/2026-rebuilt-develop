@@ -1,0 +1,2711 @@
+[
+    {
+        "messageType": 2,
+        "timestamp": -0.00006103515625,
+        "seqNumber": 1535,
+        "line": "********** Robot program starting **********"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.02471923828125,
+        "seqNumber": 1536,
+        "line": "NT: Listening on NT3 port 1735, NT4 port 5810"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.61083984375,
+        "seqNumber": 1537,
+        "line": "NT: Got a NT4 connection from 10.94.94.11 port 59538"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 0.61529541015625,
+        "seqNumber": 1538,
+        "line": "NT: CONNECTED NT4 client 'limelight-fc@1' (from 10.94.94.11:59538)"
+    },
+    {
+        "timestamp": 4.015380859375,
+        "seqNumber": 1539,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "StatusLogger: It is not recommended to log to RoboRIO internal storage. Plug in a flash drive.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.0162353515625,
+        "seqNumber": 1540,
+        "line": "StatusLogger: Logging REVLOG to '/home/lvuser/logs/REV_TBD_76e8311a76897cd9.revlog'"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.0189208984375,
+        "seqNumber": 1541,
+        "line": "StatusLogger: Renamed REVLOG from 'REV_TBD_76e8311a76897cd9.revlog' to 'REV_20260218_093529.revlog' at '/home/lvuser/logs/REV_20260218_093529.revlog'"
+    },
+    {
+        "timestamp": 4.019287109375,
+        "seqNumber": 1542,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "StatusLogger: Log storage device has 54 MB of free space remaining. REVLOGs will get deleted below 50 MB of free space. Consider deleting logs off the storage device.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.48785400390625,
+        "seqNumber": 1543,
+        "line": "Instantiating NavX on roboRIO MXP Port."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.48876953125,
+        "seqNumber": 1544,
+        "line": "NavX: Library for FRC"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.49365234375,
+        "seqNumber": 1545,
+        "line": "NavX: Connected."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.4952392578125,
+        "seqNumber": 1546,
+        "line": "NavX: Board Type 50 (navX2-MXP (Gen 2))"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.49859619140625,
+        "seqNumber": 1547,
+        "line": "NavX: firmware version 4.0.428"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.5003662109375,
+        "seqNumber": 1548,
+        "line": "NavX: startup initialization and startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.50360107421875,
+        "seqNumber": 1549,
+        "line": "NavX: onboard startup calibration complete."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 4.50775146484375,
+        "seqNumber": 1550,
+        "line": "NavX: Yaw angle auto-reset to 0.0 due to startup calibration."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.8455810546875,
+        "seqNumber": 1551,
+        "line": "RobotContainerfrc.robot.RobotContainer@102a07d"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.89324951171875,
+        "seqNumber": 1552,
+        "line": "[ClearOdometryAndLockStop] initialized: lock=5.00s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.92144775390625,
+        "seqNumber": 1553,
+        "line": "********** Robot program startup complete **********"
+    },
+    {
+        "timestamp": 6.95233154296875,
+        "seqNumber": 1554,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.95367431640625,
+        "seqNumber": 1555,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.9541015625,
+        "seqNumber": 1556,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 6.959228515625,
+        "seqNumber": 1557,
+        "line": "0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.0374755859375,
+        "seqNumber": 1558,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 7.0687255859375,
+        "seqNumber": 1559,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tTurretSubsystem.periodic(): 0.004099s\n\tSwerveSubsystem.periodic(): 0.005176s\n\tVisionSubsystem.periodic(): 0.089949s\n\tClearOdometryAndLockStopCommand.execute(): 0.002875s\n\tbuttons.run(): 0.008793s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.0693359375,
+        "seqNumber": 1560,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tTurretSubsystem.periodic(): 0.004099s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.07080078125,
+        "seqNumber": 1561,
+        "line": "\tSwerveSubsystem.periodic(): 0.005176s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.072265625,
+        "seqNumber": 1562,
+        "line": "\tVisionSubsystem.periodic(): 0.089949s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.07366943359375,
+        "seqNumber": 1563,
+        "line": "\tClearOdometryAndLockStopCommand.execute(): 0.002875s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.07421875,
+        "seqNumber": 1564,
+        "line": "\tbuttons.run(): 0.008793s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.0751953125,
+        "seqNumber": 1565,
+        "line": ""
+    },
+    {
+        "timestamp": 7.237060546875,
+        "seqNumber": 1566,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Library initialization is complete.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "timestamp": 7.30401611328125,
+        "seqNumber": 1567,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "LogCleanup: deleted 2 old log files from /home/lvuser/logs",
+        "location": "frc.robot.lib.util.LogCleanupService.periodic(LogCleanupService.java:42)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.304443359375,
+        "seqNumber": 1568,
+        "line": "Warning at frc.robot.lib.util.LogCleanupService.periodic(LogCleanupService.java:42): LogCleanup: deleted 2 old log files from /home/lvuser/logs"
+    },
+    {
+        "timestamp": 7.3350830078125,
+        "seqNumber": 1569,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tSmartDashboard.updateValues(): 0.007754s\n\tdisabledInit(): 0.002170s\n\trobotPeriodic(): 0.386081s\n\tLiveWindow.updateValues(): 0.000092s\n\tShuffleboard.update(): 0.000798s\n\tdisabledPeriodic(): 0.000891s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.33917236328125,
+        "seqNumber": 1570,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tSmartDashboard.updateValues(): 0.007754s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.3394775390625,
+        "seqNumber": 1571,
+        "line": "\tdisabledInit(): 0.002170s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.33966064453125,
+        "seqNumber": 1572,
+        "line": "\trobotPeriodic(): 0.386081s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.34002685546875,
+        "seqNumber": 1573,
+        "line": "\tLiveWindow.updateValues(): 0.000092s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.3402099609375,
+        "seqNumber": 1574,
+        "line": "\tShuffleboard.update(): 0.000798s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.34051513671875,
+        "seqNumber": 1575,
+        "line": "\tdisabledPeriodic(): 0.000891s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.3406982421875,
+        "seqNumber": 1576,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.4619140625,
+        "seqNumber": 1577,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.9822998046875,
+        "seqNumber": 1578,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "timestamp": 7.99078369140625,
+        "seqNumber": 1579,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.99169921875,
+        "seqNumber": 1580,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 7.99224853515625,
+        "seqNumber": 1581,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.17034912109375,
+        "seqNumber": 1582,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 8.18359375,
+        "seqNumber": 1583,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tTurretSubsystem.periodic(): 0.000186s\n\tSwerveSubsystem.periodic(): 0.001335s\n\tVisionSubsystem.periodic(): 0.053962s\n\tClearOdometryAndLockStopCommand.execute(): 0.002820s\n\tbuttons.run(): 0.000111s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.18414306640625,
+        "seqNumber": 1584,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tTurretSubsystem.periodic(): 0.000186s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.18511962890625,
+        "seqNumber": 1585,
+        "line": "\tSwerveSubsystem.periodic(): 0.001335s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.18536376953125,
+        "seqNumber": 1586,
+        "line": "\tVisionSubsystem.periodic(): 0.053962s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.1856689453125,
+        "seqNumber": 1587,
+        "line": "\tClearOdometryAndLockStopCommand.execute(): 0.002820s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.18585205078125,
+        "seqNumber": 1588,
+        "line": "\tbuttons.run(): 0.000111s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.18609619140625,
+        "seqNumber": 1589,
+        "line": ""
+    },
+    {
+        "timestamp": 8.26019287109375,
+        "seqNumber": 1590,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger: Available disk space (66 MB) is low; at 50 MB, old hoot logs will be deleted. Use Tuner X to download and delete hoot logs.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "timestamp": 8.26239013671875,
+        "seqNumber": 1591,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger Started (Network: rio)",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.47979736328125,
+        "seqNumber": 1592,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, 0.0deg) odom=(3.000, 4.500, 0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 8.9798583984375,
+        "seqNumber": 1593,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, 0.0deg) odom=(3.000, 4.500, 0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "timestamp": 9.28125,
+        "seqNumber": 1594,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix-diagnostics] Server 2026.1.0 (Jan  7 2026, 19:24:14) running on port: 1250",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 9.49957275390625,
+        "seqNumber": 1595,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, 0.0deg) odom=(3.000, 4.500, 0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 9.99945068359375,
+        "seqNumber": 1596,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, 0.0deg) odom=(3.000, 4.500, 0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 10.5189208984375,
+        "seqNumber": 1597,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, 0.0deg) odom=(3.000, 4.500, 0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 11.0191650390625,
+        "seqNumber": 1598,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "timestamp": 11.2757568359375,
+        "seqNumber": 1599,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger: Available disk space (66 MB) is low; at 50 MB, old hoot logs will be deleted. Use Tuner X to download and delete hoot logs.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 11.54022216796875,
+        "seqNumber": 1600,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 11.85455322265625,
+        "seqNumber": 1601,
+        "line": "[ClearOdometryAndLockStop] ended, interrupted=false"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 12.0592041015625,
+        "seqNumber": 1602,
+        "line": "[OdomCheck] vision=OFF fused=(3.000, 4.500, -0.0deg) odom=(3.000, 4.500, -0.0deg) delta=(0.000, 0.000, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 12.579345703125,
+        "seqNumber": 1603,
+        "line": "[OdomCheck] vision=OFF fused=(3.020, 4.144, -1.1deg) odom=(3.020, 4.144, -1.2deg) delta=(0.000, -0.000, 0.1deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 13.08056640625,
+        "seqNumber": 1604,
+        "line": "[OdomCheck] vision=OFF fused=(3.102, 3.585, -1.1deg) odom=(3.103, 3.562, -0.4deg) delta=(-0.000, 0.023, -0.7deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 13.6011962890625,
+        "seqNumber": 1605,
+        "line": "[OdomCheck] vision=OFF fused=(3.107, 3.093, 33.7deg) odom=(3.100, 3.081, 33.7deg) delta=(0.007, 0.012, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.1192626953125,
+        "seqNumber": 1606,
+        "line": "[OdomCheck] vision=OFF fused=(2.754, 2.669, 42.3deg) odom=(2.732, 2.653, 42.3deg) delta=(0.023, 0.016, 0.0deg)"
+    },
+    {
+        "timestamp": 14.390869140625,
+        "seqNumber": 1607,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.3919677734375,
+        "seqNumber": 1608,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.39288330078125,
+        "seqNumber": 1609,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.49188232421875,
+        "seqNumber": 1610,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.5013427734375,
+        "seqNumber": 1611,
+        "line": "[Vision] Fused Pose2d: x=3.922 m, y=6.036 m, deg=41.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.50421142578125,
+        "seqNumber": 1612,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 14.51275634765625,
+        "seqNumber": 1613,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tTurretSubsystem.periodic(): 0.000148s\n\tSwerveSubsystem.periodic(): 0.000482s\n\tVisionSubsystem.periodic(): 0.130796s\n\tRunCommand.execute(): 0.002096s\n\tbuttons.run(): 0.000056s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.51336669921875,
+        "seqNumber": 1614,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tTurretSubsystem.periodic(): 0.000148s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.51385498046875,
+        "seqNumber": 1615,
+        "line": "\tSwerveSubsystem.periodic(): 0.000482s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.51409912109375,
+        "seqNumber": 1616,
+        "line": "\tVisionSubsystem.periodic(): 0.130796s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.514404296875,
+        "seqNumber": 1617,
+        "line": "\tRunCommand.execute(): 0.002096s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.51458740234375,
+        "seqNumber": 1618,
+        "line": "\tbuttons.run(): 0.000056s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.51483154296875,
+        "seqNumber": 1619,
+        "line": ""
+    },
+    {
+        "timestamp": 14.523193359375,
+        "seqNumber": 1620,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tteleopPeriodic(): 0.000111s\n\tSmartDashboard.updateValues(): 0.000779s\n\trobotPeriodic(): 0.144764s\n\tLiveWindow.updateValues(): 0.000000s\n\tShuffleboard.update(): 0.000019s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.523681640625,
+        "seqNumber": 1621,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tteleopPeriodic(): 0.000111s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.5240478515625,
+        "seqNumber": 1622,
+        "line": "\tSmartDashboard.updateValues(): 0.000779s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.52459716796875,
+        "seqNumber": 1623,
+        "line": "\trobotPeriodic(): 0.144764s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.52490234375,
+        "seqNumber": 1624,
+        "line": "\tLiveWindow.updateValues(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.525146484375,
+        "seqNumber": 1625,
+        "line": "\tShuffleboard.update(): 0.000019s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.52545166015625,
+        "seqNumber": 1626,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.61920166015625,
+        "seqNumber": 1627,
+        "line": "[OdomCheck] vision=OFF fused=(2.706, 2.940, 42.5deg) odom=(2.445, 2.269, 42.5deg) delta=(0.261, 0.671, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.6572265625,
+        "seqNumber": 1628,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.6600341796875,
+        "seqNumber": 1629,
+        "line": "[Vision] Fused Pose2d: x=4.119 m, y=6.262 m, deg=42.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.81341552734375,
+        "seqNumber": 1630,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.81573486328125,
+        "seqNumber": 1631,
+        "line": "[Vision] Fused Pose2d: x=4.162 m, y=6.415 m, deg=41.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.85565185546875,
+        "seqNumber": 1632,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.8594970703125,
+        "seqNumber": 1633,
+        "line": "[Vision] Fused Pose2d: x=4.187 m, y=6.463 m, deg=41.2"
+    },
+    {
+        "timestamp": 14.87109375,
+        "seqNumber": 1634,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger: Available disk space (66 MB) is low; at 50 MB, old hoot logs will be deleted. Use Tuner X to download and delete hoot logs.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.91436767578125,
+        "seqNumber": 1635,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.91839599609375,
+        "seqNumber": 1636,
+        "line": "[Vision] Fused Pose2d: x=4.198 m, y=6.506 m, deg=41.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.9337158203125,
+        "seqNumber": 1637,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.93621826171875,
+        "seqNumber": 1638,
+        "line": "[Vision] Fused Pose2d: x=4.228 m, y=6.553 m, deg=41.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.9739990234375,
+        "seqNumber": 1639,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.976806640625,
+        "seqNumber": 1640,
+        "line": "[Vision] Fused Pose2d: x=4.245 m, y=6.591 m, deg=40.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.994384765625,
+        "seqNumber": 1641,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 14.9969482421875,
+        "seqNumber": 1642,
+        "line": "[Vision] Fused Pose2d: x=4.270 m, y=6.637 m, deg=40.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.014404296875,
+        "seqNumber": 1643,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.016845703125,
+        "seqNumber": 1644,
+        "line": "[Vision] Fused Pose2d: x=4.236 m, y=6.607 m, deg=40.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.03497314453125,
+        "seqNumber": 1645,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.03814697265625,
+        "seqNumber": 1646,
+        "line": "[Vision] Fused Pose2d: x=4.261 m, y=6.647 m, deg=40.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.055908203125,
+        "seqNumber": 1647,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.05859375,
+        "seqNumber": 1648,
+        "line": "[Vision] Fused Pose2d: x=4.288 m, y=6.690 m, deg=40.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.07421875,
+        "seqNumber": 1649,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.0780029296875,
+        "seqNumber": 1650,
+        "line": "[Vision] Fused Pose2d: x=4.286 m, y=6.696 m, deg=40.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.0950927734375,
+        "seqNumber": 1651,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.0977783203125,
+        "seqNumber": 1652,
+        "line": "[Vision] Fused Pose2d: x=4.307 m, y=6.718 m, deg=40.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.11956787109375,
+        "seqNumber": 1653,
+        "line": "[OdomCheck] vision=ON fused=(4.043, 6.124, 38.5deg) odom=(2.274, 1.893, 38.5deg) delta=(1.770, 4.231, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.12335205078125,
+        "seqNumber": 1654,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.1285400390625,
+        "seqNumber": 1655,
+        "line": "[Vision] Fused Pose2d: x=4.287 m, y=6.712 m, deg=39.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.15472412109375,
+        "seqNumber": 1656,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.16180419921875,
+        "seqNumber": 1657,
+        "line": "[Vision] Fused Pose2d: x=4.312 m, y=6.736 m, deg=39.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.174072265625,
+        "seqNumber": 1658,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.1781005859375,
+        "seqNumber": 1659,
+        "line": "[Vision] Fused Pose2d: x=4.306 m, y=6.758 m, deg=38.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.19354248046875,
+        "seqNumber": 1660,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.1959228515625,
+        "seqNumber": 1661,
+        "line": "[Vision] Fused Pose2d: x=4.311 m, y=6.779 m, deg=37.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.21331787109375,
+        "seqNumber": 1662,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.21563720703125,
+        "seqNumber": 1663,
+        "line": "[Vision] Fused Pose2d: x=4.324 m, y=6.816 m, deg=37.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.23486328125,
+        "seqNumber": 1664,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.237548828125,
+        "seqNumber": 1665,
+        "line": "[Vision] Fused Pose2d: x=4.310 m, y=6.831 m, deg=37.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.2540283203125,
+        "seqNumber": 1666,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.25732421875,
+        "seqNumber": 1667,
+        "line": "[Vision] Fused Pose2d: x=4.321 m, y=6.842 m, deg=37.2"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.2747802734375,
+        "seqNumber": 1668,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.27716064453125,
+        "seqNumber": 1669,
+        "line": "[Vision] Fused Pose2d: x=4.339 m, y=6.854 m, deg=37.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.313720703125,
+        "seqNumber": 1670,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.31658935546875,
+        "seqNumber": 1671,
+        "line": "[Vision] Fused Pose2d: x=4.349 m, y=6.870 m, deg=37.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.334716796875,
+        "seqNumber": 1672,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.33746337890625,
+        "seqNumber": 1673,
+        "line": "[Vision] Fused Pose2d: x=4.351 m, y=6.892 m, deg=37.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.35357666015625,
+        "seqNumber": 1674,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.3564453125,
+        "seqNumber": 1675,
+        "line": "[Vision] Fused Pose2d: x=4.358 m, y=6.908 m, deg=37.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.3736572265625,
+        "seqNumber": 1676,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.37603759765625,
+        "seqNumber": 1677,
+        "line": "[Vision] Fused Pose2d: x=4.375 m, y=6.942 m, deg=38.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.3939208984375,
+        "seqNumber": 1678,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.3975830078125,
+        "seqNumber": 1679,
+        "line": "[Vision] Fused Pose2d: x=4.388 m, y=6.966 m, deg=38.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.41534423828125,
+        "seqNumber": 1680,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.4173583984375,
+        "seqNumber": 1681,
+        "line": "[Vision] Fused Pose2d: x=4.376 m, y=6.970 m, deg=38.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.43402099609375,
+        "seqNumber": 1682,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.4371337890625,
+        "seqNumber": 1683,
+        "line": "[Vision] Fused Pose2d: x=4.400 m, y=7.008 m, deg=38.2"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.4552001953125,
+        "seqNumber": 1684,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.457763671875,
+        "seqNumber": 1685,
+        "line": "[Vision] Fused Pose2d: x=4.403 m, y=7.017 m, deg=38.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.483154296875,
+        "seqNumber": 1686,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.48583984375,
+        "seqNumber": 1687,
+        "line": "[Vision] Fused Pose2d: x=4.444 m, y=7.061 m, deg=38.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.51446533203125,
+        "seqNumber": 1688,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.51702880859375,
+        "seqNumber": 1689,
+        "line": "[Vision] Fused Pose2d: x=4.454 m, y=7.075 m, deg=38.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.53485107421875,
+        "seqNumber": 1690,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.53802490234375,
+        "seqNumber": 1691,
+        "line": "[Vision] Fused Pose2d: x=4.459 m, y=7.087 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.55462646484375,
+        "seqNumber": 1692,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.5570068359375,
+        "seqNumber": 1693,
+        "line": "[Vision] Fused Pose2d: x=4.488 m, y=7.119 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.5751953125,
+        "seqNumber": 1694,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.57769775390625,
+        "seqNumber": 1695,
+        "line": "[Vision] Fused Pose2d: x=4.518 m, y=7.154 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.59368896484375,
+        "seqNumber": 1696,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.59588623046875,
+        "seqNumber": 1697,
+        "line": "[Vision] Fused Pose2d: x=4.544 m, y=7.181 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6142578125,
+        "seqNumber": 1698,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6180419921875,
+        "seqNumber": 1699,
+        "line": "[Vision] Fused Pose2d: x=4.527 m, y=7.169 m, deg=38.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.64154052734375,
+        "seqNumber": 1700,
+        "line": "[OdomCheck] vision=ON fused=(4.348, 6.917, 38.6deg) odom=(1.967, 1.407, 38.6deg) delta=(2.381, 5.511, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6439208984375,
+        "seqNumber": 1701,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.646728515625,
+        "seqNumber": 1702,
+        "line": "[Vision] Fused Pose2d: x=4.570 m, y=7.217 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6734619140625,
+        "seqNumber": 1703,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6767578125,
+        "seqNumber": 1704,
+        "line": "[Vision] Fused Pose2d: x=4.596 m, y=7.246 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.69403076171875,
+        "seqNumber": 1705,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.6961669921875,
+        "seqNumber": 1706,
+        "line": "[Vision] Fused Pose2d: x=4.580 m, y=7.236 m, deg=38.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.71380615234375,
+        "seqNumber": 1707,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.71685791015625,
+        "seqNumber": 1708,
+        "line": "[Vision] Fused Pose2d: x=4.625 m, y=7.284 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.73370361328125,
+        "seqNumber": 1709,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.736083984375,
+        "seqNumber": 1710,
+        "line": "[Vision] Fused Pose2d: x=4.642 m, y=7.308 m, deg=38.5"
+    },
+    {
+        "timestamp": 15.7574462890625,
+        "seqNumber": 1711,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 1,
+        "details": "[VisionMapCheck] camera=frontcenter tag=2 mismatch err=0.83m yaw=160.4deg expected=(6.03, 8.50, -135.0deg) inferred=(6.36, 7.74, 25.4deg) interpretation=tagToRobot",
+        "location": "frc.robot.subsystems.vision.VisionSubsystem.runMapConsistencyCheck(VisionSubsystem.java:649)",
+        "callStack": "",
+        "messageType": 0
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.75872802734375,
+        "seqNumber": 1712,
+        "line": "Error at frc.robot.subsystems.vision.VisionSubsystem.runMapConsistencyCheck(VisionSubsystem.java:649): [VisionMapCheck] camera=frontcenter tag=2 mismatch err=0.83m yaw=160.4deg expected=(6.03, 8.50, -135.0deg) inferred=(6.36, 7.74, 25.4deg) interpretation=tagToRobot"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.76177978515625,
+        "seqNumber": 1713,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.7657470703125,
+        "seqNumber": 1714,
+        "line": "[Vision] Fused Pose2d: x=4.651 m, y=7.321 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.794677734375,
+        "seqNumber": 1715,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.7965087890625,
+        "seqNumber": 1716,
+        "line": "[Vision] Fused Pose2d: x=4.685 m, y=7.359 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.81427001953125,
+        "seqNumber": 1717,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.81787109375,
+        "seqNumber": 1718,
+        "line": "[Vision] Fused Pose2d: x=4.705 m, y=7.386 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.83453369140625,
+        "seqNumber": 1719,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.83709716796875,
+        "seqNumber": 1720,
+        "line": "[Vision] Fused Pose2d: x=4.717 m, y=7.402 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.853515625,
+        "seqNumber": 1721,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.855712890625,
+        "seqNumber": 1722,
+        "line": "[Vision] Fused Pose2d: x=4.743 m, y=7.430 m, deg=38.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.87396240234375,
+        "seqNumber": 1723,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.8765869140625,
+        "seqNumber": 1724,
+        "line": "[Vision] Fused Pose2d: x=4.755 m, y=7.441 m, deg=38.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.8941650390625,
+        "seqNumber": 1725,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.896484375,
+        "seqNumber": 1726,
+        "line": "[Vision] Fused Pose2d: x=4.773 m, y=7.453 m, deg=38.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.91357421875,
+        "seqNumber": 1727,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.9166259765625,
+        "seqNumber": 1728,
+        "line": "[Vision] Fused Pose2d: x=4.769 m, y=7.456 m, deg=37.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.93438720703125,
+        "seqNumber": 1729,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.93670654296875,
+        "seqNumber": 1730,
+        "line": "[Vision] Fused Pose2d: x=4.771 m, y=7.472 m, deg=36.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.97320556640625,
+        "seqNumber": 1731,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 15.9771728515625,
+        "seqNumber": 1732,
+        "line": "[Vision] Fused Pose2d: x=4.780 m, y=7.484 m, deg=35.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.00286865234375,
+        "seqNumber": 1733,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.94m(>1.50m) odom=(1.814,1.227) vision=(4.788,7.501)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.00518798828125,
+        "seqNumber": 1734,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0074462890625,
+        "seqNumber": 1735,
+        "line": "[Vision] Fused Pose2d: x=4.790 m, y=7.498 m, deg=34.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0177001953125,
+        "seqNumber": 1736,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.95m(>1.50m) odom=(1.812,1.226) vision=(4.785,7.503)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.01953125,
+        "seqNumber": 1737,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.02349853515625,
+        "seqNumber": 1738,
+        "line": "[Vision] Fused Pose2d: x=4.788 m, y=7.499 m, deg=34.2"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0396728515625,
+        "seqNumber": 1739,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.96m(>1.50m) odom=(1.810,1.225) vision=(4.793,7.516)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.04327392578125,
+        "seqNumber": 1740,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0455322265625,
+        "seqNumber": 1741,
+        "line": "[Vision] Fused Pose2d: x=4.796 m, y=7.513 m, deg=33.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.05950927734375,
+        "seqNumber": 1742,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.809,1.224) vision=(4.798,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.06292724609375,
+        "seqNumber": 1743,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.06573486328125,
+        "seqNumber": 1744,
+        "line": "[Vision] Fused Pose2d: x=4.799 m, y=7.521 m, deg=33.2"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.08135986328125,
+        "seqNumber": 1745,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.96m(>1.50m) odom=(1.807,1.223) vision=(4.787,7.514)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0830078125,
+        "seqNumber": 1746,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.0859375,
+        "seqNumber": 1747,
+        "line": "[Vision] Fused Pose2d: x=4.788 m, y=7.513 m, deg=33.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.108154296875,
+        "seqNumber": 1748,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.96m(>1.50m) odom=(1.807,1.223) vision=(4.786,7.514)"
+    },
+    {
+        "timestamp": 16.11181640625,
+        "seqNumber": 1749,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11248779296875,
+        "seqNumber": 1750,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.11285400390625,
+        "seqNumber": 1751,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.12542724609375,
+        "seqNumber": 1752,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.13385009765625,
+        "seqNumber": 1753,
+        "line": "[Vision] Fused Pose2d: x=4.786 m, y=7.514 m, deg=33.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.13995361328125,
+        "seqNumber": 1754,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 16.15045166015625,
+        "seqNumber": 1755,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tTurretSubsystem.periodic(): 0.000167s\n\tSwerveSubsystem.periodic(): 0.002838s\n\tVisionSubsystem.periodic(): 0.039790s\n\tRunCommand.execute(): 0.004026s\n\tbuttons.run(): 0.000055s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1510009765625,
+        "seqNumber": 1756,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tTurretSubsystem.periodic(): 0.000167s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1514892578125,
+        "seqNumber": 1757,
+        "line": "\tSwerveSubsystem.periodic(): 0.002838s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.15167236328125,
+        "seqNumber": 1758,
+        "line": "\tVisionSubsystem.periodic(): 0.039790s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.15203857421875,
+        "seqNumber": 1759,
+        "line": "\tRunCommand.execute(): 0.004026s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1522216796875,
+        "seqNumber": 1760,
+        "line": "\tbuttons.run(): 0.000055s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.152587890625,
+        "seqNumber": 1761,
+        "line": ""
+    },
+    {
+        "timestamp": 16.1627197265625,
+        "seqNumber": 1762,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tteleopPeriodic(): 0.000130s\n\tSmartDashboard.updateValues(): 0.001187s\n\trobotPeriodic(): 0.062291s\n\tLiveWindow.updateValues(): 0.000019s\n\tShuffleboard.update(): 0.000000s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1632080078125,
+        "seqNumber": 1763,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tteleopPeriodic(): 0.000130s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1639404296875,
+        "seqNumber": 1764,
+        "line": "\tSmartDashboard.updateValues(): 0.001187s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.164306640625,
+        "seqNumber": 1765,
+        "line": "\trobotPeriodic(): 0.062291s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.16448974609375,
+        "seqNumber": 1766,
+        "line": "\tLiveWindow.updateValues(): 0.000019s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.1651611328125,
+        "seqNumber": 1767,
+        "line": "\tShuffleboard.update(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.16534423828125,
+        "seqNumber": 1768,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.19061279296875,
+        "seqNumber": 1769,
+        "line": "[OdomCheck] vision=ON fused=(4.751, 7.460, 33.0deg) odom=(1.806, 1.223, 33.1deg) delta=(2.946, 6.238, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2144775390625,
+        "seqNumber": 1770,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.794,7.525)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2181396484375,
+        "seqNumber": 1771,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2379150390625,
+        "seqNumber": 1772,
+        "line": "[Vision] Fused Pose2d: x=4.795 m, y=7.524 m, deg=33.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2413330078125,
+        "seqNumber": 1773,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2530517578125,
+        "seqNumber": 1774,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.523)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2552490234375,
+        "seqNumber": 1775,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.2578125,
+        "seqNumber": 1776,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.26617431640625,
+        "seqNumber": 1777,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.26837158203125,
+        "seqNumber": 1778,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.27142333984375,
+        "seqNumber": 1779,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.28253173828125,
+        "seqNumber": 1780,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.521)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.28387451171875,
+        "seqNumber": 1781,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.28582763671875,
+        "seqNumber": 1782,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.521 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3050537109375,
+        "seqNumber": 1783,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.795,7.523)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.30877685546875,
+        "seqNumber": 1784,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3167724609375,
+        "seqNumber": 1785,
+        "line": "[Vision] Fused Pose2d: x=4.795 m, y=7.523 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.31988525390625,
+        "seqNumber": 1786,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.34368896484375,
+        "seqNumber": 1787,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.794,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.34710693359375,
+        "seqNumber": 1788,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3497314453125,
+        "seqNumber": 1789,
+        "line": "[Vision] Fused Pose2d: x=4.794 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3509521484375,
+        "seqNumber": 1790,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.36578369140625,
+        "seqNumber": 1791,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.796,7.523)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3724365234375,
+        "seqNumber": 1792,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.3883056640625,
+        "seqNumber": 1793,
+        "line": "[Vision] Fused Pose2d: x=4.796 m, y=7.523 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.39111328125,
+        "seqNumber": 1794,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.40625,
+        "seqNumber": 1795,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.794,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.40985107421875,
+        "seqNumber": 1796,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.41314697265625,
+        "seqNumber": 1797,
+        "line": "[Vision] Fused Pose2d: x=4.794 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.42816162109375,
+        "seqNumber": 1798,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.43035888671875,
+        "seqNumber": 1799,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.439453125,
+        "seqNumber": 1800,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.43994140625,
+        "seqNumber": 1801,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.45208740234375,
+        "seqNumber": 1802,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.795,7.523)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.4537353515625,
+        "seqNumber": 1803,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.47222900390625,
+        "seqNumber": 1804,
+        "line": "[Vision] Fused Pose2d: x=4.795 m, y=7.523 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.4747314453125,
+        "seqNumber": 1805,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.4986572265625,
+        "seqNumber": 1806,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.521)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.50421142578125,
+        "seqNumber": 1807,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.51177978515625,
+        "seqNumber": 1808,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.521 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.51568603515625,
+        "seqNumber": 1809,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.53765869140625,
+        "seqNumber": 1810,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.794,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.5438232421875,
+        "seqNumber": 1811,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.54693603515625,
+        "seqNumber": 1812,
+        "line": "[Vision] Fused Pose2d: x=4.794 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.55303955078125,
+        "seqNumber": 1813,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.57635498046875,
+        "seqNumber": 1814,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.793,7.521)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.579345703125,
+        "seqNumber": 1815,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.5843505859375,
+        "seqNumber": 1816,
+        "line": "[Vision] Fused Pose2d: x=4.793 m, y=7.521 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.58563232421875,
+        "seqNumber": 1817,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.5966796875,
+        "seqNumber": 1818,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.806,1.223) vision=(4.794,7.522)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.5986328125,
+        "seqNumber": 1819,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6016845703125,
+        "seqNumber": 1820,
+        "line": "[Vision] Fused Pose2d: x=4.794 m, y=7.522 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.61932373046875,
+        "seqNumber": 1821,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.97m(>1.50m) odom=(1.804,1.222) vision=(4.791,7.519)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6239013671875,
+        "seqNumber": 1822,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6258544921875,
+        "seqNumber": 1823,
+        "line": "[Vision] Fused Pose2d: x=4.791 m, y=7.519 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.642822265625,
+        "seqNumber": 1824,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.96m(>1.50m) odom=(1.803,1.221) vision=(4.782,7.509)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.64508056640625,
+        "seqNumber": 1825,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.64739990234375,
+        "seqNumber": 1826,
+        "line": "[Vision] Fused Pose2d: x=4.782 m, y=7.509 m, deg=33.1"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6632080078125,
+        "seqNumber": 1827,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=6.98m(>1.50m) odom=(1.796,1.216) vision=(4.794,7.519)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.66473388671875,
+        "seqNumber": 1828,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.66705322265625,
+        "seqNumber": 1829,
+        "line": "[Vision] Fused Pose2d: x=4.795 m, y=7.518 m, deg=33.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.68359375,
+        "seqNumber": 1830,
+        "line": "[OdomCheck] vision=ON fused=(4.762, 7.491, 32.8deg) odom=(1.775, 1.196, 32.8deg) delta=(2.987, 6.295, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.69024658203125,
+        "seqNumber": 1831,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.01m(>1.50m) odom=(1.784,1.205) vision=(4.805,7.528)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6929931640625,
+        "seqNumber": 1832,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.6961669921875,
+        "seqNumber": 1833,
+        "line": "[Vision] Fused Pose2d: x=4.805 m, y=7.528 m, deg=32.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.69805908203125,
+        "seqNumber": 1834,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.71563720703125,
+        "seqNumber": 1835,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.02m(>1.50m) odom=(1.775,1.196) vision=(4.810,7.527)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.7235107421875,
+        "seqNumber": 1836,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.72821044921875,
+        "seqNumber": 1837,
+        "line": "[Vision] Fused Pose2d: x=4.810 m, y=7.526 m, deg=32.9"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.7305908203125,
+        "seqNumber": 1838,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.75079345703125,
+        "seqNumber": 1839,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.02m(>1.50m) odom=(1.774,1.195) vision=(4.812,7.524)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.75640869140625,
+        "seqNumber": 1840,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.763916015625,
+        "seqNumber": 1841,
+        "line": "[Vision] Fused Pose2d: x=4.811 m, y=7.525 m, deg=32.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.76629638671875,
+        "seqNumber": 1842,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 16.775390625,
+        "seqNumber": 1843,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 1,
+        "details": "[VisionMapCheck] camera=frontcenter tag=2 mismatch err=0.85m yaw=151.3deg expected=(6.03, 8.50, -135.0deg) inferred=(6.34, 7.70, 16.3deg) interpretation=tagToRobot",
+        "location": "frc.robot.subsystems.vision.VisionSubsystem.runMapConsistencyCheck(VisionSubsystem.java:649)",
+        "callStack": "",
+        "messageType": 0
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.77630615234375,
+        "seqNumber": 1844,
+        "line": "Error at frc.robot.subsystems.vision.VisionSubsystem.runMapConsistencyCheck(VisionSubsystem.java:649): [VisionMapCheck] camera=frontcenter tag=2 mismatch err=0.85m yaw=151.3deg expected=(6.03, 8.50, -135.0deg) inferred=(6.34, 7.70, 16.3deg) interpretation=tagToRobot"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.7869873046875,
+        "seqNumber": 1845,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.04m(>1.50m) odom=(1.766,1.190) vision=(4.812,7.539)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.7884521484375,
+        "seqNumber": 1846,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.79046630859375,
+        "seqNumber": 1847,
+        "line": "[Vision] Fused Pose2d: x=4.812 m, y=7.539 m, deg=32.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.794677734375,
+        "seqNumber": 1848,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.81396484375,
+        "seqNumber": 1849,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.06m(>1.50m) odom=(1.763,1.189) vision=(4.825,7.554)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.82318115234375,
+        "seqNumber": 1850,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.82891845703125,
+        "seqNumber": 1851,
+        "line": "[Vision] Fused Pose2d: x=4.824 m, y=7.555 m, deg=32.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.83026123046875,
+        "seqNumber": 1852,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.84539794921875,
+        "seqNumber": 1853,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.07m(>1.50m) odom=(1.758,1.189) vision=(4.830,7.555)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.8468017578125,
+        "seqNumber": 1854,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.84832763671875,
+        "seqNumber": 1855,
+        "line": "[Vision] Fused Pose2d: x=4.829 m, y=7.556 m, deg=33.0"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.85943603515625,
+        "seqNumber": 1856,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.06m(>1.50m) odom=(1.755,1.188) vision=(4.824,7.544)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.864501953125,
+        "seqNumber": 1857,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.8663330078125,
+        "seqNumber": 1858,
+        "line": "[Vision] Fused Pose2d: x=4.823 m, y=7.545 m, deg=33.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.87713623046875,
+        "seqNumber": 1859,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.07m(>1.50m) odom=(1.751,1.188) vision=(4.834,7.551)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.878662109375,
+        "seqNumber": 1860,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.88226318359375,
+        "seqNumber": 1861,
+        "line": "[Vision] Fused Pose2d: x=4.833 m, y=7.552 m, deg=33.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.914794921875,
+        "seqNumber": 1862,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.09m(>1.50m) odom=(1.739,1.189) vision=(4.845,7.560)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.92828369140625,
+        "seqNumber": 1863,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.929931640625,
+        "seqNumber": 1864,
+        "line": "[Vision] Fused Pose2d: x=4.845 m, y=7.561 m, deg=33.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.95147705078125,
+        "seqNumber": 1865,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.10m(>1.50m) odom=(1.718,1.191) vision=(4.871,7.552)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.95379638671875,
+        "seqNumber": 1866,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.958740234375,
+        "seqNumber": 1867,
+        "line": "[Vision] Fused Pose2d: x=4.869 m, y=7.554 m, deg=34.2"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.97052001953125,
+        "seqNumber": 1868,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.10m(>1.50m) odom=(1.711,1.193) vision=(4.881,7.547)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.97283935546875,
+        "seqNumber": 1869,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 16.9739990234375,
+        "seqNumber": 1870,
+        "line": "[Vision] Fused Pose2d: x=4.881 m, y=7.548 m, deg=34.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.01507568359375,
+        "seqNumber": 1871,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.09m(>1.50m) odom=(1.706,1.194) vision=(4.892,7.531)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.02044677734375,
+        "seqNumber": 1872,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.02349853515625,
+        "seqNumber": 1873,
+        "line": "[Vision] Fused Pose2d: x=4.892 m, y=7.531 m, deg=34.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.03515625,
+        "seqNumber": 1874,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.11m(>1.50m) odom=(1.702,1.195) vision=(4.910,7.542)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.03936767578125,
+        "seqNumber": 1875,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.042724609375,
+        "seqNumber": 1876,
+        "line": "[Vision] Fused Pose2d: x=4.910 m, y=7.542 m, deg=34.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.09466552734375,
+        "seqNumber": 1877,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.12m(>1.50m) odom=(1.674,1.204) vision=(4.925,7.537)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.10003662109375,
+        "seqNumber": 1878,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.1007080078125,
+        "seqNumber": 1879,
+        "line": "[Vision] Fused Pose2d: x=4.925 m, y=7.537 m, deg=34.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.134033203125,
+        "seqNumber": 1880,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.12m(>1.50m) odom=(1.642,1.216) vision=(4.955,7.521)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.13726806640625,
+        "seqNumber": 1881,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.13812255859375,
+        "seqNumber": 1882,
+        "line": "[Vision] Fused Pose2d: x=4.955 m, y=7.521 m, deg=34.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.15460205078125,
+        "seqNumber": 1883,
+        "line": "[VisionFilter] REJECTED tag=[2] dist=7.13m(>1.50m) odom=(1.623,1.225) vision=(4.978,7.513)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.15570068359375,
+        "seqNumber": 1884,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.15704345703125,
+        "seqNumber": 1885,
+        "line": "[Vision] Fused Pose2d: x=4.978 m, y=7.513 m, deg=34.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.1748046875,
+        "seqNumber": 1886,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.24m(>1.50m) odom=(1.603,1.236) vision=(4.601,7.826)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.19512939453125,
+        "seqNumber": 1887,
+        "line": "[OdomCheck] vision=OFF fused=(4.786, 7.607, 34.7deg) odom=(1.567, 1.276, 34.7deg) delta=(3.219, 6.331, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.1993408203125,
+        "seqNumber": 1888,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.23m(>1.50m) odom=(1.589,1.249) vision=(4.617,7.817)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.21533203125,
+        "seqNumber": 1889,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.23m(>1.50m) odom=(1.589,1.249) vision=(4.617,7.817)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.23614501953125,
+        "seqNumber": 1890,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.21m(>1.50m) odom=(1.582,1.258) vision=(4.634,7.786)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.25457763671875,
+        "seqNumber": 1891,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.20m(>1.50m) odom=(1.557,1.288) vision=(4.650,7.786)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.2747802734375,
+        "seqNumber": 1892,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.17m(>1.50m) odom=(1.540,1.310) vision=(4.668,7.760)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.2945556640625,
+        "seqNumber": 1893,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.16m(>1.50m) odom=(1.536,1.316) vision=(4.680,7.750)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.2967529296875,
+        "seqNumber": 1894,
+        "line": "[SetToTag] initialized, searching for tag..."
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.3023681640625,
+        "seqNumber": 1895,
+        "line": "[SetToTag] locked tagId=2 src=limelight-fc ta=1.93 target=(5.67, 8.15, 45.00 deg)"
+    },
+    {
+        "timestamp": 17.31134033203125,
+        "seqNumber": 1896,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "Loop time of 0.02s overrun\n",
+        "location": "edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.31231689453125,
+        "seqNumber": 1897,
+        "line": "Warning at edu.wpi.first.wpilibj.IterativeRobotBase.printLoopOverrunMessage(IterativeRobotBase.java:436): Loop time of 0.02s overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.31256103515625,
+        "seqNumber": 1898,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.336669921875,
+        "seqNumber": 1899,
+        "line": "[SetToTag] tag=2 age=0.00s src=limelight-fc ta=1.93 err=(4.18, 6.78 | 7.96 m, 9.69 deg) poseSrc=odom fO=7.09 fOOk=false inField=true stepOk=true cmd=(1.50*, 1.50*, -2.3689) meas=(-0.05, 1.02, 0.002) atTrans=false atHead=false"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.3414306640625,
+        "seqNumber": 1900,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "timestamp": 17.35064697265625,
+        "seqNumber": 1901,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tTurretSubsystem.periodic(): 0.000167s\n\tRunCommand.end(true): 0.001873s\n\tSwerveSubsystem.periodic(): 0.000668s\n\tVisionSubsystem.periodic(): 0.003432s\n\tbuttons.run(): 0.000037s\n\tSetToTagCommand.initialize(): 0.000297s\n\tSetToTagCommand.execute(): 0.044409s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.35272216796875,
+        "seqNumber": 1902,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tTurretSubsystem.periodic(): 0.000167s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.35308837890625,
+        "seqNumber": 1903,
+        "line": "\tRunCommand.end(true): 0.001873s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.354736328125,
+        "seqNumber": 1904,
+        "line": "\tSwerveSubsystem.periodic(): 0.000668s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.35528564453125,
+        "seqNumber": 1905,
+        "line": "\tVisionSubsystem.periodic(): 0.003432s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.355712890625,
+        "seqNumber": 1906,
+        "line": "\tbuttons.run(): 0.000037s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.35614013671875,
+        "seqNumber": 1907,
+        "line": "\tSetToTagCommand.initialize(): 0.000297s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.3563232421875,
+        "seqNumber": 1908,
+        "line": "\tSetToTagCommand.execute(): 0.044409s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.35650634765625,
+        "seqNumber": 1909,
+        "line": ""
+    },
+    {
+        "timestamp": 17.35943603515625,
+        "seqNumber": 1910,
+        "numOccur": 1,
+        "errorCode": 1,
+        "flags": 0,
+        "details": "\tteleopPeriodic(): 0.000092s\n\tSmartDashboard.updateValues(): 0.000557s\n\trobotPeriodic(): 0.062421s\n\tLiveWindow.updateValues(): 0.000018s\n\tShuffleboard.update(): 0.000000s\n",
+        "location": "edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62)",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.36181640625,
+        "seqNumber": 1911,
+        "line": "Warning at edu.wpi.first.wpilibj.Tracer.lambda$printEpochs$0(Tracer.java:62): \tteleopPeriodic(): 0.000092s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.36236572265625,
+        "seqNumber": 1912,
+        "line": "\tSmartDashboard.updateValues(): 0.000557s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.36260986328125,
+        "seqNumber": 1913,
+        "line": "\trobotPeriodic(): 0.062421s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.36370849609375,
+        "seqNumber": 1914,
+        "line": "\tLiveWindow.updateValues(): 0.000018s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.3648681640625,
+        "seqNumber": 1915,
+        "line": "\tShuffleboard.update(): 0.000000s"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.365234375,
+        "seqNumber": 1916,
+        "line": ""
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.4132080078125,
+        "seqNumber": 1917,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.09m(>1.50m) odom=(1.475,1.392) vision=(4.711,7.704)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.41595458984375,
+        "seqNumber": 1918,
+        "line": "CommandScheduler loop overrun"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.42889404296875,
+        "seqNumber": 1919,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.04m(>1.50m) odom=(1.431,1.449) vision=(4.746,7.654)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.4410400390625,
+        "seqNumber": 1920,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.04m(>1.50m) odom=(1.431,1.449) vision=(4.746,7.654)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.45977783203125,
+        "seqNumber": 1921,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.02m(>1.50m) odom=(1.422,1.461) vision=(4.754,7.640)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.4771728515625,
+        "seqNumber": 1922,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.00m(>1.50m) odom=(1.408,1.485) vision=(4.753,7.629)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.495361328125,
+        "seqNumber": 1923,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=7.00m(>1.50m) odom=(1.408,1.485) vision=(4.753,7.629)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.51568603515625,
+        "seqNumber": 1924,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=6.98m(>1.50m) odom=(1.406,1.491) vision=(4.745,7.626)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.53570556640625,
+        "seqNumber": 1925,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=6.98m(>1.50m) odom=(1.406,1.491) vision=(4.745,7.626)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.55596923828125,
+        "seqNumber": 1926,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=6.96m(>1.50m) odom=(1.406,1.504) vision=(4.752,7.606)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.57403564453125,
+        "seqNumber": 1927,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=6.92m(>1.50m) odom=(1.417,1.520) vision=(4.746,7.590)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.5946044921875,
+        "seqNumber": 1928,
+        "line": "[VisionFilter] REJECTED tag=[2, 1] dist=6.87m(>1.50m) odom=(1.434,1.541) vision=(4.737,7.569)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.69403076171875,
+        "seqNumber": 1929,
+        "line": "[OdomCheck] vision=OFF fused=(4.779, 8.046, 46.3deg) odom=(1.563, 1.713, 46.3deg) delta=(3.216, 6.333, 0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.81781005859375,
+        "seqNumber": 1930,
+        "line": "[SetToTag] tag=2 age=0.52s src=limelight-fc ta=1.21 err=(3.93, 6.26 | 7.39 m, -1.30 deg) poseSrc=odom fO=7.09 fOOk=false inField=true stepOk=true cmd=(1.50*, 1.50*, 0.1175) meas=(1.85, -0.04, -0.009) atTrans=false atHead=false"
+    },
+    {
+        "timestamp": 17.88665771484375,
+        "seqNumber": 1931,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger: Available disk space (65 MB) is low; at 50 MB, old hoot logs will be deleted. Use Tuner X to download and delete hoot logs.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.8944091796875,
+        "seqNumber": 1932,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.895751953125,
+        "seqNumber": 1933,
+        "line": "[Vision] Fused Pose2d: x=4.844 m, y=6.767 m, deg=46.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.95513916015625,
+        "seqNumber": 1934,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.95660400390625,
+        "seqNumber": 1935,
+        "line": "[Vision] Fused Pose2d: x=4.792 m, y=6.721 m, deg=46.3"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.99395751953125,
+        "seqNumber": 1936,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 17.9954833984375,
+        "seqNumber": 1937,
+        "line": "[Vision] Fused Pose2d: x=4.694 m, y=6.615 m, deg=46.4"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.01434326171875,
+        "seqNumber": 1938,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.01556396484375,
+        "seqNumber": 1939,
+        "line": "[Vision] Fused Pose2d: x=4.654 m, y=6.574 m, deg=46.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.0372314453125,
+        "seqNumber": 1940,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.03863525390625,
+        "seqNumber": 1941,
+        "line": "[Vision] Fused Pose2d: x=4.643 m, y=6.569 m, deg=46.5"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.0567626953125,
+        "seqNumber": 1942,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.05804443359375,
+        "seqNumber": 1943,
+        "line": "[Vision] Fused Pose2d: x=4.591 m, y=6.509 m, deg=46.6"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.093017578125,
+        "seqNumber": 1944,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.09405517578125,
+        "seqNumber": 1945,
+        "line": "[Vision] Fused Pose2d: x=4.551 m, y=6.470 m, deg=46.7"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.11376953125,
+        "seqNumber": 1946,
+        "line": "[Vision] ????: [2]"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.1156005859375,
+        "seqNumber": 1947,
+        "line": "[Vision] Fused Pose2d: x=4.528 m, y=6.453 m, deg=46.8"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.1953125,
+        "seqNumber": 1948,
+        "line": "[OdomCheck] vision=OFF fused=(4.920, 6.975, 46.7deg) odom=(2.338, 2.495, 46.7deg) delta=(2.582, 4.480, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.33837890625,
+        "seqNumber": 1949,
+        "line": "[SetToTag] tag=2 age=1.04s src=limelight-fc ta=0.39 err=(3.12, 5.44 | 6.28 m, -0.79 deg) poseSrc=odom fO=5.22 fOOk=false inField=true stepOk=true cmd=(1.50*, 1.50*, 0.0000) meas=(2.18, -0.06, 0.053) atTrans=false atHead=true"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.71539306640625,
+        "seqNumber": 1950,
+        "line": "[OdomCheck] vision=OFF fused=(5.727, 7.766, 45.4deg) odom=(3.146, 3.287, 45.4deg) delta=(2.582, 4.479, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 18.837890625,
+        "seqNumber": 1951,
+        "line": "[SetToTag] tag=2 age=1.54s src=limelight-fc ta=0.39 err=(2.35, 4.68 | 5.24 m, -0.15 deg) poseSrc=odom fO=5.22 fOOk=false inField=true stepOk=true cmd=(1.50*, 1.50*, 0.0000) meas=(2.18, -0.03, -0.021) atTrans=false atHead=true"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 19.2333984375,
+        "seqNumber": 1952,
+        "line": "[OdomCheck] vision=OFF fused=(6.551, 8.570, 45.1deg) odom=(3.930, 4.053, 45.2deg) delta=(2.621, 4.517, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 19.3572998046875,
+        "seqNumber": 1953,
+        "line": "[SetToTag] tag=2 age=2.06s src=limelight-fc ta=0.39 err=(1.53, 3.89 | 4.18 m, -0.14 deg) poseSrc=odom fO=5.20 fOOk=false inField=false stepOk=true cmd=(1.50*, 1.50*, 0.0000) meas=(2.18, -0.03, -0.041) atTrans=false atHead=true"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 19.73468017578125,
+        "seqNumber": 1954,
+        "line": "[OdomCheck] vision=OFF fused=(7.345, 9.346, 44.8deg) odom=(4.724, 4.828, 44.8deg) delta=(2.621, 4.518, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 19.8778076171875,
+        "seqNumber": 1955,
+        "line": "[SetToTag] tag=2 age=2.57s src=limelight-fc ta=0.39 err=(0.73, 3.11 | 3.19 m, 0.33 deg) poseSrc=odom fO=5.22 fOOk=false inField=false stepOk=false cmd=(1.50*, 1.50*, 0.0000) meas=(2.17, -0.03, -0.039) atTrans=false atHead=true"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 20.2557373046875,
+        "seqNumber": 1956,
+        "line": "[OdomCheck] vision=OFF fused=(8.079, 10.126, 44.1deg) odom=(5.467, 5.624, 44.1deg) delta=(2.612, 4.502, -0.0deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 20.37750244140625,
+        "seqNumber": 1957,
+        "line": "[SetToTag] tag=2 age=3.08s src=limelight-fc ta=0.39 err=(0.13, 2.35 | 2.35 m, 1.91 deg) poseSrc=odom fO=5.21 fOOk=false inField=false stepOk=false cmd=(0.32, 1.50*, -0.1661) meas=(1.58, 0.83, -0.107) atTrans=false atHead=false"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 20.77581787109375,
+        "seqNumber": 1958,
+        "line": "[OdomCheck] vision=OFF fused=(8.264, 10.932, 46.1deg) odom=(5.644, 6.414, 46.2deg) delta=(2.620, 4.518, -0.1deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 20.895751953125,
+        "seqNumber": 1959,
+        "line": "[SetToTag] tag=2 age=3.60s src=limelight-fc ta=0.39 err=(0.02, 1.55 | 1.55 m, -1.32 deg) poseSrc=odom fO=5.22 fOOk=false inField=false stepOk=false cmd=(0.03, 1.50*, 0.1101) meas=(1.17, 1.00, -0.004) atTrans=false atHead=false"
+    },
+    {
+        "timestamp": 20.9031982421875,
+        "seqNumber": 1960,
+        "numOccur": 1,
+        "errorCode": 0,
+        "flags": 0,
+        "details": "[phoenix] Signal Logger: Available disk space (65 MB) is low; at 50 MB, old hoot logs will be deleted. Use Tuner X to download and delete hoot logs.",
+        "location": "",
+        "callStack": "",
+        "messageType": 1
+    },
+    {
+        "messageType": 2,
+        "timestamp": 21.2735595703125,
+        "seqNumber": 1961,
+        "line": "[OdomCheck] vision=OFF fused=(8.294, 11.675, 46.3deg) odom=(5.674, 7.158, 46.4deg) delta=(2.620, 4.518, -0.1deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 21.3538818359375,
+        "seqNumber": 1962,
+        "line": "[SetToTag] ended lockedTag=2 src=limelight-fc ta=0.39 lockAge=4.06s interrupted=true"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 21.795166015625,
+        "seqNumber": 1963,
+        "line": "[OdomCheck] vision=OFF fused=(8.296, 11.991, 44.0deg) odom=(5.676, 7.473, 44.0deg) delta=(2.620, 4.518, -0.0deg)"
+    }
+]

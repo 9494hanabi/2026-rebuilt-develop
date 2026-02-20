@@ -1,18 +1,13 @@
 package frc.robot.bindings;
 
-import static frc.robot.lib.util.Constants.VisionConstants.kLimelightBTableName;
-
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotState;
-import frc.robot.commands.debug.vision.AbsoluteDriveOKCommand;
-import frc.robot.commands.debug.vision.ObservationOKCommand;
-import frc.robot.commands.debug.vision.RelativeDriveOKCommand;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
-import frc.robot.commands.debug.odmetry.SetDriveToZeroCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 import frc.robot.commands.debug.odmetry.SetToTagCommand;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
-import frc.robot.lib.util.Constants.VisionConstants;
+import frc.robot.commands.debug.safety.ClearOdometryAndLockStopCommand;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -39,49 +34,29 @@ public class DriveBindings {
         this.driveAngularVelocity = driveAngularVelocity;
     }
 
-    /**
-     * ドライブ/ビジョン関連のバインディングを設定
-     * 本番時もこのメソッドを呼び出す
-     */
     public void configure() {
-        // B: AprilTagへ相対ドライブ
+        controller.a().onTrue(Commands.print("[DriveBindings] A pressed -> SetDriveHorizonCommand"));
+        controller.x().onTrue(Commands.print("[DriveBindings] X pressed -> SetZeroCommand"));
+
         controller.b().whileTrue(
-            new RelativeDriveOKCommand(drivebase, robotState)
-        );
-
-        // A: タグが見えているなら後ろへドライブ
-        controller.a().whileTrue(
-            new ObservationOKCommand(drivebase)
-        );
-
-        // Y: 角度を0へ、
-        controller.y().whileTrue(
             new SetThetaZeroCommand(drivebase, robotState)
         );
 
-        // X:AprilTagに絶対ドライブ
+        controller.a().whileTrue(
+            new SetDriveHorizonCommand(drivebase, robotState)
+        );
+
+        controller.y().whileTrue(
+            new SetToTagCommand(drivebase, robotState)
+        );
+
         controller.x().whileTrue(
-            new AbsoluteDriveOKCommand(drivebase, robotState)
-        );
-
-        // 上矢印（POV Up）: フィールド基準で水平移動
-        controller.povUp().whileTrue(
-            new SetDriveHorizonCommand(drivebase)
-        );
-
-        // 下矢印 : フィールド基準で0へドライブ
-        controller.povDown().whileTrue(
-            new SetDriveToZeroCommand(drivebase, robotState)
-        );
-
-        // 右矢印 : 角度も含めて0へ
-        controller.povRight().whileTrue(
             new SetZeroCommand(drivebase, robotState)
         );
 
-        // 左矢印 : タグを探索→ロック→頂点座標へドライブ
-        controller.povLeft().whileTrue(
-            new SetToTagCommand(drivebase, robotState)
+        // 強制停止コマンド
+        controller.leftTrigger().onTrue(
+            new ClearOdometryAndLockStopCommand(drivebase)
         );
     }
 }

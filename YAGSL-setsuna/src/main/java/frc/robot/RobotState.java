@@ -1,8 +1,8 @@
 package frc.robot;
 
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
+import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.util.ConcurrentTimeInterpolatableBuffer;
-import frc.robot.lib.util.Constants.FieldConstants;
 import frc.robot.lib.util.MathHelpers;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -150,11 +150,64 @@ public class RobotState {
 
     // ポーズサンプルのadder
     public void addOdometryMeasurement(double timestamp, Pose2d pose) {
+        if (!isFinitePose(pose)) {
+            return;
+        }
         fieldToRobot.addSample(timestamp, pose);
     }
 
     public void addOdometryOnlyMeasurement(double timestamp, Pose2d pose) {
+        if (!isFinitePose(pose)) {
+            return;
+        }
         fieldToRobotOdom.addSample(timestamp, pose);
+    }
+
+    private static boolean isFinitePose(Pose2d pose) {
+        if (pose == null) {
+            return false;
+        }
+        return Double.isFinite(pose.getX())
+                && Double.isFinite(pose.getY())
+                && Double.isFinite(pose.getRotation().getRadians());
+    }
+
+    /**
+     * オドメトリ関連の履歴を完全消去し、指定姿勢を初期値として再投入する。
+     */
+    public void resetOdometryState(double timestamp, Pose2d pose) {
+        Pose2d resetPose = pose == null ? MathHelpers.kPose2dZero : pose;
+
+        fieldToRobot.clear();
+        fieldToRobotOdom.clear();
+        driveYawAngularVelocity.clear();
+        driveRollAngularVelocity.clear();
+        drivePitchAngularVelocity.clear();
+        drivePitchRads.clear();
+        driveRollRads.clear();
+        accelX.clear();
+        accelY.clear();
+
+        fieldToRobot.addSample(timestamp, resetPose);
+        fieldToRobotOdom.addSample(timestamp, resetPose);
+        driveYawAngularVelocity.addSample(timestamp, 0.0);
+        driveRollAngularVelocity.addSample(timestamp, 0.0);
+        drivePitchAngularVelocity.addSample(timestamp, 0.0);
+        drivePitchRads.addSample(timestamp, 0.0);
+        driveRollRads.addSample(timestamp, 0.0);
+        accelX.addSample(timestamp, 0.0);
+        accelY.addSample(timestamp, 0.0);
+
+        measuredRobotRelativeChassisSpeeds.set(new ChassisSpeeds());
+        measuredFieldRelativeChassisSpeeds.set(new ChassisSpeeds());
+        desiredRobotRelativeChassisSpeeds.set(new ChassisSpeeds());
+        desiredFieldRelativeChassisSpeeds.set(new ChassisSpeeds());
+        fusedFieldRelativeChassisSpeeds.set(new ChassisSpeeds());
+
+        trajectoryTargetPose = Optional.empty();
+        trajectoryCurrentPose = Optional.empty();
+        lastUsedMegatagTimestamp = timestamp;
+        lastUsedMegatagPose = resetPose;
     }
 
     // イテレーション(periodicなど)のカウンタ
@@ -203,6 +256,10 @@ public class RobotState {
 
     public Map.Entry<Double, Pose2d> getLatestFieldToRobot() {
         return fieldToRobot.getLatest();
+    }
+
+    public Map.Entry<Double, Pose2d> getLatestFieldToRobotOdom() {
+        return fieldToRobotOdom.getLatest();
     }
 
     // 現在の速度から短時間先の姿勢を予測する。

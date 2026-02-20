@@ -1,9 +1,8 @@
 package frc.robot.commands.debug.vision;
 
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.lib.constants.VisionConstants;
 import frc.robot.lib.limelight.VisionTargetSelector;
-import frc.robot.lib.util.Constants.VisionConstants;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
