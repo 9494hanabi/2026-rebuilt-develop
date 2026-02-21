@@ -4,7 +4,6 @@ import static frc.robot.lib.constants.SemiAutoConstants.omegaMaximum;
 import static frc.robot.lib.constants.SemiAutoConstants.velocityMaximum;
 import static frc.robot.lib.constants.PIDConstants.*;
 import static frc.robot.lib.constants.LogConstants.*;
-
 import frc.robot.lib.constants.commandconstants.SetToTagCommandConstants;
 import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.constants.VisionConstants;
@@ -12,9 +11,6 @@ import frc.robot.lib.constants.VisionConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,9 +22,9 @@ import frc.robot.lib.limelight.VisionTargetSelector;
 import frc.robot.lib.util.OdomHeadingController;
 
 public class SetToTagCommand extends Command {
+
     private static final double kSaturationEpsilon = 1e-9;
     private static final boolean kEnableVerboseStatusLog = false;
-    private static final double kTagStandoffDistanceMeters = 0.50;
     private static final double kFusedOdomTranslationMismatchMeter = 0.75;
     private static final double kFieldBoundaryMarginMeter = 0.25;
     private static final double kFusedUseBoundaryMarginMeter = 1.0;
@@ -73,7 +69,7 @@ public class SetToTagCommand extends Command {
         translationPidY.setIntegratorRange(-kTranslationIntegralContributionLimit, kTranslationIntegralContributionLimit);
         headingPid.disableContinuousInput();
         headingPid.setTolerance(kHeadingToleranceRad, kHeadingVelocityToleranceRadPerSec);
-        headingPid.setIntegratorRange(-kTranslationIntegralContributionLimit, kTranslationIntegralContributionLimit);
+        headingPid.setIntegratorRange(-kHeadingIntegralContributionLimit, kHeadingIntegralContributionLimit);
         headingControl = new OdomHeadingController(headingPid, omegaMaximum);
     }
 
@@ -93,7 +89,7 @@ public class SetToTagCommand extends Command {
         lastWarningLogSec = Double.NEGATIVE_INFINITY;
         lastAcceptedFusedTranslationPose = null;
         lastAcceptedFusedTimestampSec = Double.NaN;
-        System.out.println("[SetToTag] initialized, searching for tag...");
+        System.out.println("[SetToTag] INITIALIZED: searching for tag...");
     }
 
     @Override
@@ -102,6 +98,7 @@ public class SetToTagCommand extends Command {
 
         // フェーズ1: タグ未ロック → 探索
         if (lockedTagId < 0) {
+            // 最有力の観測を取得
             var best = targetSelector.selectBestObservation();
             if (best.isEmpty()) {
                 if (nowSec - lastSearchLogSec >= kSearchLogPeriodSec) {
@@ -115,10 +112,10 @@ public class SetToTagCommand extends Command {
             var bestObservation = best.get();
             int tagId = bestObservation.tagId();
             Pose2d resolvedTarget = resolveTargetPose(tagId);
+
             if (resolvedTarget == null) {
-                System.out.printf(
-                        "[SetToTag] tagId=%d has no valid target, ignoring (src=%s ta=%.2f)%n",
-                        tagId,
+                System.out.printf("[SetToTag] !!TAG ID=%d HAS NO VALID TARGET IGNORING!!%n", tagId);
+                System.out.printf("            (src=%s ta=%.2f)%n",
                         bestObservation.tableName(),
                         bestObservation.area());
                 swerve.driveFieldOriented(new ChassisSpeeds());
@@ -130,12 +127,16 @@ public class SetToTagCommand extends Command {
             lockedSourceTable = bestObservation.tableName();
             lockedSourceArea = bestObservation.area();
             lockAcquiredTimestampSec = nowSec;
+
+            // exclusivetag -> そのタグを含む観測以外を無視
             state.setExclusiveTag(lockedTagId);
+
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
-            System.out.printf(
-                    "[SetToTag] locked tagId=%d src=%s ta=%.2f target=(%.2f, %.2f, %.2f deg)%n",
+
+            System.out.println("[SetToTag] TAG LOCKED ");
+            System.out.printf(             "tagId=%d src=%s ta=%.2f target=(%.2f, %.2f, %.2f deg)%n",
                     tagId,
                     lockedSourceTable,
                     lockedSourceArea,
@@ -144,7 +145,7 @@ public class SetToTagCommand extends Command {
                     target.getRotation().getDegrees());
         }
 
-        // フェーズ2: タグロック済み → ドライブ
+        // フェーズ2: タグロック済み -> ドライブ
         var currentObservation = targetSelector.observationForTag(lockedTagId);
         if (currentObservation.isPresent()) {
             lockedSourceTable = currentObservation.get().tableName();
@@ -153,10 +154,13 @@ public class SetToTagCommand extends Command {
 
         var latest = state.getLatestFieldToRobot();
         var latestOdom = state.getLatestFieldToRobotOdom();
+
+        // nullチェック
         if (latest == null || latestOdom == null) {
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
-                System.out.println("[SetToTag] pose is null, skipping");
+                System.out.println("[SetToTag] !!POSE IS NULL!!");
+                System.out.println("           skipping");
             }
             translationPidX.reset();
             translationPidY.reset();
@@ -165,44 +169,81 @@ public class SetToTagCommand extends Command {
             return;
         }
 
+        // Vision融合済み観測
         double fusedX = latest.getValue().getX();
         double fusedY = latest.getValue().getY();
         double fusedHeadingRad = latest.getValue().getRotation().getRadians();
+
+        // Vision未混入観測
         double odomX = latestOdom.getValue().getX();
         double odomY = latestOdom.getValue().getY();
         double odomHeadingRad = latestOdom.getValue().getRotation().getRadians();
+
+        // デルタを計算
         double fusedOdomTranslationDelta = Math.hypot(fusedX - odomX, fusedY - odomY);
+
+        // 誤差許容範囲 フラグ
         boolean fusedOdomTranslationConsistent =
                 fusedOdomTranslationDelta <= kFusedOdomTranslationMismatchMeter;
+
+        // フィールド外ポーズ フラグ
         boolean fusedInField = isInsideFieldWithMargin(fusedX, fusedY);
+
+        // フィールド + マージン 外ポーズ フラグ
         boolean fusedUseCandidateInField =
                 isInsideFieldWithCustomMargin(
                         fusedX, fusedY, kFusedUseBoundaryMarginMeter);
+
+        // ポーズジャンプ受け入れ フラグ
         boolean fusedStepAccepted = false;
+
+        // 融合ポーズが有限の値か判定
         if (fusedUseCandidateInField
                 && Double.isFinite(fusedX)
                 && Double.isFinite(fusedY)
                 && Double.isFinite(nowSec)) {
+            // 前回採用が無ければ無条件受け入れ
             if (lastAcceptedFusedTranslationPose == null || !Double.isFinite(lastAcceptedFusedTimestampSec)) {
                 fusedStepAccepted = true;
             } else {
                 double dtSec = nowSec - lastAcceptedFusedTimestampSec;
+
+                // dtが有限の値か判定
                 if (Double.isFinite(dtSec) && dtSec > 0.0) {
+
+                    // 受け入れる最大のポーズジャンプ幅を定義
+                    // = 基礎値 + 前回採用から離れるほど大きくなる比例値
                     double maxAllowedStepMeter = kFusedStepSlackMeter + kMaxFusedStepMetersPerSec * dtSec;
+
+                    // ジャンプ幅を計算
                     double fusedStepMeter = Math.hypot(
                             fusedX - lastAcceptedFusedTranslationPose.getX(),
                             fusedY - lastAcceptedFusedTranslationPose.getY());
+
+                    // ジャンプ受け入れフラグ
                     fusedStepAccepted = Double.isFinite(fusedStepMeter) && fusedStepMeter <= maxAllowedStepMeter;
                 } else {
-                    fusedStepAccepted = true;
+                    // dtSec が NaN / +Infinity / -Infinity
+                    // dtSec == 0.0
+                    // dtSec < 0.0（時間が逆行した状態）
+                    // などの場合。
+                    fusedStepAccepted = false;
                 }
             }
         }
 
+        // 融合値受け入れフラグ
+        //
+        // 予測値が
+        //      フィールド + マージン 内 &&
+        //      ポーズジャンプ許容範囲内 &&
+        //      オドメトリとの誤差が許容範囲内
+        //
         boolean translationFromFused =
                 fusedUseCandidateInField
                         && fusedStepAccepted
                         && fusedOdomTranslationConsistent;
+
         if (translationFromFused) {
             lastAcceptedFusedTranslationPose = latest.getValue();
             lastAcceptedFusedTimestampSec = nowSec;
@@ -213,21 +254,22 @@ public class SetToTagCommand extends Command {
         double currentY = translationFromFused ? fusedY : odomY;
         double currentHeadingRad = odomHeadingRad;
 
-        if (!Double.isFinite(currentX)
+        // オドメトリが有限の値か判定
+        if (target == null
+                || !Double.isFinite(currentX)
                 || !Double.isFinite(currentY)
                 || !Double.isFinite(fusedHeadingRad)
                 || !Double.isFinite(odomX)
                 || !Double.isFinite(odomY)
                 || !Double.isFinite(currentHeadingRad)
-                || target == null
                 || !Double.isFinite(target.getX())
                 || !Double.isFinite(target.getY())
                 || !Double.isFinite(target.getRotation().getRadians())) {
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
-                System.out.printf(
-                        "[SetToTag] invalid pose/target -> stop. current=(%s, %s, %s) target=%s%n",
-                        currentX, currentY, currentHeadingRad, target);
+                System.out.println("[SetToTag] !!INVALID!!");
+                System.out.printf ("           current=(%s, %s, %s) target=%s\n", currentX, currentY, currentHeadingRad, target);
+                System.out.println("[SetToTag] ROBOT STOPPED");
             }
             translationPidX.reset();
             translationPidY.reset();
@@ -255,7 +297,10 @@ public class SetToTagCommand extends Command {
         if (maybeHeadingResult.isEmpty()) {
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
-                System.out.println("[SetToTag] invalid heading control input -> stop");
+                System.out.println("[SetToTag] !!INVALID!!");
+                System.out.println("           heading control input = empty");
+                System.out.println("[SetToTag] ROBOT STOPPED");
+
             }
             translationPidX.reset();
             translationPidY.reset();
@@ -269,6 +314,7 @@ public class SetToTagCommand extends Command {
         boolean atTranslation = translationPidX.atSetpoint() && translationPidY.atSetpoint();
         boolean atHeading = headingResult.atSetpoint();
         if (atTranslation) {
+            System.out.println("[SetToTag] ROBOT AT SETPOINT");
             translationX = 0.0;
             translationY = 0.0;
         }
@@ -276,13 +322,15 @@ public class SetToTagCommand extends Command {
         if (!Double.isFinite(translationX) || !Double.isFinite(translationY) || !Double.isFinite(omega)) {
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
-                System.out.printf(
-                        "[SetToTag] invalid command output -> stop. vx=%s vy=%s omega=%s%n",
-                        translationX, translationY, omega);
+                System.out.println("[SetToTag] !!INVALID!!");
+                System.out.printf ("           command output -> vx=%s vy=%s omega=%s%n", translationX, translationY, omega);
+                System.out.println("[SetToTag] ROBOT STOPPED");
             }
+
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
+
             swerve.driveFieldOriented(new ChassisSpeeds());
             return;
         }
@@ -295,8 +343,7 @@ public class SetToTagCommand extends Command {
             boolean saturatedY = Math.abs(translationY) >= (velocityMaximum - kSaturationEpsilon);
             boolean saturatedOmega = Math.abs(omega) >= (omegaMaximum - kSaturationEpsilon);
             ChassisSpeeds measuredRobotSpeeds = swerve.getSwerveDrive().getRobotVelocity();
-            System.out.printf(
-                    "[SetToTag] tag=%d age=%.2fs src=%s ta=%.2f "
+            System.out.printf("[SetToTag] tag=%d age=%.2fs src=%s ta=%.2f "
                             + "err=(%.2f, %.2f | %.2f m, %.2f deg) "
                             + "poseSrc=%s fO=%.2f fOOk=%b inField=%b stepOk=%b "
                             + "cmd=(%.2f%s, %.2f%s, %.4f%s) "
@@ -314,39 +361,39 @@ public class SetToTagCommand extends Command {
                     fusedOdomTranslationConsistent,
                     fusedInField,
                     fusedStepAccepted,
-                    translationX,
-                    saturatedX ? "*" : "",
-                    translationY,
-                    saturatedY ? "*" : "",
-                    omega,
-                    saturatedOmega ? "*" : "",
+                    translationX, saturatedX ? "*" : "",
+                    translationY, saturatedY ? "*" : "",
+                    omega, saturatedOmega ? "*" : "",
                     measuredRobotSpeeds.vxMetersPerSecond,
                     measuredRobotSpeeds.vyMetersPerSecond,
                     measuredRobotSpeeds.omegaRadiansPerSecond,
                     atTranslation,
                     atHeading);
             if (kEnableVerboseStatusLog) {
-                System.out.printf(
-                        "[SetToTag][detail] poseF=(%.2f, %.2f, %.2f deg) poseO=(%.2f, %.2f, %.2f deg)%n",
+
+                //
+                System.out.println("[SetToTag][detail]");
+                System.out.printf ("                   poseF=(%.2f, %.2f, %.2f deg)\n",
                         fusedX,
                         fusedY,
-                        Math.toDegrees(fusedHeadingRad),
+                        Math.toDegrees(fusedHeadingRad));
+                System.out.printf ("                   poseO=(%.2f, %.2f, %.2f deg)\n",
                         odomX,
                         odomY,
                         Math.toDegrees(odomHeadingRad));
-                System.out.printf(
-                        "[SetToTag][detail] target=(%.2f, %.2f, %.2f deg) "
-                                + "heading=(wrapCur %.2f deg, wrapTgt %.2f deg, contCur %.2f deg, contTgt %.2f deg)%n",
+                System.out.printf ("                   target=(%.2f, %.2f, %.2f deg)%n",
                         targetX,
                         targetY,
-                        Math.toDegrees(targetHeadingRad),
+                        Math.toDegrees(targetHeadingRad));
+                System.out.printf ("                   heading=(wrapCur %.2f deg, wrapTgt %.2f deg, "
+                                 + "contCur %.2f deg, contTgt %.2f deg)%n",
                         Math.toDegrees(headingResult.wrappedCurrentHeadingRad()),
                         Math.toDegrees(headingResult.wrappedTargetHeadingRad()),
                         Math.toDegrees(headingResult.continuousCurrentHeadingRad()),
                         Math.toDegrees(headingResult.continuousTargetHeadingRad()));
             }
         }
-        
+
         swerve.driveFieldOriented(new ChassisSpeeds(translationX, translationY, omega));
     }
 
@@ -359,13 +406,14 @@ public class SetToTagCommand extends Command {
         swerve.driveFieldOriented(new ChassisSpeeds());
         System.out.printf(
                 "[SetToTag] ended lockedTag=%d src=%s ta=%.2f lockAge=%.2fs interrupted=%b%n",
-                    lockedTagId,
+                lockedTagId,
                 lockedSourceTable,
-                    lockedSourceArea,
+                lockedSourceArea,
                 lockAcquiredTimestampSec > 0.0 ? (Timer.getFPGATimestamp() - lockAcquiredTimestampSec) : Double.NaN,
                 interrupted);
     }
 
+    // 有効なLimelightを返すメソッド
     private static String[] getEnabledVisionTables() {
         var enabled = LimelightConfig.getInstance().getEnabledLimelights().stream()
                 .map(entry -> entry.table)
@@ -378,22 +426,11 @@ public class SetToTagCommand extends Command {
         return new String[] {VisionConstants.kLimelightATableName, VisionConstants.kLimelightBTableName};
     }
 
+    // TagIdを引数として、そのtagに対して目標とするべき座標を返すメソッド
     private static Pose2d resolveTargetPose(int tagId) {
-        var maybeTagPose3d = FieldConstants.kAprilTagLayout.getTagPose(tagId);
-        if (maybeTagPose3d.isPresent()) {
-            Pose2d tagPose = maybeTagPose3d.get().toPose2d();
-            Transform2d frontOffset = new Transform2d(
-                    new Translation2d(kTagStandoffDistanceMeters, 0.0),
-                    Rotation2d.kPi);
-            Pose2d standoffTarget = tagPose.transformBy(frontOffset);
-            if (isFinitePose(standoffTarget)) {
-                return standoffTarget;
-            }
-        }
-
-        Pose2d legacyTarget = SetToTagCommandConstants.tagToVertexMap.get(tagId);
-        if (isFinitePose(legacyTarget)) {
-            return legacyTarget;
+        Pose2d targetPose2d = SetToTagCommandConstants.tagToVertexMap.get(tagId);
+        if (isFinitePose(targetPose2d)) {
+            return targetPose2d;
         }
         return null;
     }

@@ -1,8 +1,8 @@
 package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotState;
+import frc.robot.controllboard.DriverController;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 import frc.robot.commands.debug.odmetry.SetToTagCommand;
@@ -20,13 +20,13 @@ import swervelib.SwerveInputStream;
 public class DriveBindings {
     private final SwerveSubsystem drivebase;
     private final RobotState robotState;
-    private final CommandXboxController controller;
+    private final DriverController controller;
     private final SwerveInputStream driveAngularVelocity;
 
     public DriveBindings(
             SwerveSubsystem drivebase,
             RobotState robotState,
-            CommandXboxController controller,
+            DriverController controller,
             SwerveInputStream driveAngularVelocity) {
         this.drivebase = drivebase;
         this.robotState = robotState;

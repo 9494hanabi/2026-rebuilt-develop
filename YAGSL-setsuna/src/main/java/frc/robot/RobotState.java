@@ -11,7 +11,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,12 +97,12 @@ public class RobotState {
     private final ConcurrentTimeInterpolatableBuffer<Double> drivePitchAngularVelocity =
             ConcurrentTimeInterpolatableBuffer.createDoubleBuffer(LOOKBACK_TIME_SEC);
     
-    // 基準水平面からの絶対角(ロール)
+    // 基準水平面からの絶対角(ピッチ)
     private final ConcurrentTimeInterpolatableBuffer<Double> drivePitchRads =
             ConcurrentTimeInterpolatableBuffer.createDoubleBuffer(LOOKBACK_TIME_SEC);
-    
-    // 基準水平面からの絶対角(ピッチ)
-    private final ConcurrentTimeInterpolatableBuffer<Double> driveRollRads = 
+
+    // 基準水平面からの絶対角(ロール)
+    private final ConcurrentTimeInterpolatableBuffer<Double> driveRollRads =
             ConcurrentTimeInterpolatableBuffer.createDoubleBuffer(LOOKBACK_TIME_SEC);
     
     // X軸への加速度
@@ -263,7 +262,7 @@ public class RobotState {
     }
 
     // 現在の速度から短時間先の姿勢を予測する。
-    public Pose2d getPredicatedFieldToRobot(double lookaheadTimeS) {
+    public Pose2d getPredictedFieldToRobot(double lookaheadTimeS) {
         var maybeFieldToRobot = getLatestFieldToRobot();
         Pose2d fieldToRobot =
                 maybeFieldToRobot == null ? MathHelpers.kPose2dZero : maybeFieldToRobot.getValue();
@@ -277,7 +276,7 @@ public class RobotState {
     }
 
     // 予測時に-方向の草土をゼロに制限する。(非ホロノミック用)
-    public Pose2d getPredicateCappedFieldToRobot(double lookaheadTimeS) {
+    public Pose2d getPredictedCappedFieldToRobot(double lookaheadTimeS) {
         var maybeFieldToRobot = getLatestFieldToRobot();
         Pose2d fieldToRobot = 
                         maybeFieldToRobot == null ? MathHelpers.kPose2dZero : maybeFieldToRobot.getValue();
@@ -322,9 +321,11 @@ public class RobotState {
 
     public ChassisSpeeds getLatestFusedRobotRelativeChassisSpeeds() {
         var speeds = getLatestRobotRelativeChassisSpeed();
-        speeds.omegaRadiansPerSecond = 
-                        getLatestFusedFieldRelativeChassisSpeed().omegaRadiansPerSecond;
-        return speeds;
+        var fusedSpeeds = getLatestFusedFieldRelativeChassisSpeed();
+        return new ChassisSpeeds(
+                speeds.vxMetersPerSecond,
+                speeds.vyMetersPerSecond,
+                fusedSpeeds.omegaRadiansPerSecond);
     }
 
     // ledは使う予定無いので未再現
@@ -358,8 +359,8 @@ public class RobotState {
     }
 
     public Optional<Double> getMaxAbsDriveRollAngularVelocityInRange(
-            double mitTime, double maxTime) {
-        return getMaxAbsValueInRange(driveRollAngularVelocity, mitTime, maxTime);
+            double minTime, double maxTime) {
+        return getMaxAbsValueInRange(driveRollAngularVelocity, minTime, maxTime);
     }
 
     public void updateMegatagEstimate(VisionFieldPoseEstimate megatagEstimate) {
@@ -525,6 +526,10 @@ public class RobotState {
     }
 
     public boolean onOpponentSide() {
-        return onOpponentSide(this.isRedAlliance(), this.getLatestFieldToRobot().getValue());
+        var latest = this.getLatestFieldToRobot();
+        if (latest == null) {
+            return false;
+        }
+        return onOpponentSide(this.isRedAlliance(), latest.getValue());
     }
 }

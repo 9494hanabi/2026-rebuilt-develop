@@ -1,54 +1,30 @@
 package frc.robot.lib.util;
 
+import static frc.robot.lib.constants.OdomConstants.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+
 import java.util.Optional;
 
 /**
  * odom由来のラップ角(-pi..pi)を連続角へ展開し、安定したHeading制御出力を作る補助クラス。
  */
 public class OdomHeadingController {
-    // デフォルトの最小の角速度
-    private static final double kDefaultMinEffectiveOmegaRadPerSec = 0.35;
-
-    // 許容する最小の角度誤差
-    private static final double kDefaultMinOmegaEnableErrorRad = Math.toRadians(4.0);
-
-    // キャリブレーションのためのハードコード
-    private static final double kDefaultOdomOmegaSign = -1.0;
 
     private final PIDController pid;
     private final double maxOmegaRadPerSec;
-    private final double minEffectiveOmegaRadPerSec;
-    private final double minOmegaEnableErrorRad;
-    private final double odomOmegaSign;
 
     private boolean hasPreviousHeading = false;
     private double previousWrappedHeadingRad = 0.0;
     private double continuousHeadingRad = 0.0;
 
-    public OdomHeadingController(PIDController pid, double maxOmegaRadPerSec) {
-        // コンストラクタ2を呼んでいる
-        this(
-                pid,
-                maxOmegaRadPerSec,
-                kDefaultMinEffectiveOmegaRadPerSec,
-                kDefaultMinOmegaEnableErrorRad,
-                kDefaultOdomOmegaSign);
-    }
-
     // コンストラクタ2
     public OdomHeadingController(
             PIDController pid,
-            double maxOmegaRadPerSec,
-            double minEffectiveOmegaRadPerSec,
-            double minOmegaEnableErrorRad,
-            double odomOmegaSign) {
+            double maxOmegaRadPerSec) {
         this.pid = pid;
         this.maxOmegaRadPerSec = maxOmegaRadPerSec;
-        this.minEffectiveOmegaRadPerSec = minEffectiveOmegaRadPerSec;
-        this.minOmegaEnableErrorRad = minOmegaEnableErrorRad;
-        this.odomOmegaSign = odomOmegaSign;
     }
 
     public void reset() {
@@ -139,7 +115,7 @@ public class OdomHeadingController {
          */
 
         // omegaを計算
-        double omega = odomOmegaSign
+        double omega = kOdomOmegaSign
                 * MathUtil.clamp(
                         pid.calculate(continuousHeadingRad, targetContinuousHeadingRad),
                         -maxOmegaRadPerSec,
@@ -151,9 +127,9 @@ public class OdomHeadingController {
         boolean atSetpoint = pid.atSetpoint();
         double headingErrorRad = targetContinuousHeadingRad - continuousHeadingRad;
         if (!atSetpoint
-                && Math.abs(headingErrorRad) > minOmegaEnableErrorRad
-                && Math.abs(omega) < minEffectiveOmegaRadPerSec) {
-            omega = Math.copySign(minEffectiveOmegaRadPerSec, headingErrorRad);
+                && Math.abs(headingErrorRad) > kMinOmegaEnableErrorRad
+                && Math.abs(omega) < kMinEffectiveOmegaRadPerSec) {
+            omega = Math.copySign(kMinEffectiveOmegaRadPerSec, headingErrorRad);
         }
         if (atSetpoint) {
             omega = 0.0;

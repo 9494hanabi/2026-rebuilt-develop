@@ -37,6 +37,8 @@ public class VisionSubsystem extends SubsystemBase {
     private static final double kMapMismatchTranslationThresholdMeter = 0.7;
     private static final int kMapMismatchMinStreak = 10;
     private static final double kMapMismatchWarnIntervalSec = 1.0;
+    private static final int kOdomDriftRecoveryThreshold = 50;
+    private static final double kOdomDriftRecoveryMultiplier = 2.0;
 
     private static class MapCheckState {
         int mismatchStreak = 0;
@@ -49,6 +51,7 @@ public class VisionSubsystem extends SubsystemBase {
     private final Map<String, MapCheckState> mapCheckStates = new HashMap<>();
 
     private boolean useVision = true;
+    private int consecutiveOdomDistanceRejections = 0;
 
     private static boolean isUsingMegaTag2() {
         return VisionConstants.useMegaTag2;
@@ -133,10 +136,12 @@ public class VisionSubsystem extends SubsystemBase {
         // 分散の逆数を取っている。
         // 分散が小さい -> 信頼度が高い
         // -> 逆数をとることで分散が小さくなるほど重みが大きくなるようにしている。
-        double weightAx = 1.0 / varianceA.get(0, 0);
-        double weightAy = 1.0 / varianceA.get(1, 0);
-        double weightBx = 1.0 / varianceB.get(0, 0);
-        double weightBy = 1.0 / varianceB.get(1, 0);
+        // 分散がゼロの場合のInfinity防止
+        double kMinVariance = 1e-12;
+        double weightAx = 1.0 / Math.max(varianceA.get(0, 0), kMinVariance);
+        double weightAy = 1.0 / Math.max(varianceA.get(1, 0), kMinVariance);
+        double weightBx = 1.0 / Math.max(varianceB.get(0, 0), kMinVariance);
+        double weightBy = 1.0 / Math.max(varianceB.get(1, 0), kMinVariance);
 
         // ２つの推定を重み付きで平均で融合
         // fuesdPose = 
@@ -165,7 +170,8 @@ public class VisionSubsystem extends SubsystemBase {
                 VecBuilder.fill(
                     Math.sqrt(1.0 / (weightAx + weightBx)),
                     Math.sqrt(1.0 / (weightAy + weightBy)),
-                    Math.sqrt(1.0 / (1.0 / varianceA.get(2, 0) + 1.0 / varianceB.get(2,0))));
+                    Math.sqrt(1.0 / (1.0 / Math.max(varianceA.get(2, 0), kMinVariance)
+                            + 1.0 / Math.max(varianceB.get(2, 0), kMinVariance))));
         
         // 推定に使われたタグの数。
         int numTags = a.getNumTags() + b.getNumTags();
@@ -181,13 +187,13 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         // 入力更新と推定統合を行い、RobotStateへ反映する。
         double startTime = RobotTime.getTimestampSeconds();
+        io.readInputs(inputs);
+
         if (DriverStation.isDisabled() || !useVision) {
             Logger.recordOutput("Vision/usingVision", false);
             Logger.recordOutput("Vision/exclusiveTagId", state.getExclusiveTag().orElse(-1));
             return;
         }
-
-        io.readInputs(inputs);
 
         List<VisionFieldPoseEstimate> acceptedByCamera = new ArrayList<>();
         for (var cam : inputs.cameras) {
@@ -324,7 +330,7 @@ public class VisionSubsystem extends SubsystemBase {
             VisionIO.VisionIOInputs.CameraInputs cam,
             String logPrefix) {
         // 単一タグ推定をジャイロと整合させて補正する。
-        if (poseEstimate.timestampSeconds() <= state.lastUsedMegatagTimestamp()) {
+        if (poseEstimate.timestampSeconds() < state.lastUsedMegatagTimestamp()) {
             return Optional.empty();
         }
 
@@ -414,7 +420,7 @@ public class VisionSubsystem extends SubsystemBase {
             VisionIO.VisionIOInputs.CameraInputs cam,
             String logPrefix) {
         // MegaTag推定の妥当性チェックと標準偏差の算出を行う。
-        if (poseEstimate.timestampSeconds() <= state.lastUsedMegatagTimestamp()) {
+        if (poseEstimate.timestampSeconds() < state.lastUsedMegatagTimestamp()) {
             return Optional.empty();
         }
 
@@ -489,18 +495,25 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Vision推定がOdomから大幅に離れている場合は棄却する。
         // fmapミスマッチや実タグ配置誤りによるジャンプ防止。
+        // 連続棄却が続いた場合はしきい値を緩和し、オドメトリドリフトからの回復を許可する。
+        double effectiveMaxDist = VisionConstants.kMaxVisionOdomDistanceMeter;
+        if (consecutiveOdomDistanceRejections >= kOdomDriftRecoveryThreshold) {
+            effectiveMaxDist *= kOdomDriftRecoveryMultiplier;
+        }
         double distFromOdom = poseEstimate.fieldToRobot().getTranslation()
                 .getDistance(loggedPose.get().getTranslation());
-        if (distFromOdom > VisionConstants.kMaxVisionOdomDistanceMeter) {
+        if (distFromOdom > effectiveMaxDist) {
+            consecutiveOdomDistanceRejections++;
             System.out.printf(
-                "[VisionFilter] REJECTED tag=%s dist=%.2fm(>%.2fm)"
+                "[VisionFilter] REJECTED tag=%s dist=%.2fm(>%.2fm, streak=%d)"
                     + " odom=(%.3f,%.3f) vision=(%.3f,%.3f)%n",
                 java.util.Arrays.toString(poseEstimate.fiducialIds()),
-                distFromOdom, VisionConstants.kMaxVisionOdomDistanceMeter,
+                distFromOdom, effectiveMaxDist, consecutiveOdomDistanceRejections,
                 loggedPose.get().getX(), loggedPose.get().getY(),
                 poseEstimate.fieldToRobot().getX(), poseEstimate.fieldToRobot().getY());
             return Optional.empty();
         }
+        consecutiveOdomDistanceRejections = 0;
 
         // 返り値を作る
         Pose2d estimatePose = poseEstimate.fieldToRobot();

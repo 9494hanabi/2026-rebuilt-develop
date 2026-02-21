@@ -5,7 +5,6 @@ import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import swervelib.SwerveInputStream;
 
@@ -13,7 +12,8 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.lib.constants.Constants.OperatorConstants;
+import frc.robot.controllboard.DriverController;
+import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 // バインディング
 import frc.robot.bindings.DriveBindings;
@@ -34,8 +34,8 @@ public class RobotContainer {
   private final RobotState robotState;
   private final SwerveSubsystem drivebase;
   private final TurretSubsystem turret;
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final DriverController m_driverController =
+      new DriverController(ControlConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
 
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -68,7 +68,7 @@ public class RobotContainer {
             () -> m_driverController.getLeftY() * -1,
             () -> m_driverController.getLeftX() * -1)
         .withControllerRotationAxis(m_driverController::getRightX)
-        .deadband(OperatorConstants.DEADBAND)
+        .deadband(ControlConstants.kDeadband)
         .scaleTranslation(0.8)
         .allianceRelativeControl(true);
 

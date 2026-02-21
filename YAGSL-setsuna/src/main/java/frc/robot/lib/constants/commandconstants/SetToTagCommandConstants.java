@@ -7,6 +7,7 @@ import frc.robot.lib.constants.FieldConstants;
 import java.util.Map;
 
 public final class SetToTagCommandConstants {
+
   // Expected-TestFieldLayouts-TestMap.fmap のWPIBlue座標（タグ中心座標 + タグ姿勢）
   private static final double kMaxX = FieldConstants.fieldLengthMeter; // 6.05
   private static final double kMinX = 0.0;

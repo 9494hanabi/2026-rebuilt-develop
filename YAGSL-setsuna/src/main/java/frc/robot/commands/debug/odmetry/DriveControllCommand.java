@@ -46,6 +46,22 @@ public class DriveControllCommand extends Command{
             RobotState state,
             Supplier<Pose2d> currentRobotPose,
             Supplier<Pose2d> targetRobotPose) {
+        this(
+                swerve,
+                state,
+                currentRobotPose,
+                targetRobotPose,
+                velocityMaximum,
+                omegaMaximum);
+    }
+
+    public DriveControllCommand(
+            SwerveSubsystem swerve,
+            RobotState state,
+            Supplier<Pose2d> currentRobotPose,
+            Supplier<Pose2d> targetRobotPose,
+            double maxTranslationMeterPerSec,
+            double maxOmegaRadPerSec) {
         this.swerve = swerve;
         this.state = state;
         addRequirements(swerve);
@@ -57,12 +73,16 @@ public class DriveControllCommand extends Command{
         translationPidX.setIntegratorRange(-kTranslationIntegralContributionLimit, kTranslationIntegralContributionLimit);
         translationPidY.setTolerance(kTranslationToleranceMeters, kTranslationVelocityToleranceMPerSec);
         translationPidY.setIntegratorRange(-kTranslationIntegralContributionLimit, kTranslationIntegralContributionLimit);
-        translationControl = new OdomTranslationController(translationPidX, translationPidY, velocityMaximum);
+        translationControl =
+                new OdomTranslationController(
+                        translationPidX,
+                        translationPidY,
+                        maxTranslationMeterPerSec);
 
         headingPid.disableContinuousInput();
         headingPid.setTolerance(kHeadingToleranceRad, kHeadingVelocityToleranceRadPerSec);
         headingPid.setIntegratorRange(-kHeadingIntegralContributionLimit, kHeadingIntegralContributionLimit);
-        headingControl = new OdomHeadingController(headingPid, omegaMaximum);
+        headingControl = new OdomHeadingController(headingPid, maxOmegaRadPerSec);
     }
 
     @Override
@@ -70,6 +90,7 @@ public class DriveControllCommand extends Command{
         translationPidX.reset();
         translationPidY.reset();
         headingControl.reset();
+        translationControl.reset();
     }
 
     @Override
@@ -95,10 +116,10 @@ public class DriveControllCommand extends Command{
                 || !Double.isFinite(targetHeadingRad)) {
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
-                System.out.println("[SetToTag] !!INVALID!!");
-                System.out.printf ("           current=(%s, %s, %s)", currentXMeter, currentYMeter, currentHeadingRad);
-                System.out.printf ("           target =(%s, %s, %s)", targetXMeter, targetYMeter, targetHeadingRad);
-                System.out.println("[SetToTag] ROBOT STOPPED");
+                System.out.println("[DriveControl] !!INVALID!!");
+                System.out.printf ("                current=(%s, %s, %s)%n", currentXMeter, currentYMeter, currentHeadingRad);
+                System.out.printf ("                target =(%s, %s, %s)%n", targetXMeter, targetYMeter, targetHeadingRad);
+                System.out.println("[DriveControl] ROBOT STOPPED");
             }
             translationPidX.reset();
             translationPidY.reset();
@@ -113,12 +134,12 @@ public class DriveControllCommand extends Command{
         // 変化量が0の時停止
         if (maybeHeadingResult.isEmpty()
             || maybeTranslationResult.isEmpty()) {
-            if (nowSec - lastWarningLogSec >= kStatusLogPeriodSec) {
-                lastStatusLogSec = nowSec;
-                System.out.println("[DriveControll] !!INVALID!!");
-                System.out.printf ("                heading     result is %s\n", maybeHeadingResult.isEmpty() ? "empty" : "occupied");
-                System.out.printf ("                translation result is %s\n", maybeTranslationResult.isEmpty() ? "empty" : "occupied");
-                System.out.println("[DriveControll] ROBOT STOPPED");
+            if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
+                lastWarningLogSec = nowSec;
+                System.out.println("[DriveControl] !!INVALID!!");
+                System.out.printf ("                heading     result is %s%n", maybeHeadingResult.isEmpty() ? "empty" : "occupied");
+                System.out.printf ("                translation result is %s%n", maybeTranslationResult.isEmpty() ? "empty" : "occupied");
+                System.out.println("[DriveControl] ROBOT STOPPED");
             }
             headingControl.reset();
             translationControl.reset();
@@ -130,8 +151,8 @@ public class DriveControllCommand extends Command{
         var translationResult = maybeTranslationResult.get();
 
         double omega        = headingResult.omegaRadPerSec();
-        double translationX = translationResult.TranslationXMeterPerSec();
-        double translationY = translationResult.TranslationYMeterPerSec();
+        double translationX = translationResult.translationXMeterPerSec();
+        double translationY = translationResult.translationYMeterPerSec();
 
 
         if (!Double.isFinite(omega)
@@ -140,9 +161,9 @@ public class DriveControllCommand extends Command{
             if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
                 lastWarningLogSec = nowSec;
                 System.out.println("[DriveControl] !!INVALID!!");
-                System.out.printf ("               omega        = %.2f rad", omega);
-                System.out.printf ("               translationX = %.2f m/s", translationX);
-                System.out.printf ("               translationY = %.2f m/s", translationY);
+                System.out.printf ("               omega        = %.2f rad%n", omega);
+                System.out.printf ("               translationX = %.2f m/s%n", translationX);
+                System.out.printf ("               translationY = %.2f m/s%n", translationY);
             }
             headingControl.reset();
             translationControl.reset();
@@ -150,15 +171,18 @@ public class DriveControllCommand extends Command{
             return;
         }
 
-        if (nowSec - lastStatusLogSec >= kStatusLogPeriodSec) {
-            lastStatusLogSec = nowSec;
-            System.out.println("[DriveControl] periodic log");
-            System.out.printf ("               ");
-        }
-
         boolean headingAtSetpoint = headingResult.atSetpoint();
         boolean xAtSetpoint = translationResult.xAtSetpoint();
         boolean yAtSetpoint = translationResult.yAtSetpoint();
+
+        if (nowSec - lastStatusLogSec >= kStatusLogPeriodSec) {
+            lastStatusLogSec = nowSec;
+            System.out.printf("[DriveControl] cur=(%.2f, %.2f, %.1f deg) tgt=(%.2f, %.2f, %.1f deg) cmd=(%.2f, %.2f, %.3f) at=(%b, %b, %b)%n",
+                    currentXMeter, currentYMeter, Math.toDegrees(currentHeadingRad),
+                    targetXMeter, targetYMeter, Math.toDegrees(targetHeadingRad),
+                    translationX, translationY, omega,
+                    xAtSetpoint, yAtSetpoint, headingAtSetpoint);
+        }
 
         if (headingAtSetpoint) {
             omega = 0.0;
@@ -171,5 +195,12 @@ public class DriveControllCommand extends Command{
         }
 
         swerve.driveFieldOriented(new ChassisSpeeds(translationX, translationY, omega));
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        headingControl.reset();
+        translationControl.reset();
+        swerve.driveFieldOriented(new ChassisSpeeds());
     }
 }

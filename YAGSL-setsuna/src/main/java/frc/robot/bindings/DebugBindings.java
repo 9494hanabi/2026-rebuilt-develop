@@ -1,9 +1,9 @@
 package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.RobotState;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
+import frc.robot.controllboard.DriverController;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -18,13 +18,13 @@ public class DebugBindings {
     private final SwerveSubsystem drivebase;
     private final VisionSubsystem vision;
     private final RobotState robotState;
-    private final CommandXboxController controller;
+    private final DriverController controller;
 
     public DebugBindings(
             SwerveSubsystem drivebase,
             VisionSubsystem vision,
             RobotState robotState,
-            CommandXboxController controller) {
+            DriverController controller) {
         this.drivebase = drivebase;
         this.vision = vision;
         this.robotState = robotState;
