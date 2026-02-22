@@ -8,7 +8,6 @@ import frc.robot.lib.constants.commandconstants.SetToTagCommandConstants;
 import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.constants.VisionConstants;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -20,6 +19,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.lib.limelight.LimelightConfig;
 import frc.robot.lib.limelight.VisionTargetSelector;
 import frc.robot.lib.util.OdomHeadingController;
+import frc.robot.lib.util.OdomTranslationController;
 
 public class SetToTagCommand extends Command {
 
@@ -42,6 +42,7 @@ public class SetToTagCommand extends Command {
     private final PIDController headingPid =
         new PIDController(kHeadingKp, kHeadingKi, kHeadingKd);
     private final OdomHeadingController headingControl;
+    private final OdomTranslationController translationControl;
 
     private int lockedTagId = -1;
     private Pose2d target = null;
@@ -71,6 +72,11 @@ public class SetToTagCommand extends Command {
         headingPid.setTolerance(kHeadingToleranceRad, kHeadingVelocityToleranceRadPerSec);
         headingPid.setIntegratorRange(-kHeadingIntegralContributionLimit, kHeadingIntegralContributionLimit);
         headingControl = new OdomHeadingController(headingPid, omegaMaximum);
+        translationControl =
+                new OdomTranslationController(
+                        translationPidX,
+                        translationPidY,
+                        velocityMaximum);
     }
 
     @Override
@@ -84,6 +90,7 @@ public class SetToTagCommand extends Command {
         translationPidX.reset();
         translationPidY.reset();
         headingControl.reset();
+        translationControl.reset();
         lastStatusLogSec = Double.NEGATIVE_INFINITY;
         lastSearchLogSec = Double.NEGATIVE_INFINITY;
         lastWarningLogSec = Double.NEGATIVE_INFINITY;
@@ -165,6 +172,7 @@ public class SetToTagCommand extends Command {
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
+            translationControl.reset();
             swerve.driveFieldOriented(new ChassisSpeeds());
             return;
         }
@@ -274,6 +282,7 @@ public class SetToTagCommand extends Command {
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
+            translationControl.reset();
             swerve.driveFieldOriented(new ChassisSpeeds());
             return;
         }
@@ -285,13 +294,25 @@ public class SetToTagCommand extends Command {
         double errorY = targetY - currentY;
         double errorNorm = Math.hypot(errorX, errorY);
 
-        double translationX = MathUtil.clamp(
-                        translationPidX.calculate(currentX, targetX),
-                        -velocityMaximum, velocityMaximum);
-
-        double translationY = MathUtil.clamp(
-                        translationPidY.calculate(currentY, targetY),
-                        -velocityMaximum, velocityMaximum);
+        var maybeTranslationResult =
+                translationControl.calculate(currentX, currentY, targetX, targetY);
+        if (maybeTranslationResult.isEmpty()) {
+            if (nowSec - lastWarningLogSec >= kWarningLogPeriodSec) {
+                lastWarningLogSec = nowSec;
+                System.out.println("[SetToTag] !!INVALID!!");
+                System.out.println("           translation control input = empty");
+                System.out.println("[SetToTag] ROBOT STOPPED");
+            }
+            translationPidX.reset();
+            translationPidY.reset();
+            headingControl.reset();
+            translationControl.reset();
+            swerve.driveFieldOriented(new ChassisSpeeds());
+            return;
+        }
+        var translationResult = maybeTranslationResult.get();
+        double translationX = translationResult.translationXMeterPerSec();
+        double translationY = translationResult.translationYMeterPerSec();
 
         var maybeHeadingResult = headingControl.calculate(currentHeadingRad, targetHeadingRad);
         if (maybeHeadingResult.isEmpty()) {
@@ -305,13 +326,14 @@ public class SetToTagCommand extends Command {
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
+            translationControl.reset();
             swerve.driveFieldOriented(new ChassisSpeeds());
             return;
         }
         var headingResult = maybeHeadingResult.get();
         double omega = headingResult.omegaRadPerSec();
 
-        boolean atTranslation = translationPidX.atSetpoint() && translationPidY.atSetpoint();
+        boolean atTranslation = translationResult.xAtSetpoint() && translationResult.yAtSetpoint();
         boolean atHeading = headingResult.atSetpoint();
         if (atTranslation) {
             System.out.println("[SetToTag] ROBOT AT SETPOINT");
@@ -330,6 +352,7 @@ public class SetToTagCommand extends Command {
             translationPidX.reset();
             translationPidY.reset();
             headingControl.reset();
+            translationControl.reset();
 
             swerve.driveFieldOriented(new ChassisSpeeds());
             return;
@@ -369,6 +392,25 @@ public class SetToTagCommand extends Command {
                     measuredRobotSpeeds.omegaRadiansPerSecond,
                     atTranslation,
                     atHeading);
+            Pose2d yagslPose = swerve.getSwerveDrive().getPose();
+            System.out.printf("[SetToTag][pose] yagsl=%s fused=(%.2f, %.2f, %.1f deg) "
+                            + "odom=(%.2f, %.2f, %.1f deg) selected=(%.2f, %.2f, %.1f deg) "
+                            + "target=(%.2f, %.2f, %.1f deg) deltaFO=%.2f useFused=%b%n",
+                    formatPose(yagslPose),
+                    fusedX,
+                    fusedY,
+                    Math.toDegrees(fusedHeadingRad),
+                    odomX,
+                    odomY,
+                    Math.toDegrees(odomHeadingRad),
+                    currentX,
+                    currentY,
+                    Math.toDegrees(currentHeadingRad),
+                    targetX,
+                    targetY,
+                    Math.toDegrees(targetHeadingRad),
+                    fusedOdomTranslationDelta,
+                    translationFromFused);
             if (kEnableVerboseStatusLog) {
 
                 //
@@ -402,6 +444,7 @@ public class SetToTagCommand extends Command {
         translationPidX.reset();
         translationPidY.reset();
         headingControl.reset();
+        translationControl.reset();
         state.clearExclusiveTag();
         swerve.driveFieldOriented(new ChassisSpeeds());
         System.out.printf(
@@ -440,6 +483,17 @@ public class SetToTagCommand extends Command {
                 && Double.isFinite(pose.getX())
                 && Double.isFinite(pose.getY())
                 && Double.isFinite(pose.getRotation().getRadians());
+    }
+
+    private static String formatPose(Pose2d pose) {
+        if (pose == null) {
+            return "null";
+        }
+        return String.format(
+                "(%.2f, %.2f, %.1f deg)",
+                pose.getX(),
+                pose.getY(),
+                pose.getRotation().getDegrees());
     }
 
     private static boolean isInsideFieldWithMargin(double xMeter, double yMeter) {

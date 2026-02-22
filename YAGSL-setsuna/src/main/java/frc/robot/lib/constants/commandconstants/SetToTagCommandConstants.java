@@ -22,23 +22,23 @@ public final class SetToTagCommandConstants {
   public static final Map<Integer, Pose2d> tagToVertexMap = Map.ofEntries(
       // +X +Y 側
       // tag 1: (5.5500, 9.0000), heading -135.0 deg
-      Map.entry(1, new Pose2d(kNearMaxX, kMaxY, Rotation2d.fromDegrees(-135.0))),
+      Map.entry(1, new Pose2d(kNearMaxX, kNearMaxY, Rotation2d.fromDegrees(-135.0))),
       // tag 2: (6.0500, 8.5000), heading -135.0 deg
-      Map.entry(2, new Pose2d(kMaxX, kNearMaxY, Rotation2d.fromDegrees(-135.0))),
+      Map.entry(2, new Pose2d(kNearMaxX, kNearMaxY, Rotation2d.fromDegrees(-135.0))),
       // +X -Y 側
       // tag 3: (6.0500, 0.0500), heading -45.0 deg
-      Map.entry(3, new Pose2d(kMaxX, kNearMinY, Rotation2d.fromDegrees(135.0))),
+      Map.entry(3, new Pose2d(kNearMaxX, kNearMinY, Rotation2d.fromDegrees(135.0))),
       // tag 4: (5.5500, 9.0000), heading -45.0 deg
-      Map.entry(4, new Pose2d(kNearMaxX, kMinY, Rotation2d.fromDegrees(135.0))),
+      Map.entry(4, new Pose2d(kNearMaxX, kNearMinY, Rotation2d.fromDegrees(135.0))),
       // +X -Y 側
       // tag 5: (0.5000, 0.0000), heading 135.0 deg
-      Map.entry(5, new Pose2d(kNearMinX, kMinY, Rotation2d.fromDegrees(45.0))),
+      Map.entry(5, new Pose2d(kNearMinX, kNearMinY, Rotation2d.fromDegrees(45.0))),
       // tag 6: (0.0000, 0.5000), heading 135.0 deg
-      Map.entry(6, new Pose2d(kMinX, kNearMinY, Rotation2d.fromDegrees(45.0))),
+      Map.entry(6, new Pose2d(kNearMinX, kNearMinY, Rotation2d.fromDegrees(45.0))),
       // -X -Y 側
       // tag 7: (0.0000, 8.5000), heading 45.0 deg
-      Map.entry(7, new Pose2d(kMinX, kNearMaxY, Rotation2d.fromDegrees(-45.0))),
+      Map.entry(7, new Pose2d(kNearMinX, kNearMaxY, Rotation2d.fromDegrees(-45.0))),
       // tag 8: (0.5000, 9.0000), heading 45.0 deg
-      Map.entry(8, new Pose2d(kNearMinX, kMaxY, Rotation2d.fromDegrees(-45.0)))
+      Map.entry(8, new Pose2d(kNearMinX, kNearMaxY, Rotation2d.fromDegrees(-45.0)))
   );
 } 

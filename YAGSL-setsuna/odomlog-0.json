@@ -1,0 +1,56 @@
+[
+    {
+        "messageType": 2,
+        "timestamp": 184.71575927734375,
+        "seqNumber": 1800,
+        "line": "[ClearOdometryAndLockStop] ended, interrupted=false"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.27520751953125,
+        "seqNumber": 1801,
+        "line": "[DriveBindings] X pressed -> SetZeroCommand"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.27740478515625,
+        "seqNumber": 1802,
+        "line": "[SetZero] INITIALIZED"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.279541015625,
+        "seqNumber": 1803,
+        "line": "[DriveControl] cur=(0.65, 0.81, -148.9 deg) tgt=(3.00, 4.50, 0.0 deg) cmd=(1.50, 1.50, -4.000) at=(false, false, false)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.27996826171875,
+        "seqNumber": 1804,
+        "line": "[SetZero] periodic pose log"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.2803955078125,
+        "seqNumber": 1805,
+        "line": "          target=(3.00, 4.50, 0.0 deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.28155517578125,
+        "seqNumber": 1806,
+        "line": "          yagsl=(0.65, 0.81, -148.9 deg) fused=(0.65, 0.81, -148.9 deg) odom=(0.64, 0.82, -148.9 deg) selected=(0.65, 0.81, -148.9 deg)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.28338623046875,
+        "seqNumber": 1807,
+        "line": "          useFused=true inField=true deltaFO=0.01 meas=(-0.00, 0.00, -0.000)"
+    },
+    {
+        "messageType": 2,
+        "timestamp": 192.35565185546875,
+        "seqNumber": 1808,
+        "line": "[SetZero] ended, interrupted=true"
+    }
+]

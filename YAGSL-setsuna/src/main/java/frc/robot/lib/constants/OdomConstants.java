@@ -9,7 +9,7 @@ public class OdomConstants {
     public static final double kMinOmegaEnableErrorRad = Math.toRadians(4.0);
 
     // キャリブレーションのためのハードコード
-    public static final double kOdomOmegaSign = 1.0;
+    public static final double kOdomOmegaSign = -1.0;
 
     // =================Translation=================
     // デフォルトの最小の速度
