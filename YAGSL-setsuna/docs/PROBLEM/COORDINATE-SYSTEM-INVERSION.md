@@ -119,3 +119,7 @@ System.out.printf("[OdomDebug] FL=%.3f FR=%.3f BL=%.3f BR=%.3f yaw=%.1f%n",
 - 仮説1（invertedIMU）除外: 2026-02-21
 - 最有力仮説（エンコーダ符号）提示: 2026-02-21
 - Status: 診断Step 1待ち（実機テスト必要）
+
+## Solution
+- Driver Station のAllianceを反転(Red -> Blue)
+- コード上の初期位置を180°回転

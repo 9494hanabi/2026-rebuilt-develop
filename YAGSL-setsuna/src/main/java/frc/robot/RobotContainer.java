@@ -65,8 +65,8 @@ public class RobotContainer {
     DriverStation.silenceJoystickConnectionWarning(true);
     driveAngularVelocity = SwerveInputStream.of(
             drivebase.getSwerveDrive(),
-            () -> m_driverController.getLeftY() * 1,
-            () -> m_driverController.getLeftX() * 1)
+            () -> m_driverController.getLeftY() * -1,
+            () -> m_driverController.getLeftX() * -1)
         .withControllerRotationAxis(m_driverController::getRightX)
         .deadband(ControlConstants.kDeadband)
         .scaleTranslation(0.8)
