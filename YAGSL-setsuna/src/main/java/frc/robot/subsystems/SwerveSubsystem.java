@@ -37,7 +37,7 @@ import swervelib.SwerveDrive;
 // 254系
 import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.RobotState;
-import frc.robot.lib.constants.Constants;
+import frc.robot.lib.constants.TeleopConstants;
 import frc.robot.lib.constants.FieldConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
@@ -84,7 +84,7 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       swerveDrive =
           new SwerveParser(directory)
-              .createSwerveDrive(Constants.maxSpeed, FieldConstants.kInitialFieldToRobotPose);
+              .createSwerveDrive(TeleopConstants.maxSpeed, FieldConstants.kInitialFieldToRobotPose);
     } catch (Exception e)
     {
       throw new RuntimeException(e);

@@ -24,7 +24,7 @@ import frc.robot.bindings.DebugBindings;
 
 // === 担当者 ===
 // 共通（このファイルはできるだけ編集しない）
-//
+// 晴太
 // バインディングは各Bindingsクラスに分離されています：
 // - DriveBindings.java: ひなた担当（ドライブ/ビジョン関連）
 // - AutoBindings.java: 二年生担当（Autonomous関連）
