@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
 
   // 以下smartdashboadを使ったAutoのこと
   private static final String kDoNothingAuto = "Do Nothing";
-  private static final String kMyAuto = "My Auto";
+  private static final String kMyAuto = "New Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -33,8 +33,8 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().schedule(m_robotContainer.getStartupOdometryLockCommand());
 
     // smartdashboadで出てくる選択肢
-    m_chooser.setDefaultOption("Do Nothing", kDoNothingAuto);
-    m_chooser.addOption("My Auto", kMyAuto);
+    m_chooser.setDefaultOption("New Auto", kMyAuto);
+    m_chooser.addOption("Do Nothing", kDoNothingAuto);
 
     // smartdashboadにウェジットを追加する（名前：Auto setting）
     SmartDashboard.putData("Auto setting", m_chooser);
@@ -55,27 +55,30 @@ public class Robot extends TimedRobot {
   //　Init：一度だけ呼ばれるプログラム
   @Override
   public void autonomousInit() {
-    // Command自体ではなくScheduler経由で実行する
-    CommandScheduler.getInstance().schedule(m_autonomousCommand);
-    if (m_autoSelected == null) {
-      m_autoSelected = kDoNothingAuto;
-    }
-    System.out.println("Auto selected: " + m_autoSelected);
-
-    switch (m_autoSelected) {
-      case kMyAuto:
-        m_autonomousCommand = new PathPlannerAuto(kMyAuto);
-        break;
-      case kDoNothingAuto:
-      default:
-        m_autonomousCommand = Commands.none();
-        break;
-    }
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
-    }
+  // ダッシュボードで選ばれたAuto名を取得
+  m_autoSelected = m_chooser.getSelected();
+  if (m_autoSelected == null) {
+    m_autoSelected = kDoNothingAuto;
   }
+  System.out.println("Auto selected: " + m_autoSelected);
+
+  switch (m_autoSelected) {
+    case kMyAuto:
+      m_autonomousCommand = new PathPlannerAuto(kMyAuto);
+      break;
+    case kDoNothingAuto:
+    default:
+      m_autonomousCommand = Commands.none();
+      break;
+  }
+
+  CommandScheduler.getInstance().cancel(m_robotContainer.getStartupOdometryLockCommand());
+
+  // ここで1回だけscheduleする
+  if (m_autonomousCommand != null) {
+    CommandScheduler.getInstance().schedule(m_autonomousCommand);
+  }
+}
 
   // Periodic：エネイブル中に約20msごとに繰り返し呼ばれる関数
   @Override

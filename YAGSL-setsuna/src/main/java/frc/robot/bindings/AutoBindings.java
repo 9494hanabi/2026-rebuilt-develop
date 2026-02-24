@@ -2,10 +2,10 @@ package frc.robot.bindings;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.commands.AutoCommand;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.RobotState;
+import frc.robot.commands.AutoCommand;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 
 // === 担当者 ===
 // ハルタ
@@ -21,12 +21,17 @@ import frc.robot.RobotState;
 public class AutoBindings {
     private final SwerveSubsystem drivebase;
     private final RobotState robotState;
-    private final TurretSubsystem turret;
+    private final ShooterSubsystem shooter;
+    // 仮値: 実機完成後に距離別に最適化する
+    private static final double kShooterTestTargetRps = 80.0;
+    private static final double kShooterReadyTimeoutSec = 1.0;
+    private static final double kShooterShootWindowSec = 2.0;
 
-    public AutoBindings(SwerveSubsystem drivebase, RobotState robotState, TurretSubsystem turret) {
+
+    public AutoBindings(SwerveSubsystem drivebase, RobotState robotState, ShooterSubsystem shooter) {
         this.drivebase = drivebase;
         this.robotState = robotState;
-        this.turret = turret;
+        this.shooter = shooter;
     }
 
     /**
@@ -34,109 +39,78 @@ public class AutoBindings {
      * PathPlannerで使用するコマンドをここに追加
      */
     public void configure() {
-        /* 
-        * ==== Vision/AprilTag 関連マーカー登録 ====
-        * 方針:
-        * 1) まずは時間ベースでSim検証
-        * 2) 後で距離/状態ベース終了条件に置き換える
-        * 3) マーカー名はPathPlanner側と完全一致させる
-        */
-
-        // llFaceTag1_1p0s: AprilTag ID=1に向けて、最大1.0秒だけ機首を合わせる
+        /*
+         * ==== Shooter 関連マーカー登録 ====
+         */
+        // shooterSetTarget80Rps: 目標80RPSへスピンアップ開始
         NamedCommands.registerCommand(
-            "llFaceTag1_1p0s",
-            AutoCommand.faceTagFor(drivebase, robotState, 1, 1.0)
-        );
-        // llDriveOnTag0p8s: タグを検出している間だけ、最大0.8秒前進する
-        NamedCommands.registerCommand(
-            "llDriveOnTag0p8s",
-            AutoCommand.driveOnTagFor(drivebase, robotState, 0.8)
-        );
-        // llAlignAndApproachTag1: 「タグ1へ向く→寄る」を1イベントで実行する
-        NamedCommands.registerCommand(
-            "llAlignAndApproachTag1",
-            AutoCommand.alignAndApproachTag(drivebase, robotState, 1, 1.0, 0.8)
+            "shooterSetTarget80Rps",
+            AutoCommand.shooterSetTargetRps(shooter, kShooterTestTargetRps)
         );
 
-        /* 
-         * ==== タレット/得点関連マーカー登録 ====
-         * 
-        */
-        // scorePrep: 得点前準備として、タグへ向いてからタレットを得点角に向ける
+        // shooterWaitReady1p0s: Ready成立まで最大1.0秒待機
         NamedCommands.registerCommand(
-            "scorePrep",
-            Commands.sequence(
-                AutoCommand.faceTagFor(drivebase, robotState, 1, 1.0),
-                AutoCommand.turretToAngle(turret, 20.00, 1.2)
-            )
+            "shooterWaitReady1p0s",
+            AutoCommand.shooterWaitReady(shooter, kShooterReadyTimeoutSec)
         );
-        // scoreExecuteMock: 射出機構未実装のため、ログ出力と短い待機で疑似射出を行う
+
+        // shooterSpinUpAndWait80Rps: スピンアップ＋Ready待ちを1コマンド化
         NamedCommands.registerCommand(
-            "scoreExecuteMock",
-            Commands.sequence(
-                Commands.print("[AUTOモード] はっしゃ〜〜"),
-                Commands.waitSeconds(0.20)
-            )
+            "shooterSpinUpAndWait80Rps",
+            AutoCommand.shooterSpinUpAndWaitReady(shooter, kShooterTestTargetRps, kShooterReadyTimeoutSec)
         );
-        // scoreReset: 得点後にタレットを格納位置へ戻す
+
+        // shooterStop: シューター停止
         NamedCommands.registerCommand(
-            "scoreReset",
-            AutoCommand.turretStow(turret)
+            "shooterStop",
+            AutoCommand.shooterStop(shooter)
         );
-        // scoreCycleBasic: 基本得点シーケンスを1イベントで実行する
+
+                // shooterShoot2p0s: スピンアップ→Ready待ち→2.0秒シュート→停止（ログ付き）
         NamedCommands.registerCommand(
-            "scoreCycleBasic",
-            AutoCommand.scoreCycleBasic(drivebase, robotState, turret)
+            "shooterShoot2p0s",
+            AutoCommand.shooterShootAtRpsForWithLogs(
+                shooter,
+                kShooterTestTargetRps,
+                kShooterReadyTimeoutSec,
+                kShooterShootWindowSec)
         );
 
         /*
-         *==== PathPlannerイベントマーカー用コマンド登録 ====
-         * 
-        */
+         * ==== PathPlannerイベントマーカー用コマンド登録 ====
+         */
+
         // markStart: イベント発火確認のために開始ログを出力する
         NamedCommands.registerCommand(
-            "markStart", 
+            "markStart",
             Commands.print("[AUTO] marker start")
         );
-        // driveForward0p6s: テスト用に1.0m/sで0.6秒だけ前進する
+
+        // markFinish: イベントが終わった時の確認用ログ
         NamedCommands.registerCommand(
-            "driveForward0p6s", 
-            AutoCommand.driveForwardFor(drivebase, 1.0, 0.6)
-        );
-        // llDriveOnTag0p7s: テスト用にタグ検出前進を0.7秒だけ実行する
-        NamedCommands.registerCommand(
-            "llDriveOnTag0p7s", 
-            AutoCommand.driveOnTagFor(drivebase, robotState, 0.7)
-        );
-        // stopDrive: 任意タイミングでドライブを明示停止する安全用コマンド
-        NamedCommands.registerCommand(
-            "stopDrive", 
-            AutoCommand.stopDrive(drivebase)
+            "markFinish",
+            Commands.print("[AUTO] marker Finish")            
         );
 
-        /* 
+        /*
          * ==== ログ/安全停止 ====
-         * 
-        */
-        // logScoreStart: 得点シーケンス開始をログに残してデバッグしやすくする
+         */
+        // logScoreStart: シーケンス開始ログ
         NamedCommands.registerCommand(
             "logScoreStart",
             AutoCommand.logMarker("score-start")
         );
-        // logScoreEnd: 得点シーケンス終了をログに残してデバッグしやすくする
+
+        // logScoreEnd: シーケンス終了ログ
         NamedCommands.registerCommand(
             "logScoreEnd",
             AutoCommand.logMarker("score-end")
         );
-        // safeStopAll: ドライブとタレットを同時に停止し、Auto終了時の安全を確保する
+
+        // safeStopAll: ドライブとシューターを同時停止し、Auto終了時の安全を確保する
         NamedCommands.registerCommand(
             "safeStopAll",
-            AutoCommand.safeStopAll(drivebase, turret)
-        );
-        // scoreCycleBasicSafe: 基本得点シーケンスにタイムアウトと安全停止を追加した運用版
-        NamedCommands.registerCommand(
-            "scoreCycleBasicSafe",
-            AutoCommand.scoreCycleBasicSafe(drivebase, robotState, turret)
+            AutoCommand.safeStopAll(drivebase, shooter)
         );
     }
 }

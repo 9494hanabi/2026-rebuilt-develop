@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5,
+        "x": 2.5,
         "y": 4.222
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3293842441606607,
-        "y": 4.222
+        "x": 2.5,
+        "y": 4.771275906066039
       },
       "isLocked": false,
       "linkedName": null
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 2.5,
-        "y": 4.2216548945986
+        "y": 6.09828297582166
       },
       "prevControl": {
-        "x": 3.861083757503366,
-        "y": 4.2216548945986
+        "x": 2.5,
+        "y": 5.357472456325092
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,20 +33,9 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "markStart",
-      "waypointRelativePos": 0.3529041325934578,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "markStart"
-        }
-      }
-    },
-    {
       "name": "shooterShoot2p0s",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
+      "waypointRelativePos": 0.2997355999043976,
+      "endWaypointRelativePos": 0.7987272944550673,
       "command": {
         "type": "named",
         "data": {

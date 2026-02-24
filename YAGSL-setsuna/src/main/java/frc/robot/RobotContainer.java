@@ -1,7 +1,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,7 +33,7 @@ import frc.robot.bindings.DebugBindings;
 public class RobotContainer {
   private final RobotState robotState;
   private final SwerveSubsystem drivebase;
-  private final TurretSubsystem turret;
+  private final ShooterSubsystem turret;
   private final DriverController m_driverController =
       new DriverController(ControlConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
@@ -54,7 +54,7 @@ public class RobotContainer {
   public RobotContainer() {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
-    turret = new TurretSubsystem();
+    turret = new ShooterSubsystem();
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
     visionSubsystem = new VisionSubsystem(
         LimelightConfig.getInstance().isAnyLimelightEnabled()
