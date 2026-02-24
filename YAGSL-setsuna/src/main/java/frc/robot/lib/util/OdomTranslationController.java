@@ -9,6 +9,13 @@ import java.util.Optional;
 /**
  * 安定したTranslation制御出力を作る補助クラス。
  */
+
+// === 担当者 ===
+// ひなた
+//
+// 並進制御のコントローラー
+//
+
 public class OdomTranslationController {
 
     private final PIDController translationXPid;

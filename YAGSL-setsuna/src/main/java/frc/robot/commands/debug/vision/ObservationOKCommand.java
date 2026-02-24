@@ -7,6 +7,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
+// === 担当者 ===
+// ひなた
+//
+
 public class ObservationOKCommand extends Command {
     private static final double kBackwardSpeedMetersPerSec = -1.0;
     private static final double kTargetSeenHoldSeconds = 0.20;

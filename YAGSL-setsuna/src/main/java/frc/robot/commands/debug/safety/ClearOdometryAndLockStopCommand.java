@@ -9,6 +9,11 @@ import frc.robot.subsystems.SwerveSubsystem;
 /**
  * 開始時にオドメトリ履歴を完全に消去し、指定時間は全操作を受け付けず停止を維持する。
  */
+
+// === 担当者 ===
+// ひなた
+//
+
 public class ClearOdometryAndLockStopCommand extends Command {
     private static final double kDefaultLockSeconds = 5.0;
 

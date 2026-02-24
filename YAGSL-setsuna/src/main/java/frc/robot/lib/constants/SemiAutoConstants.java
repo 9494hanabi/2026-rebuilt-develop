@@ -1,5 +1,9 @@
 package frc.robot.lib.constants;
 
+// === 担当者 ===
+// ひなた
+//
+
 public final class SemiAutoConstants {
     // 速度係数 (m/s)/m
     public static final double translationGain = 1.2; // 目標位置誤差に対する並進ゲイン

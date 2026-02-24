@@ -14,6 +14,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+// === 担当者 ===
+// ひなた
+//
+
 public class LogCleanupService {
     private static final Path LOG_DIR = Path.of("/home/lvuser/logs");
 

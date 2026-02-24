@@ -20,6 +20,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+// === 担当者 ===
+// ひなた
+//
+
 public class VisionIOHardwareLimelight implements VisionIO {
     private static final double HEARTBEAT_TIMEOUT_SEC = 0.5;
     private static final double[] DEFAULT_STDDEVS;

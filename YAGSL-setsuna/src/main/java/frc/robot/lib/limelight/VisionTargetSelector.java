@@ -13,6 +13,11 @@ import java.util.Optional;
  * 1) tv==1 かつ tid>=0 を「有効観測」とみなす
  * 2) 複数のカメラで見えている場合は ta が大きい方を優先する
  */
+
+// === 担当者 ===
+// ひなた
+//
+
 public class VisionTargetSelector {
   public static final class TargetObservation {
     private final String tableName;

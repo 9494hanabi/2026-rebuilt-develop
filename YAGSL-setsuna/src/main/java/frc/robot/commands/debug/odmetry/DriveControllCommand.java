@@ -18,6 +18,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 import java.util.function.Supplier;
 
+// === 担当者 ===
+// ひなた
+//
 
 public class DriveControllCommand extends Command{
 

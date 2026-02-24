@@ -6,6 +6,10 @@ import frc.robot.lib.constants.FieldConstants;
 
 import java.util.Map;
 
+// === 担当者 ===
+// ひなた
+//
+
 public final class SetToTagCommandConstants {
 
   // Expected-TestFieldLayouts-TestMap.fmap のWPIBlue座標（タグ中心座標 + タグ姿勢）

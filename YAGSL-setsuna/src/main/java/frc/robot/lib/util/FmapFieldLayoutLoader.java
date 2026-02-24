@@ -17,6 +17,11 @@ import java.util.List;
  * Limelight Map Builder形式(.fmap)をAprilTagFieldLayoutへ変換する。
  * fmap座標はフィールド中心原点を前提に、WPILibの青同盟側コーナー原点へ変換する。
  */
+
+// === 担当者 ===
+// ひなた
+//
+
 public final class FmapFieldLayoutLoader {
   private static final ObjectMapper MAPPER =
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

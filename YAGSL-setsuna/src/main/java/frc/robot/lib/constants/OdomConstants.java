@@ -1,5 +1,9 @@
 package frc.robot.lib.constants;
 
+// === 担当者 ===
+// ひなた
+//
+
 public class OdomConstants {
     // =================Heading=================
     // デフォルトの最小の角速度

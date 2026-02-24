@@ -10,6 +10,13 @@ import java.util.Optional;
 /**
  * odom由来のラップ角(-pi..pi)を連続角へ展開し、安定したHeading制御出力を作る補助クラス。
  */
+
+// === 担当者 ===
+// ひなた
+//
+// 回頭制御のコントローラー
+//
+
 public class OdomHeadingController {
 
     private final PIDController pid;

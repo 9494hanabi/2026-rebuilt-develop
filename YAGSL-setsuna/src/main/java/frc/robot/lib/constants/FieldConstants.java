@@ -6,6 +6,10 @@ import frc.robot.lib.util.FmapFieldLayoutLoader;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 
+// === 担当者 ===
+// ひなた
+//
+
 public final class FieldConstants {
     public static final double kMidlineBufferMeter = 5.0;   // 中央ライン判定用のバッファ距離[m]
 

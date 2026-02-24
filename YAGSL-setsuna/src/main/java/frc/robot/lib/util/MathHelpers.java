@@ -6,8 +6,9 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 // === 担当者 ===
-// ひなた
+// 誰でも
 //
+// 数学的なライブラリを集結させる。
 
 public class MathHelpers {
     // ロボットの姿勢(x, y, r)を格納する配列
