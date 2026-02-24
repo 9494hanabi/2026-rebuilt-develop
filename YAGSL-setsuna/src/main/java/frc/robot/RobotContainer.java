@@ -33,7 +33,7 @@ import frc.robot.bindings.DebugBindings;
 public class RobotContainer {
   private final RobotState robotState;
   private final SwerveSubsystem drivebase;
-  private final ShooterSubsystem turret;
+  private final ShooterSubsystem shooter;
   private final DriverController m_driverController =
       new DriverController(ControlConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
@@ -54,7 +54,7 @@ public class RobotContainer {
   public RobotContainer() {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
-    turret = new ShooterSubsystem();
+    shooter = new ShooterSubsystem();
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
     visionSubsystem = new VisionSubsystem(
         LimelightConfig.getInstance().isAnyLimelightEnabled()
@@ -82,7 +82,7 @@ public class RobotContainer {
 
     // バインディングクラスの初期化
     driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
-    autoBindings = new AutoBindings(drivebase, robotState, turret);
+    autoBindings = new AutoBindings(drivebase, robotState, shooter);
     debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController);
 
     // バインディングの設定

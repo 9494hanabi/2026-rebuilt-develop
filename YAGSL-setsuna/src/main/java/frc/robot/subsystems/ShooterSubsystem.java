@@ -18,10 +18,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // 2) 目標回転数に入ったか(Ready)を判定する
 // 3) Auto/チューニング用のログを出す
 public class ShooterSubsystem extends SubsystemBase {
-  private static final int kShooterMotorCanId = 3;
+  private static final int kShooterMotorCanId = 15;
 
   // 安全のための上限（実機で要調整）
   private static final double kMaxTargetRps = 120.0;
+
+    // Auto/Teleop共通で使う基準回転数（実機で調整）
+  public static final double kNominalShotRps = 10;
 
   // あなた指定の基準
   private static final double kReadyToleranceRps = 2.0; // ±2 RPS

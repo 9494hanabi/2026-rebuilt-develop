@@ -19,5 +19,5 @@ public final class Constants {
 
 
 
-  public static final double maxSpeed  = 4.5; // 最大走行速度[m/s]
+  public static final double maxSpeed  = 2.5; // 最大走行速度[m/s]
 }
