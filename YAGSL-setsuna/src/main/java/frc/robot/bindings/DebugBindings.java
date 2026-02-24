@@ -9,7 +9,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 // === 担当者 ===
 // 誰でも（デバッグ用）
-//
+//  一旦晴太
 // デバッグ用のバインディングを管理するクラス
 // テスト中のコードやデバッグ用のバインディングはここに書く
 // 本番前に configure() の呼び出しをコメントアウトすればOK
