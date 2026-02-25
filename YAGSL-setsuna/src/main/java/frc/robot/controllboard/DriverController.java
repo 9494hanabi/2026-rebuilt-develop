@@ -52,6 +52,19 @@ public class DriverController {
         return hid.button(getBackButton());
     }
 
+    public Trigger leftBumper() {
+        return hid.button(getLeftBumperButton());
+    }
+
+    public Trigger rightBumper() {
+        return hid.button(getRightBumperButton());
+    }
+
+    public Trigger rightTrigger() {
+        return new Trigger(() -> hid.getRawAxis(getRightTriggerAxis()) > ControlConstants.kTriggerPressedThreshold);
+    }
+
+
     public Trigger leftTrigger() {
         return new Trigger(() -> hid.getRawAxis(getLeftTriggerAxis()) > ControlConstants.kTriggerPressedThreshold);
     }
@@ -85,6 +98,13 @@ public class DriverController {
                 ? ControlConstants.XboxMapping.kLeftTriggerAxis
                 : ControlConstants.LogitechMapping.kLeftTriggerAxis;
     }
+
+    private static int getRightTriggerAxis() {
+    return isXbox()
+            ? ControlConstants.XboxMapping.kRightTriggerAxis
+            : ControlConstants.LogitechMapping.kRightTriggerAxis;
+    }
+
 
     private static int getAButton() {
         return isXbox()
@@ -121,6 +141,19 @@ public class DriverController {
                 ? ControlConstants.XboxMapping.kStartButton
                 : ControlConstants.LogitechMapping.kStartButton;
     }
+
+    private static int getLeftBumperButton() {
+    return isXbox()
+            ? ControlConstants.XboxMapping.kLeftBumperButton
+            : ControlConstants.LogitechMapping.kLeftBumperButton;
+}
+
+    private static int getRightBumperButton() {
+        return isXbox()
+            ? ControlConstants.XboxMapping.kRightBumperButton
+            : ControlConstants.LogitechMapping.kRightBumperButton;
+    }
+
 
     private static boolean isXbox() {
         return ControlConstants.kDriverControllerType == DriverControllerType.XBOX;

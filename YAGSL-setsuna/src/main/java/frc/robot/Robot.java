@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
 
   // 以下smartdashboadを使ったAutoのこと
   private static final String kDoNothingAuto = "Do Nothing";
-  private static final String kMyAuto = "New Auto";
+  private static final String kMyAuto = "New New Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().schedule(m_robotContainer.getStartupOdometryLockCommand());
 
     // smartdashboadで出てくる選択肢
-    m_chooser.setDefaultOption("New Auto", kMyAuto);
+    m_chooser.setDefaultOption("New New Auto", kMyAuto);
     m_chooser.addOption("Do Nothing", kDoNothingAuto);
 
     // smartdashboadにウェジットを追加する（名前：Auto setting）

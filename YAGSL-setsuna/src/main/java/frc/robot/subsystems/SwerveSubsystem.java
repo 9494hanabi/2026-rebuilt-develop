@@ -141,9 +141,9 @@ public class SwerveSubsystem extends SubsystemBase {
           // ROBOT RELATIVE ChassisSpeeds に基づいてロボットを駆動するメソッド。オプションで個々のモジュールのフィードフォワードを出力可能。
           new PPHolonomicDriveController(
               // PPHolonomicControllerは、ホロノミック駆動系向けの組み込みパス追従制御器です
-              new PIDConstants(5.0, 0.0, 0.0),
+              new PIDConstants(0.3, 0.0, 0.0),
               // PID定数
-              new PIDConstants(5.0, 0.0, 0.0)
+              new PIDConstants(0.3, 0.0, 0.0)
               // 回転PID定数
           ),
           config,
