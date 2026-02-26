@@ -33,6 +33,12 @@ public final class ControlConstants {
         public static final int kYButton = 4;
         public static final int kBackButton = 7;
         public static final int kStartButton = 8;
+
+        // シュートよう
+        public static final int kRightTriggerAxis = 3;
+        public static final int kLeftBumperButton = 5;
+        public static final int kRightBumperButton = 6;
+
     }
 
     // Logitech F310 (XInput) を想定したマッピング
@@ -51,5 +57,11 @@ public final class ControlConstants {
         public static final int kYButton = 4;
         public static final int kBackButton = 7;
         public static final int kStartButton = 8;
+
+        // シューター用
+        public static final int kRightTriggerAxis = 3;
+        public static final int kLeftBumperButton = 5;
+        public static final int kRightBumperButton = 6;
+
     }
 }

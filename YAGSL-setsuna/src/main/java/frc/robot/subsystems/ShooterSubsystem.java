@@ -18,13 +18,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // 2) 目標回転数に入ったか(Ready)を判定する
 // 3) Auto/チューニング用のログを出す
 public class ShooterSubsystem extends SubsystemBase {
-  private static final int kShooterMotorCanId = 15;
+  private static final int kShooterMotor_1CanId = 15;
+  private static final int kShooterMotor_2CanId = 16;
 
   // 安全のための上限（実機で要調整）
   private static final double kMaxTargetRps = 120.0;
 
     // Auto/Teleop共通で使う基準回転数（実機で調整）
-  public static final double kNominalShotRps = 10;
+  public static final double kNominalShotRps = 30;
 
   // あなた指定の基準
   private static final double kReadyToleranceRps = 2.0; // ±2 RPS
@@ -37,7 +38,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private static final double kI = 0.00;
   private static final double kD = 0.00;
 
-  private final TalonFX shooterMotor = new TalonFX(kShooterMotorCanId);
+  private final TalonFX shooterMotor_1 = new TalonFX(kShooterMotor_1CanId);
+  private final TalonFX shooterMotor_2 = new TalonFX(kShooterMotor_2CanId);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0.0);
 
   private double targetRps = 0.0;
@@ -58,7 +60,8 @@ public class ShooterSubsystem extends SubsystemBase {
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
 
-    shooterMotor.getConfigurator().apply(config);
+    shooterMotor_1.getConfigurator().apply(config);
+    shooterMotor_2.getConfigurator().apply(config);
   }
 
   // 目標RPSを設定して速度閉ループ開始
@@ -66,14 +69,16 @@ public class ShooterSubsystem extends SubsystemBase {
     targetRps = MathUtil.clamp(requestedRps, 0.0, kMaxTargetRps);
     readyWindowStartSec = Double.NaN;
     atSpeed = false;
-    shooterMotor.setControl(velocityRequest.withVelocity(targetRps));
+    shooterMotor_1.setControl(velocityRequest.withVelocity(-targetRps));
+    shooterMotor_2.setControl(velocityRequest.withVelocity(targetRps));
   }
 
   public void stop() {
     targetRps = 0.0;
     readyWindowStartSec = Double.NaN;
     atSpeed = false;
-    shooterMotor.stopMotor();
+    shooterMotor_1.stopMotor();
+    shooterMotor_2.stopMotor();
   }
 
   public double getTargetRps() {
@@ -81,7 +86,9 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public double getVelocityRps() {
-    return shooterMotor.getVelocity().getValueAsDouble();
+    double v1 = shooterMotor_1.getVelocity().getValueAsDouble();
+    double v2 = shooterMotor_2.getVelocity().getValueAsDouble();
+    return (Math.abs(v1) + Math.abs(v2)) / 2.0;
   }
 
   public double getVelocityErrorRps() {

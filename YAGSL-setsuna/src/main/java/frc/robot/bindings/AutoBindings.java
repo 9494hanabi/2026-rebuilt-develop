@@ -25,7 +25,7 @@ public class AutoBindings {
     private final RobotState robotState;
     private final ShooterSubsystem shooter;
     // 仮値: 実機完成後に距離別に最適化する
-    private static final double kShooterTestTargetRps = 80.0;
+    private static final double kShooterTestTargetRps = ShooterSubsystem.kNominalShotRps;
     private static final double kShooterReadyTimeoutSec = 1.0;
     private static final double kShooterShootWindowSec = 2.0;
 
@@ -76,6 +76,12 @@ public class AutoBindings {
                 kShooterTestTargetRps,
                 kShooterReadyTimeoutSec,
                 kShooterShootWindowSec)
+        );
+
+        // shooterZoneSpin: PathPlannerのZoned Event中だけシューターを回す
+        NamedCommands.registerCommand(
+            "shooterZoneSpin",
+            AutoCommand.shooterZoneSpin(shooter, kShooterTestTargetRps)
         );
 
         /*

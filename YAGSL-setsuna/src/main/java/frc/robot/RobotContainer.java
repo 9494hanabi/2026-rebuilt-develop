@@ -82,7 +82,7 @@ public class RobotContainer {
     // バインディングクラスの初期化
     driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
     autoBindings = new AutoBindings(drivebase, robotState, shooter);
-    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController);
+    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter);
 
     // バインディングの設定
     configureBindings();

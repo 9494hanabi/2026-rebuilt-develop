@@ -168,16 +168,16 @@ public final class AutoCommand {
   // 4) 停止
   // ※ Sim/実機どちらでもターミナル確認できるようにログを出す
   public static Command shooterShootAtRpsForWithLogs(
-      ShooterSubsystem shooter,
-      double targetRps,
-      double readyTimeoutSec,
-      double shootWindowSec) {
+    ShooterSubsystem shooter,
+    double targetRps,
+    double readyTimeoutSec,
+    double shootWindowSec) {
     return Commands.sequence(
         Commands.runOnce(() ->
             System.out.printf("[AUTO shooter] SPINUP target=%.1fRPS timeout=%.2fs%n", targetRps, readyTimeoutSec)),
-        shooterSpinUpAndWaitReady(shooter, targetRps, readyTimeoutSec),
-        Commands.runOnce(() ->
-            System.out.printf(
+       shooterSpinUpAndWaitReady(shooter, targetRps, readyTimeoutSec),
+       Commands.runOnce(() ->
+           System.out.printf(
                 "[AUTO shooter] READY=%b actual=%.2fRPS target=%.2fRPS -> SHOOT %.2fs%n",
                 shooter.atSpeed(),
                 shooter.getVelocityRps(),
@@ -187,12 +187,33 @@ public final class AutoCommand {
         shooterStop(shooter),
         Commands.runOnce(() ->
             System.out.printf("[AUTO shooter] STOP actual=%.2fRPS%n", shooter.getVelocityRps()))
-    );
+   ).finallyDo(interrupted -> {
+     shooter.stop();
+     System.out.printf(
+          "[AUTO shooter] FINAL STOP interrupted=%b actual=%.2fRPS%n",
+          interrupted, shooter.getVelocityRps());
+      });
   }
+
 
   // shooterStop: シューター停止
   public static Command shooterStop(ShooterSubsystem shooter) {
     return Commands.runOnce(shooter::stop, shooter);
+  }
+
+  // Zoned Event専用: ゾーン中だけ回し、ゾーンを抜けたら必ず停止
+  public static Command shooterZoneSpin(ShooterSubsystem shooter, double targetRps) {
+    return Commands.startEnd(
+        () -> {
+          shooter.setTargetRps(targetRps);
+          System.out.printf("[AUTO shooter] ZONE START target=%.1fRPS%n", targetRps);
+        },
+        () -> {
+          shooter.stop();
+          System.out.printf("[AUTO shooter] ZONE END actual=%.2fRPS%n", shooter.getVelocityRps());
+        },
+        shooter
+    ).finallyDo(interrupted -> shooter.stop());
   }
 
 
@@ -200,6 +221,8 @@ public final class AutoCommand {
   public static Command logMarker(String markerName) {
     return Commands.print("[AUTO marker] " + markerName);
   }
+
+  
 
   // safeStopAll: Auto終了時の安全停止（ドライブ + シューター）
   public static Command safeStopAll(SwerveSubsystem drivebase, ShooterSubsystem shooter) {
