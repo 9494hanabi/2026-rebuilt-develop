@@ -37,8 +37,11 @@ public class VisionSubsystem extends SubsystemBase {
     private static final double kMapMismatchTranslationThresholdMeter = 0.7;
     private static final int kMapMismatchMinStreak = 10;
     private static final double kMapMismatchWarnIntervalSec = 1.0;
-    private static final int kOdomDriftRecoveryThreshold = 50;
+    private static final int kOdomDriftRecoveryThreshold = 12;
     private static final double kOdomDriftRecoveryMultiplier = 2.0;
+    private static final double kFarTagDistanceBonusMeter = 1.0;
+    private static final double kGyroFallbackMinOdomDistanceMeter = 3.0;
+    private static final double kDistanceAwareStdScaleGain = 3.0;
 
     private static class MapCheckState {
         int mismatchStreak = 0;
@@ -73,6 +76,38 @@ public class VisionSubsystem extends SubsystemBase {
         return isUsingMegaTag2()
                 ? VisionConstants.kMegatag2YawStdDevIndex
                 : VisionConstants.kMegatag1YawStdDevIndex;
+    }
+
+    private double getEffectiveMaxVisionOdomDistanceMeter(
+            MegatagPoseEstimate poseEstimate, boolean gyroFallbackPath) {
+        double effectiveMaxDist = VisionConstants.kMaxVisionOdomDistanceMeter;
+        if (consecutiveOdomDistanceRejections >= kOdomDriftRecoveryThreshold) {
+            effectiveMaxDist *= kOdomDriftRecoveryMultiplier;
+        }
+
+        double area = poseEstimate.avgTagArea();
+        if (Double.isFinite(area) && VisionConstants.kTagAreaThresholdForYawCheck > 0.0) {
+            double farTagRatio =
+                    MathUtil.clamp(
+                            (VisionConstants.kTagAreaThresholdForYawCheck - area)
+                                    / VisionConstants.kTagAreaThresholdForYawCheck,
+                            0.0,
+                            1.0);
+            effectiveMaxDist += kFarTagDistanceBonusMeter * farTagRatio;
+        }
+
+        if (gyroFallbackPath && poseEstimate.fiducialIds().length == 1) {
+            effectiveMaxDist = Math.max(effectiveMaxDist, kGyroFallbackMinOdomDistanceMeter);
+        }
+        return effectiveMaxDist;
+    }
+
+    private static double getDistanceAwareStdScale(double distFromOdom, double effectiveMaxDist) {
+        if (!Double.isFinite(distFromOdom) || !Double.isFinite(effectiveMaxDist) || effectiveMaxDist <= 0.0) {
+            return 1.0;
+        }
+        double ratio = MathUtil.clamp(distFromOdom / effectiveMaxDist, 0.0, 1.5);
+        return 1.0 + ratio * ratio * kDistanceAwareStdScaleGain;
     }
 
     // コンストラクタ
@@ -222,6 +257,7 @@ public class VisionSubsystem extends SubsystemBase {
         accepted.ifPresent(
             est -> {
                 Logger.recordOutput("Vision/fusedAccepted", est.getVisionRobotPoseMeters());
+                consecutiveOdomDistanceRejections = 0;
                 state.updateMegatagEstimate((est));
             });
         
@@ -387,14 +423,16 @@ public class VisionSubsystem extends SubsystemBase {
 
         // fuseWithGyroの結果もOdomから大幅に離れている場合は棄却する。
         // processMegatagが弾いた後にこちらが通り抜けるのを防ぐ。
+        double effectiveMaxDist = getEffectiveMaxVisionOdomDistanceMeter(poseEstimate, true);
         double distFromOdomGyro = posteriorPose.getTranslation()
                 .getDistance(priorPose.get().getTranslation());
-        if (distFromOdomGyro > VisionConstants.kMaxVisionOdomDistanceMeter) {
+        if (distFromOdomGyro > effectiveMaxDist) {
+            consecutiveOdomDistanceRejections++;
             System.out.printf(
                 "[VisionFilter/Gyro] REJECTED tag=%s dist=%.2fm(>%.2fm)"
                     + " odom=(%.3f,%.3f) posterior=(%.3f,%.3f)%n",
                 java.util.Arrays.toString(poseEstimate.fiducialIds()),
-                distFromOdomGyro, VisionConstants.kMaxVisionOdomDistanceMeter,
+                distFromOdomGyro, effectiveMaxDist,
                 priorPose.get().getX(), priorPose.get().getY(),
                 posteriorPose.getX(), posteriorPose.getY());
             return Optional.empty();
@@ -403,7 +441,8 @@ public class VisionSubsystem extends SubsystemBase {
         // 標準偏差
         double xStd = cam.standardDeviations[getVisionXStdDevIndex()];
         double yStd = cam.standardDeviations[getVisionYStdDevIndex()];
-        double xyStd = Math.max(xStd, yStd);
+        double distanceAwareScale = getDistanceAwareStdScale(distFromOdomGyro, effectiveMaxDist);
+        double xyStd = Math.max(xStd, yStd) * distanceAwareScale;
 
         // 補正した姿勢情報からデータクラスVisionFieldPoseEstimateを作成して返り値として代入
         return Optional.of(
@@ -496,10 +535,7 @@ public class VisionSubsystem extends SubsystemBase {
         // Vision推定がOdomから大幅に離れている場合は棄却する。
         // fmapミスマッチや実タグ配置誤りによるジャンプ防止。
         // 連続棄却が続いた場合はしきい値を緩和し、オドメトリドリフトからの回復を許可する。
-        double effectiveMaxDist = VisionConstants.kMaxVisionOdomDistanceMeter;
-        if (consecutiveOdomDistanceRejections >= kOdomDriftRecoveryThreshold) {
-            effectiveMaxDist *= kOdomDriftRecoveryMultiplier;
-        }
+        double effectiveMaxDist = getEffectiveMaxVisionOdomDistanceMeter(poseEstimate, false);
         double distFromOdom = poseEstimate.fieldToRobot().getTranslation()
                 .getDistance(loggedPose.get().getTranslation());
         if (distFromOdom > effectiveMaxDist) {
@@ -528,7 +564,8 @@ public class VisionSubsystem extends SubsystemBase {
             rotStd = Math.max(rotStd, VisionConstants.kLargeVariance);
         }
         
-        double xyStd = Math.max(xStd, yStd);
+        double distanceAwareScale = getDistanceAwareStdScale(distFromOdom, effectiveMaxDist);
+        double xyStd = Math.max(xStd, yStd) * distanceAwareScale;
         Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStd, xyStd, rotStd);
 
         return Optional.of(

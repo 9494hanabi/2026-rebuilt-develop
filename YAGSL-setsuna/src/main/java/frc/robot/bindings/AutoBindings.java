@@ -4,6 +4,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
 import frc.robot.commands.AutoCommand;
+import frc.robot.lib.constants.FieldConstants;
+import frc.robot.lib.constants.PathPlannerConstants;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -111,6 +113,25 @@ public class AutoBindings {
         NamedCommands.registerCommand(
             "safeStopAll",
             AutoCommand.safeStopAll(drivebase, shooter)
+        );
+
+        // pathfindToFieldCenter: フィールド中心へ経路探索して移動（デバッグ用）
+        NamedCommands.registerCommand(
+            "pathfindToFieldCenter",
+            AutoCommand.pathfindToPose(
+                drivebase,
+                FieldConstants.kInitialFieldToRobotPose,
+                PathPlannerConstants.kDefaultPathfindingConstraints,
+                0.0)
+        );
+
+        // pathfindThenFollowNewPath: New Pathへ接続して追従（デバッグ用）
+        NamedCommands.registerCommand(
+            "pathfindThenFollowNewPath",
+            AutoCommand.pathfindThenFollowPath(
+                drivebase,
+                "New Path",
+                PathPlannerConstants.kDefaultPathfindingConstraints)
         );
     }
 }

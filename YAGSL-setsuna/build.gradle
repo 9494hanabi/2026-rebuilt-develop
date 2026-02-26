@@ -8,6 +8,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+sourceSets {
+    main {
+        java {
+            // Keep local experimental pathplanner copies out of production compile.
+            exclude 'frc/robot/lib/pathplanner/**'
+        }
+    }
+}
+
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)

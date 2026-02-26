@@ -1,0 +1,4 @@
+interface:
+  display_name: "Issue Creator"
+  short_description: "Generate MANAGEMENT issue files reliably."
+  default_prompt: "Use $issue-creator to create a new MANAGEMENT issue directory and markdown file from request details."

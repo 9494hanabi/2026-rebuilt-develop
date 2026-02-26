@@ -8,11 +8,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -21,16 +25,19 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveDrive;
+import org.littletonrobotics.junction.Logger;
 // import swervelib.SwerveInputStream;
 // import edu.wpi.first.math.util.Units;
 
@@ -39,6 +46,7 @@ import frc.robot.subsystems.vision.VisionFieldPoseEstimate;
 import frc.robot.RobotState;
 import frc.robot.lib.constants.TeleopConstants;
 import frc.robot.lib.constants.FieldConstants;
+import frc.robot.lib.constants.PathPlannerConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 // === 担当者 ===
@@ -167,12 +175,53 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       DriverStation.reportWarning(
           "PathPlanner 初期化に失敗したため AutoBuilder を無効化します: " + e.getMessage(), false);
+      PathPlannerLogging.clearLoggingCallbacks();
       return;
     }
+
+    setupPathPlannerLogging();
+
     // PathPlannerの経路探索プリロードはCPU負荷が高く、
     // 起動直後にループオーバーランを誘発するためデフォルトでは無効化。
     if (ENABLE_PATHFINDING_WARMUP) {
       CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+    }
+  }
+
+  private void setupPathPlannerLogging() {
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> {
+          robotState.setTrajectoryTargetPose(pose);
+          Logger.recordOutput("PathPlanner/targetPose", pose);
+        });
+    PathPlannerLogging.setLogCurrentPoseCallback(
+        pose -> {
+          robotState.setTrajectoryCurrentPose(pose);
+          Logger.recordOutput("PathPlanner/currentPose", pose);
+        });
+    PathPlannerLogging.setLogActivePathCallback(
+        activePath -> {
+          List<Pose2d> poses = activePath == null ? List.of() : activePath;
+          Logger.recordOutput("PathPlanner/activePath", poses.toArray(new Pose2d[0]));
+        });
+  }
+
+  public SendableChooser<Command> buildAutoChooser(String defaultAutoName) {
+    if (!AutoBuilder.isConfigured()) {
+      DriverStation.reportWarning(
+          "AutoBuilderが未設定のため、Auto chooserはNoneのみを表示します。", false);
+      SendableChooser<Command> fallback = new SendableChooser<>();
+      fallback.setDefaultOption("None", Commands.none());
+      return fallback;
+    }
+    try {
+      return AutoBuilder.buildAutoChooser(defaultAutoName);
+    } catch (RuntimeException e) {
+      DriverStation.reportWarning(
+          "Auto chooser生成に失敗したためNoneへフォールバックします: " + e.getMessage(), false);
+      SendableChooser<Command> fallback = new SendableChooser<>();
+      fallback.setDefaultOption("None", Commands.none());
+      return fallback;
     }
   }
 
@@ -184,6 +233,62 @@ public class SwerveSubsystem extends SubsystemBase {
     // AutoBuilderを使用してパス追跡コマンドを作成します。これによりイベントマーカーもトリガーされます。
     return new PathPlannerAuto(pathName);
   }
+
+  public Command followPath(String pathName) {
+    if (!AutoBuilder.isConfigured()) {
+      DriverStation.reportWarning(
+          "AutoBuilder未設定のため followPath(" + pathName + ") をスキップします。", false);
+      return Commands.none();
+    }
+
+    try {
+      PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+      return AutoBuilder.followPath(path);
+    } catch (Exception e) {
+      DriverStation.reportWarning(
+          "Pathファイル読み込み失敗: " + pathName + " (" + e.getMessage() + ")", false);
+      return Commands.none();
+    }
+  }
+
+  public Command pathfindToPose(Pose2d targetPose, PathConstraints constraints, double goalEndVelocityMps) {
+    if (!AutoBuilder.isPathfindingConfigured()) {
+      DriverStation.reportWarning(
+          "Pathfinding未設定のため pathfindToPose をスキップします。", false);
+      return Commands.none();
+    }
+    return AutoBuilder.pathfindToPose(targetPose, constraints, goalEndVelocityMps);
+  }
+
+  public Command pathfindToPose(Pose2d targetPose, PathConstraints constraints) {
+    return pathfindToPose(targetPose, constraints, 0.0);
+  }
+
+  public Command pathfindToPose(Pose2d targetPose) {
+    return pathfindToPose(targetPose, PathPlannerConstants.kDefaultPathfindingConstraints, 0.0);
+  }
+
+  public Command pathfindThenFollowPath(String goalPathName, PathConstraints constraints) {
+    if (!AutoBuilder.isPathfindingConfigured()) {
+      DriverStation.reportWarning(
+          "Pathfinding未設定のため pathfindThenFollowPath(" + goalPathName + ") をスキップします。", false);
+      return Commands.none();
+    }
+
+    try {
+      PathPlannerPath goalPath = PathPlannerPath.fromPathFile(goalPathName);
+      return AutoBuilder.pathfindThenFollowPath(goalPath, constraints);
+    } catch (Exception e) {
+      DriverStation.reportWarning(
+          "Pathファイル読み込み失敗: " + goalPathName + " (" + e.getMessage() + ")", false);
+      return Commands.none();
+    }
+  }
+
+  public Command pathfindThenFollowPath(String goalPathName) {
+    return pathfindThenFollowPath(goalPathName, PathPlannerConstants.kDefaultPathfindingConstraints);
+  }
+
   //===========PathPlannreの設定終わり==============
 
 

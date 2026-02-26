@@ -5,8 +5,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.RobotState;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
@@ -42,6 +44,37 @@ public final class AutoCommand {
         drivebase.getAutonomousCommand(autoName),
         stopDrive(drivebase),
         Commands.print("[AUTO] end: " + autoName));
+  }
+
+  public static Command followPath(SwerveSubsystem drivebase, String pathName) {
+    return Commands.sequence(
+        Commands.print("[AUTO] followPath start: " + pathName),
+        drivebase.followPath(pathName),
+        stopDrive(drivebase),
+        Commands.print("[AUTO] followPath end: " + pathName));
+  }
+
+  public static Command pathfindToPose(
+      SwerveSubsystem drivebase,
+      Pose2d targetPose,
+      PathConstraints constraints,
+      double goalEndVelocityMps) {
+    return Commands.sequence(
+        Commands.print("[AUTO] pathfindToPose start"),
+        drivebase.pathfindToPose(targetPose, constraints, goalEndVelocityMps),
+        stopDrive(drivebase),
+        Commands.print("[AUTO] pathfindToPose end"));
+  }
+
+  public static Command pathfindThenFollowPath(
+      SwerveSubsystem drivebase,
+      String goalPathName,
+      PathConstraints constraints) {
+    return Commands.sequence(
+        Commands.print("[AUTO] pathfindThenFollowPath start: " + goalPathName),
+        drivebase.pathfindThenFollowPath(goalPathName, constraints),
+        stopDrive(drivebase),
+        Commands.print("[AUTO] pathfindThenFollowPath end: " + goalPathName));
   }
 
   // runChassisFor: 指定時間だけ任意の速度で走る共通メソッド

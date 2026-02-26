@@ -1,0 +1,4 @@
+interface:
+  display_name: "Trial Creator"
+  short_description: "Generate MANAGEMENT trial files reliably."
+  default_prompt: "Use $trial-creator to create a new MANAGEMENT trial file for a parent issue or trial."

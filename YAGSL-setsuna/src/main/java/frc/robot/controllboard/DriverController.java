@@ -56,6 +56,22 @@ public class DriverController {
         return new Trigger(() -> hid.getRawAxis(getLeftTriggerAxis()) > ControlConstants.kTriggerPressedThreshold);
     }
 
+    public Trigger povUp() {
+        return new Trigger(() -> hid.getHID().getPOV() == 0);
+    }
+
+    public Trigger povRight() {
+        return new Trigger(() -> hid.getHID().getPOV() == 90);
+    }
+
+    public Trigger povDown() {
+        return new Trigger(() -> hid.getHID().getPOV() == 180);
+    }
+
+    public Trigger povLeft() {
+        return new Trigger(() -> hid.getHID().getPOV() == 270);
+    }
+
     private static int getLeftXAxis() {
         return isXbox()
                 ? ControlConstants.XboxMapping.kLeftXAxis
