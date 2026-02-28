@@ -29,8 +29,11 @@ public class SetToCornerPathPlannerCommand extends SequentialCommandGroup {
                     1.0,
                     Math.toRadians(90.0),
                     Math.toRadians(180.0));
+    private static final double kMinimumCornerPathTimeoutSec = 3.0;
+    private static final double kCornerPathTimeoutBufferSec = 1.5;
 
     private Pose2d targetPose;
+    private double targetTimeoutSec = kMinimumCornerPathTimeoutSec;
 
     public SetToCornerPathPlannerCommand(
             SwerveSubsystem swerve,
@@ -38,14 +41,21 @@ public class SetToCornerPathPlannerCommand extends SequentialCommandGroup {
             Corner corner) {
         addCommands(
                 Commands.runOnce(() -> {
-                    Rotation2d keepHeading = swerve.getSwerveDrive().getPose().getRotation();
+                    Pose2d currentPose = swerve.getSwerveDrive().getPose();
+                    Rotation2d keepHeading = currentPose.getRotation();
                     targetPose = resolveCornerPose(corner, keepHeading);
+                    targetTimeoutSec =
+                            estimatePathTimeoutSec(
+                                    currentPose,
+                                    targetPose,
+                                    kSafeCornerPathfindingConstraints);
                     state.setTrajectoryTargetPose(targetPose);
                     System.out.printf(
-                            "[SetToCornerPathPlanner] START corner=%s target=%s keepHeading=%.1fdeg%n",
+                            "[SetToCornerPathPlanner] START corner=%s target=%s keepHeading=%.1fdeg timeout=%.2fs%n",
                             corner,
                             formatPose(targetPose),
-                            keepHeading.getDegrees());
+                            keepHeading.getDegrees(),
+                            targetTimeoutSec);
                 }),
                 Commands.defer(
                         () -> {
@@ -58,7 +68,7 @@ public class SetToCornerPathPlannerCommand extends SequentialCommandGroup {
                             return swerve.pathfindToPose(
                                     targetPose,
                                     kSafeCornerPathfindingConstraints,
-                                    0.0);
+                                    0.0).withTimeout(targetTimeoutSec);
                         },
                         Set.of(swerve)),
                 Commands.runOnce(() ->
@@ -81,6 +91,48 @@ public class SetToCornerPathPlannerCommand extends SequentialCommandGroup {
             case RIGHT_DOWN -> new Pose2d(nearMaxX, nearMinY, headingToKeep);
             case LEFT_DOWN -> new Pose2d(nearMinX, nearMinY, headingToKeep);
         };
+    }
+
+    private static double estimatePathTimeoutSec(
+            Pose2d startPose,
+            Pose2d goalPose,
+            PathConstraints constraints) {
+        if (!isFinitePose(startPose) || !isFinitePose(goalPose) || constraints == null) {
+            return kMinimumCornerPathTimeoutSec;
+        }
+
+        double distanceMeter = startPose.getTranslation().getDistance(goalPose.getTranslation());
+        double maxVelocityMps = constraints.maxVelocityMPS();
+        double maxAccelerationMpsSq = constraints.maxAccelerationMPSSq();
+
+        if (!Double.isFinite(distanceMeter)
+                || !Double.isFinite(maxVelocityMps)
+                || !Double.isFinite(maxAccelerationMpsSq)
+                || maxVelocityMps <= 0.0
+                || maxAccelerationMpsSq <= 0.0) {
+            return kMinimumCornerPathTimeoutSec;
+        }
+
+        double accelTimeSec = maxVelocityMps / maxAccelerationMpsSq;
+        double accelDistanceMeter =
+                0.5 * maxAccelerationMpsSq * accelTimeSec * accelTimeSec;
+
+        double motionTimeSec;
+        if (distanceMeter <= 2.0 * accelDistanceMeter) {
+            motionTimeSec = 2.0 * Math.sqrt(distanceMeter / maxAccelerationMpsSq);
+        } else {
+            motionTimeSec =
+                    (2.0 * accelTimeSec)
+                            + ((distanceMeter - (2.0 * accelDistanceMeter)) / maxVelocityMps);
+        }
+
+        if (!Double.isFinite(motionTimeSec)) {
+            return kMinimumCornerPathTimeoutSec;
+        }
+
+        return Math.max(
+                kMinimumCornerPathTimeoutSec,
+                motionTimeSec + kCornerPathTimeoutBufferSec);
     }
 
     private static boolean isFinitePose(Pose2d pose) {

@@ -11,7 +11,7 @@ public final class ControlConstants {
     }
 
     // 使用するドライバーコントローラー種別をここで切り替える
-    public static final DriverControllerType kDriverControllerType = DriverControllerType.XBOX;
+    public static final DriverControllerType kDriverControllerType = DriverControllerType.LOGITECH;
 
     public static final int kDriverControllerPort = 0;
     public static final double kDeadband = 0.08;

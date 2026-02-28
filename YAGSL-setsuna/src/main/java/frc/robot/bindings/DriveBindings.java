@@ -50,28 +50,28 @@ public class DriveBindings {
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.LEFT_UP)
+                SetToCornerPathPlannerCommand.Corner.RIGHT_UP)
         );
 
         controller.y().and(controller.povRight()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.RIGHT_UP)
+                SetToCornerPathPlannerCommand.Corner.RIGHT_DOWN)
         );
 
         controller.y().and(controller.povDown()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.RIGHT_DOWN)
+                SetToCornerPathPlannerCommand.Corner.LEFT_DOWN)
         );
 
         controller.y().and(controller.povLeft()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.LEFT_DOWN)
+                SetToCornerPathPlannerCommand.Corner.LEFT_UP)
         );
 
         controller.x().whileTrue(
@@ -79,8 +79,15 @@ public class DriveBindings {
         );
 
         // 強制停止コマンド
-        controller.leftTrigger().onTrue(
-            new ClearOdometryAndLockStopCommand(drivebase)
+        controller.leftTrigger().onTrue(Commands.sequence(
+            Commands.print("[DriveBindings] LEFT TRIGGER -> ClearOdometryAndLockStopCommand"),
+            new ClearOdometryAndLockStopCommand(drivebase))
+        );
+
+        // 予備の強制停止（トリガー系が反応しない場合のバックアップ）
+        controller.start().onTrue(Commands.sequence(
+            Commands.print("[DriveBindings] START -> ClearOdometryAndLockStopCommand"),
+            new ClearOdometryAndLockStopCommand(drivebase))
         );
     }
 }
