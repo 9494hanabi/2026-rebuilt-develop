@@ -15,12 +15,12 @@ public final class FieldConstants {
 
     // === フィールド切り替えフラグ ===
     /** テスト用フィールドを使用するか（true: テスト用, false: 公式） */
-    public static final boolean useTestField = true;
+        public static final boolean useTestField = true;
 
-    // テスト用fmap (src/main/deploy からの相対パス)
-    // Limelight側で使用している Expected マップと一致させる。
-    private static final String testFieldFmapPath =
-            "maps/fiducials.fmap";
+        // テスト用fmap (src/main/deploy からの相対パス)
+        // Limelight側で使用している Expected マップと一致させる。
+        private static final String testFieldFmapPath =
+                "maps/fiducials.fmap";
 
     // 使用中のフィールドレイアウト
     public static final AprilTagFieldLayout kAprilTagLayout =

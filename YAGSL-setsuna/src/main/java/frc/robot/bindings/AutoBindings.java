@@ -3,9 +3,13 @@ package frc.robot.bindings;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
-import frc.robot.commands.AutoCommand;
+import frc.robot.commands.auto.AutoCommand;
+import frc.robot.commands.auto.autovision.AutoVisionCommand;
+import frc.robot.lib.constants.AutoVisionConstants;
 import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.constants.PathPlannerConstants;
+import frc.robot.lib.constants.ShootAngleConstants;
+import frc.robot.subsystems.ShootAngleSubsystems;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -24,16 +28,24 @@ public class AutoBindings {
     private final SwerveSubsystem drivebase;
     private final RobotState robotState;
     private final ShooterSubsystem shooter;
+    private final ShootAngleSubsystems shootAngle;
     // 仮値: 実機完成後に距離別に最適化する
     private static final double kShooterTestTargetRps = ShooterSubsystem.kNominalShotRps;
     private static final double kShooterReadyTimeoutSec = 1.0;
     private static final double kShooterShootWindowSec = 2.0;
 
+    // Angle調整のtimeout
+    private static final double kShootAngleReadyTimeoutSec = 0.5;
 
-    public AutoBindings(SwerveSubsystem drivebase, RobotState robotState, ShooterSubsystem shooter) {
+    public AutoBindings(
+        SwerveSubsystem drivebase,
+        RobotState robotState,
+        ShooterSubsystem shooter,
+        ShootAngleSubsystems shootAngle) {
         this.drivebase = drivebase;
         this.robotState = robotState;
         this.shooter = shooter;
+        this.shootAngle = shootAngle;
     }
 
     /**
@@ -83,6 +95,23 @@ public class AutoBindings {
             "shooterZoneSpin",
             AutoCommand.shooterZoneSpin(shooter, kShooterTestTargetRps)
         );
+
+        NamedCommands.registerCommand(
+            "shootAngleSetTag7",
+            AutoCommand.shootAngleSetTargetRot(shootAngle, ShootAngleConstants.kAutoTag7Rot));
+
+        NamedCommands.registerCommand(
+            "shootAngleWaitReady0p5s",
+            AutoCommand.shootAngleWaitAtTarget(shootAngle, kShootAngleReadyTimeoutSec));
+
+        NamedCommands.registerCommand(
+            "shootAngleSetAndWaitTag7",
+            AutoCommand.shootAngleSetAndWaitRot(
+                shootAngle,
+                ShootAngleConstants.kAutoTag7Rot,
+                kShootAngleReadyTimeoutSec));
+
+
 
         /*
          * ==== PathPlannerイベントマーカー用コマンド登録 ====
@@ -139,5 +168,55 @@ public class AutoBindings {
                 "New Path",
                 PathPlannerConstants.kDefaultPathfindingConstraints)
         );
+
+        /*
+        * ==== AutoVision 関連マーカー登録 ====
+        */
+        NamedCommands.registerCommand(
+            "visionScoreModeOn",
+            AutoVisionCommand.enterScoreVisionMode(
+            robotState,
+            AutoVisionConstants.kVisionTableName,
+            AutoVisionConstants.kAprilTagPipeline,
+            AutoVisionConstants.kDefaultScoreTagId));
+
+        NamedCommands.registerCommand(
+            "visionScoreModeOff",
+            AutoVisionCommand.exitScoreVisionMode(robotState));
+
+        NamedCommands.registerCommand(
+            "visionAlignTag1p0s",
+            AutoVisionCommand.alignToTagFor(
+                drivebase,
+                robotState,
+                AutoVisionConstants.kTagAlignTimeoutSec));
+
+        NamedCommands.registerCommand(
+            "visionPieceModeOn",
+            AutoVisionCommand.setPipeline(
+                AutoVisionConstants.kVisionTableName,
+                AutoVisionConstants.kPieceDetectorPipeline));
+
+        NamedCommands.registerCommand(
+            "visionAcquirePiece",
+            AutoVisionCommand.acquirePieceWithTimeout(
+                drivebase,
+                AutoVisionConstants.kVisionTableName,
+                AutoVisionConstants.kPieceDetectorPipeline,
+                AutoVisionConstants.kAprilTagPipeline,
+                AutoVisionConstants.kPieceForwardMps,
+                AutoVisionConstants.kPieceTurnKpRadPerSecPerDeg,
+                AutoVisionConstants.kPieceMaxOmegaRadPerSec,
+                AutoVisionConstants.kPieceCenterDeadbandDeg,
+                AutoVisionConstants.kPieceNearStartAreaThreshold,
+                AutoVisionConstants.kPieceCollectWindowSec,
+                AutoVisionConstants.kPieceAcquireTimeoutSec));
+
+
+        NamedCommands.registerCommand(
+            "visionAprilTagModeOn",
+            AutoVisionCommand.setPipeline(
+                AutoVisionConstants.kVisionTableName,
+                AutoVisionConstants.kAprilTagPipeline));
     }
 }

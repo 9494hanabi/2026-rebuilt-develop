@@ -5,6 +5,12 @@ import frc.robot.RobotState;
 import frc.robot.controllboard.DriverController;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.lib.constants.FieldConstants;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.lib.constants.ControlConstants;
+import frc.robot.lib.constants.ShootAngleConstants;
+import frc.robot.subsystems.ShootAngleSubsystems;
+
 
 // === 担当者 ===
 // 誰でも（デバッグ用）
@@ -23,18 +29,31 @@ public class DebugBindings {
     private final ShooterSubsystem shooter;
     private static final double kDebugShooterRps = ShooterSubsystem.kNominalShotRps;
 
+    private final ShootAngleSubsystems shootAngle;
+    private int shootAnglePresetIndex = ShootAngleConstants.kDefaultPresetIndex;
+
+    private final Trigger dpadUp = new Trigger(
+        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 0);
+
+    private final Trigger dpadDown = new Trigger(
+        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 180);
+
+
     public DebugBindings(
             SwerveSubsystem drivebase,
             VisionSubsystem vision,
             RobotState robotState,
             DriverController controller,
-            ShooterSubsystem shooter) {
+            ShooterSubsystem shooter,
+            ShootAngleSubsystems shootAngle) {
         this.drivebase = drivebase;
         this.vision = vision;
         this.robotState = robotState;
         this.controller = controller;
         this.shooter = shooter;
+        this.shootAngle = shootAngle;
     }
+
 
     /**
      * デバッグ用のバインディングを設定
@@ -67,6 +86,20 @@ public class DebugBindings {
             shooter.atSpeed());
         }, shooter));
 
+        dpadUp.onTrue(Commands.runOnce(() -> {
+            shootAnglePresetIndex =
+                Math.min(shootAnglePresetIndex + 1, ShootAngleConstants.kPresetRot.length - 1);
+            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
+            shootAngle.setTargetMotorRot(targetRot);
+            System.out.printf("[ShootAngle] DPadUp -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
+        }, shootAngle));
+
+        dpadDown.onTrue(Commands.runOnce(() -> {
+            shootAnglePresetIndex = Math.max(shootAnglePresetIndex - 1, 0);
+            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
+            shootAngle.setTargetMotorRot(targetRot);
+            System.out.printf("[ShootAngle] DPadDown -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
+        }, shootAngle));
 
         // Backボタン: 現在のポーズを表示
         controller.back().onTrue(Commands.runOnce(() -> {
