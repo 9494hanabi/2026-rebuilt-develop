@@ -24,8 +24,8 @@ public class ShooterSubsystem extends SubsystemBase {
   // 安全のための上限（実機で要調整）
   private static final double kMaxTargetRps = 120.0;
 
-    // Auto/Teleop共通で使う基準回転数（実機で調整）
-  public static final double kNominalShotRps = 30;
+  // Auto/Teleop共通で使う基準回転数（実機で調整）
+  public static final double kNominalShotRps = 95;
 
   // あなた指定の基準
   private static final double kReadyToleranceRps = 2.0; // ±2 RPS

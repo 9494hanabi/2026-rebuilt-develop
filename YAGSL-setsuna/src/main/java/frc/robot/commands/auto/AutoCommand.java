@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.auto;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,6 +14,7 @@ import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ShootAngleSubsystems;
 
 // === 担当者 ===
 // はるた
@@ -160,6 +161,35 @@ public final class AutoCommand {
         Commands.waitSeconds(seconds),
         shooterStop(shooter));
   }
+
+  /*
+  * shootAngleSetTargetRotのCommand
+  */
+  // shootAngleSetTargetRot: 目標Rotをセット
+  public static Command shootAngleSetTargetRot(ShootAngleSubsystems shootAngle, double targetRot) {
+    return Commands.runOnce(() -> shootAngle.setTargetMotorRot(targetRot), shootAngle);
+  }
+
+  // shootAngleWaitAtTarget: 目標Rot到達を待つ
+  public static Command shootAngleWaitAtTarget(ShootAngleSubsystems shootAngle, double timeoutSec) {
+    return Commands.waitUntil(shootAngle::atTarget).withTimeout(timeoutSec);
+  }
+
+  // shootAngleSetAndWaitRot: Rotセット -> 到達待ち
+  public static Command shootAngleSetAndWaitRot(
+      ShootAngleSubsystems shootAngle,
+      double targetRot,
+      double timeoutSec) {
+    return Commands.sequence(
+        shootAngleSetTargetRot(shootAngle, targetRot),
+        shootAngleWaitAtTarget(shootAngle, timeoutSec));
+  }
+
+  // shootAngleStop: 角度モーター停止
+  public static Command shootAngleStop(ShootAngleSubsystems shootAngle) {
+    return Commands.runOnce(shootAngle::stop, shootAngle);
+  }
+
 
   // shooterShootAtRpsForWithLogs:
   // 1) 目標RPSへスピンアップ

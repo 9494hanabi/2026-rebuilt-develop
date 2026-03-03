@@ -4,7 +4,6 @@ package frc.robot.lib.constants;
 // ひなた
 //
 
-@Deprecated
 public final class FieldConstants extends VisionFieldConstants {
     private FieldConstants() {}
 }

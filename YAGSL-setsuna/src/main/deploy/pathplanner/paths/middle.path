@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 4.222
+        "x": 3.5,
+        "y": 7.423
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0,
-        "y": 4.771275906066039
+        "x": 5.26767922125182,
+        "y": 7.572181472889374
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.0,
-        "y": 6.09828297582166
+        "x": 7.426,
+        "y": 6.513
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 5.357472456325092
+        "x": 5.501229541939592,
+        "y": 7.78532618040393
       },
       "nextControl": null,
       "isLocked": false,
@@ -38,26 +38,14 @@
       },
       "rotationOffset": 0.0,
       "minWaypointRelativePos": 0.0,
-      "maxWaypointRelativePos": 1.0,
+      "maxWaypointRelativePos": 0.5,
       "name": "Point Towards Zone"
     }
   ],
-  "eventMarkers": [
-    {
-      "name": "shootZoneSpin",
-      "waypointRelativePos": 0.2997355999043976,
-      "endWaypointRelativePos": 0.7987272944550673,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "shooterZoneSpin"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
-    "maxAcceleration": 0.5,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -65,7 +53,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -106.87279917119
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,

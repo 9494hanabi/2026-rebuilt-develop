@@ -2,6 +2,7 @@ package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.ShootAngleSubsystems;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,8 +19,8 @@ import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 // バインディング
 import frc.robot.bindings.DriveBindings;
-import frc.robot.bindings.AutoBindings;
 import frc.robot.bindings.DebugBindings;
+import frc.robot.bindings.AutoBindings;
 
 
 // === 担当者 ===
@@ -49,11 +50,14 @@ public class RobotContainer {
   private final DriveBindings driveBindings;
   private final AutoBindings autoBindings;
   private final DebugBindings debugBindings;
+  private final ShootAngleSubsystems shootAngle;
 
   public RobotContainer() {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
     shooter = new ShooterSubsystem();
+    shootAngle = new ShootAngleSubsystems();
+
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
     visionSubsystem = new VisionSubsystem(
         LimelightConfig.getInstance().isAnyLimelightEnabled()
@@ -81,13 +85,12 @@ public class RobotContainer {
 
     // バインディングクラスの初期化
     driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
-    autoBindings = new AutoBindings(drivebase, robotState, shooter);
-    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter);
+    autoBindings = new AutoBindings(drivebase, robotState, shooter, shootAngle);
+    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter, shootAngle);
 
     // バインディングの設定
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-
     autoChooser = drivebase.buildAutoChooser("New Auto");
     SmartDashboard.putData("Auto setting", autoChooser);
   }
