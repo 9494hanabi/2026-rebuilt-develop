@@ -21,13 +21,13 @@
             "table": "limelight-fc",
             "enabled": true,
             "robotToCamera": {
-                "x": 0.4275,
+                "x": 0.3225,
                 "y": 0.00,
                 "yawDeg": 0.00
             },
             "cameraPose": {
-                "heightMeters": 0.2,
-                "pitchDeg": 0.00
+                "heightMeters": 0.25,
+                "pitchDeg": 30.00
             },
             "stdDevScale": 1.0,
             "pipeline": 1.0

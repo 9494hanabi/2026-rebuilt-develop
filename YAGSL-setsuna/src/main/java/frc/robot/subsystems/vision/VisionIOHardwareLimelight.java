@@ -100,7 +100,14 @@ public class VisionIOHardwareLimelight implements VisionIO {
 
     private void setLLSettings() {
         for (CameraHandle camera : cameraHandles) {
-            // cameraPoseはLimelight Web UIで設定するため、コードからの上書きは行わない
+            LimelightHelpers.setCameraPose_RobotSpace(
+                    camera.tableName,
+                    camera.cameraPose[0],
+                    camera.cameraPose[1],
+                    camera.cameraPose[2],
+                    camera.cameraPose[3],
+                    camera.cameraPose[4],
+                    camera.cameraPose[5]);
             camera.table.getEntry("pipeline").setDouble(camera.pipeline);
         }
     }

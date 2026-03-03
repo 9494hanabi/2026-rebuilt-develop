@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.RobotState;
 import frc.robot.lib.constants.PathPlannerConstants;
-import frc.robot.lib.constants.VisionConstants;
 import frc.robot.lib.constants.commandconstants.SetToTagCommandConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 import frc.robot.lib.limelight.VisionTargetSelector;
@@ -182,19 +181,7 @@ public class SetToTagPathPlannerCommand extends Command {
   }
 
   private static String[] getEnabledVisionTables() {
-    var enabled =
-        LimelightConfig.getInstance().getEnabledLimelights().stream()
-            .map(entry -> entry.table)
-            .filter(table -> table != null && !table.isBlank())
-            .distinct()
-            .toList();
-    if (!enabled.isEmpty()) {
-      return enabled.toArray(String[]::new);
-    }
-    return new String[] {
-      VisionConstants.kLimelightATableName,
-      VisionConstants.kLimelightBTableName
-    };
+    return LimelightConfig.getInstance().getEnabledTableNames();
   }
 
   private static Pose2d resolveTargetPose(int tagId) {

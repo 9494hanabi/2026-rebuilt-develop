@@ -1,7 +1,7 @@
 package frc.robot.commands.debug.vision;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.lib.constants.VisionConstants;
+import frc.robot.lib.limelight.LimelightConfig;
 import frc.robot.lib.limelight.VisionTargetSelector;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,10 +22,8 @@ public class ObservationOKCommand extends Command {
     public ObservationOKCommand(
             SwerveSubsystem swerve) {
         this.swerve = swerve;
-        this.targetSelector =
-            new VisionTargetSelector(
-                VisionConstants.kLimelightATableName,
-                VisionConstants.kLimelightBTableName);
+        this.targetSelector = new VisionTargetSelector(
+                LimelightConfig.getInstance().getEnabledTableNames());
         addRequirements(swerve);
     }
 
