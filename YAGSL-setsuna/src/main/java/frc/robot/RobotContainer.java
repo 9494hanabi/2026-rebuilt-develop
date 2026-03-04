@@ -1,8 +1,8 @@
 package frc.robot;
 
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,10 +14,10 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.controllboard.DriverController;
 import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 // バインディング
+import frc.robot.bindings.DriverController;
 import frc.robot.bindings.DriveBindings;
 import frc.robot.bindings.DebugBindings;
 import frc.robot.bindings.AutoBindings;

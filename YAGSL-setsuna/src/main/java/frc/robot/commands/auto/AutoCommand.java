@@ -12,9 +12,9 @@ import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.RobotState;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
-import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
 
 // === 担当者 ===
 // はるた

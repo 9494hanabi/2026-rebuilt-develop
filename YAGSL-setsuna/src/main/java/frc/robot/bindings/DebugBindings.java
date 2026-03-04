@@ -2,14 +2,9 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
-import frc.robot.controllboard.DriverController;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.lib.constants.FieldConstants;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.lib.constants.ControlConstants;
-import frc.robot.lib.constants.ShootAngleConstants;
-import frc.robot.subsystems.ShootAngleSubsystems;
+import frc.robot.lib.constants.commandconstants.ShootAngleCommandConstants;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
 
 
 // === 担当者 ===
@@ -30,13 +25,7 @@ public class DebugBindings {
     private static final double kDebugShooterRps = ShooterSubsystem.kNominalShotRps;
 
     private final ShootAngleSubsystems shootAngle;
-    private int shootAnglePresetIndex = ShootAngleConstants.kDefaultPresetIndex;
-
-    private final Trigger dpadUp = new Trigger(
-        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 0);
-
-    private final Trigger dpadDown = new Trigger(
-        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 180);
+    private int shootAnglePresetIndex = ShootAngleCommandConstants.kDefaultPresetIndex;
 
 
     public DebugBindings(
@@ -86,17 +75,17 @@ public class DebugBindings {
             shooter.atSpeed());
         }, shooter));
 
-        dpadUp.onTrue(Commands.runOnce(() -> {
+        controller.povUp().onTrue(Commands.runOnce(() -> {
             shootAnglePresetIndex =
-                Math.min(shootAnglePresetIndex + 1, ShootAngleConstants.kPresetRot.length - 1);
-            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
+                Math.min(shootAnglePresetIndex + 1, ShootAngleCommandConstants.kPresetRot.length - 1);
+            double targetRot = ShootAngleCommandConstants.kPresetRot[shootAnglePresetIndex];
             shootAngle.setTargetMotorRot(targetRot);
             System.out.printf("[ShootAngle] DPadUp -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
         }, shootAngle));
 
-        dpadDown.onTrue(Commands.runOnce(() -> {
+        controller.povDown().onTrue(Commands.runOnce(() -> {
             shootAnglePresetIndex = Math.max(shootAnglePresetIndex - 1, 0);
-            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
+            double targetRot = ShootAngleCommandConstants.kPresetRot[shootAnglePresetIndex];
             shootAngle.setTargetMotorRot(targetRot);
             System.out.printf("[ShootAngle] DPadDown -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
         }, shootAngle));

@@ -508,7 +508,7 @@ public class RobotState {
 
     // モード未実装のため、割愛
     // 
-    // モードが実装された場合は controllboard/ModalControls.javaを実装せよ
+    // モードが実装された場合は bindings 側に入力定義を追加する
     //
     // public void logControllerMode() {
     //     // モード切替の追跡用ログ

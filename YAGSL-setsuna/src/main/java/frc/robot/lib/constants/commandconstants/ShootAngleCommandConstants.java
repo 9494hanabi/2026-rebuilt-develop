@@ -1,9 +1,9 @@
-package frc.robot.lib.constants;
+package frc.robot.lib.constants.commandconstants;
 
 import edu.wpi.first.units.measure.Velocity;
 
-public final class ShootAngleConstants {
-  private ShootAngleConstants() {}
+public final class ShootAngleCommandConstants {
+  private ShootAngleCommandConstants() {}
 
   // 旧deg設定(80/100/220)を現在の換算値でRot化した仮値
   // TODO: 実機で最終調整

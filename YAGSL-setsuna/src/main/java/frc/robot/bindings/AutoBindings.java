@@ -8,9 +8,9 @@ import frc.robot.commands.auto.autovision.AutoVisionCommand;
 import frc.robot.lib.constants.AutoVisionConstants;
 import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.constants.PathPlannerConstants;
-import frc.robot.lib.constants.ShootAngleConstants;
-import frc.robot.subsystems.ShootAngleSubsystems;
-import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.lib.constants.commandconstants.ShootAngleCommandConstants;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 // === 担当者 ===
@@ -98,7 +98,7 @@ public class AutoBindings {
 
         NamedCommands.registerCommand(
             "shootAngleSetTag7",
-            AutoCommand.shootAngleSetTargetRot(shootAngle, ShootAngleConstants.kAutoTag7Rot));
+            AutoCommand.shootAngleSetTargetRot(shootAngle, ShootAngleCommandConstants.kAutoTag7Rot));
 
         NamedCommands.registerCommand(
             "shootAngleWaitReady0p5s",
@@ -108,7 +108,7 @@ public class AutoBindings {
             "shootAngleSetAndWaitTag7",
             AutoCommand.shootAngleSetAndWaitRot(
                 shootAngle,
-                ShootAngleConstants.kAutoTag7Rot,
+                ShootAngleCommandConstants.kAutoTag7Rot,
                 kShootAngleReadyTimeoutSec));
 
 

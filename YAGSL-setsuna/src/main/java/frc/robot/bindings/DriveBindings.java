@@ -2,11 +2,10 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
-import frc.robot.controllboard.DriverController;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
-import frc.robot.commands.debug.odmetry.SetToCornerPathPlannerCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
+import frc.robot.commands.debug.pathplanner.SetToCornerPathPlannerCommand;
 import frc.robot.commands.debug.safety.ClearOdometryAndLockStopCommand;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -46,32 +45,33 @@ public class DriveBindings {
             new SetDriveHorizonCommand(drivebase, robotState)
         );
 
+        // SetToCornerPathPlannerCommand.java
         controller.y().and(controller.povUp()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.RIGHT_UP)
+                SetToCornerPathPlannerCommand.Corner.LEFT_UP)
         );
 
         controller.y().and(controller.povRight()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.RIGHT_DOWN)
+                SetToCornerPathPlannerCommand.Corner.RIGHT_UP)
         );
 
         controller.y().and(controller.povDown()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.LEFT_DOWN)
+                SetToCornerPathPlannerCommand.Corner.RIGHT_DOWN)
         );
 
         controller.y().and(controller.povLeft()).onTrue(
             new SetToCornerPathPlannerCommand(
                 drivebase,
                 robotState,
-                SetToCornerPathPlannerCommand.Corner.LEFT_UP)
+                SetToCornerPathPlannerCommand.Corner.RIGHT_DOWN)
         );
 
         controller.x().whileTrue(
