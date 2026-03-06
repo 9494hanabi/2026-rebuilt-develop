@@ -8,6 +8,7 @@ import frc.robot.bindings.AutoBindings;
 import frc.robot.bindings.DebugBindings;
 import frc.robot.bindings.DriverController;
 import frc.robot.bindings.DriveBindings;
+import frc.robot.bindings.TrajectoryBindings;
 import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.limelight.LimelightConfig;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -50,11 +51,13 @@ public class RobotContainer {
   private final DriveBindings driveBindings;
   private final AutoBindings autoBindings;
   private final DebugBindings debugBindings;
+  private final TrajectoryBindings trajectoryBindings;
   private final ShootAngleSubsystems shootAngle;
 
   public RobotContainer() {
     robotState = new RobotState();
     drivebase = new SwerveSubsystem(robotState);
+    // carryer = new CarryerSubsystem(); // TODO: PWMチャンネル未設定のため無効化
     shooter = new ShooterSubsystem();
     shootAngle = new ShootAngleSubsystems();
     shooterFeed = new ShooterFeedSubsystem();
@@ -105,6 +108,7 @@ public class RobotContainer {
             shooter,
             shootAngle,
             shooterFeed);
+    trajectoryBindings = new TrajectoryBindings(m_driverController, shooter, shootAngle);
 
     // バインディングの設定
     configureBindings();
@@ -114,14 +118,10 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // ドライブ/ビジョン関連のバインディング（ひなた担当）
-    driveBindings.configure();
-
-    // Autonomous関連のバインディング（二年生担当）
-    autoBindings.configure();
-
-    // デバッグ用のバインディング（本番前にコメントアウト）
-    debugBindings.configure();
+    if (ControlConstants.kEnableDriveBindings) driveBindings.configure();
+    if (ControlConstants.kEnableAutoBindings) autoBindings.configure();
+    if (ControlConstants.kEnableDebugBindings) debugBindings.configure();
+    if (ControlConstants.kEnableTrajectoryBindings) trajectoryBindings.configure();
   }
 
   public Command getAutonomousCommand() {

@@ -57,6 +57,16 @@ public class LimelightConfig {
         return instance;
     }
 
+    /** deploy 配下の最新JSONを再読込しつつインスタンスを返す */
+    public static LimelightConfig refreshInstance() {
+        if (instance == null) {
+            instance = new LimelightConfig();
+        } else {
+            instance.loadConfig();
+        }
+        return instance;
+    }
+
     private void loadConfig() {
         try {
             File configFile = new File(Filesystem.getDeployDirectory(), "limelight/limelights.json");

@@ -19,7 +19,7 @@
         {
             "name": "frontcenter",
             "table": "limelight-fc",
-            "enabled": true,
+            "enabled": false,
             "robotToCamera": {
                 "x": 0.3225,
                 "y": 0.00,

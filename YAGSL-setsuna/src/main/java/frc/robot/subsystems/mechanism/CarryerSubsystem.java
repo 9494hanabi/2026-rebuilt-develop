@@ -7,7 +7,7 @@ public class CarryerSubsystem extends SubsystemBase {
     private static final int kCarryerMotor_1CanId = 255;
     private static final boolean kCarryerMotorInverted = false;
     
-    private static PWMSparkMax kCarryerMotor = new PWMSparkMax(kCarryerMotor_1CanId);
+    private final PWMSparkMax kCarryerMotor = new PWMSparkMax(kCarryerMotor_1CanId);
 
     private static final double kTargetSpeed = 1;
 

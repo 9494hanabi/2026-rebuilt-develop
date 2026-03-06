@@ -7,7 +7,7 @@ public class IntakerSubsystem extends SubsystemBase {
   private static final int kIntakerMotor_CanId = 255;
   private static final boolean kIntakerMotorInverted = false;
 
-  private static PWMSparkMax kIntakerMotor = new PWMSparkMax(kIntakerMotor_CanId);
+  private final PWMSparkMax kIntakerMotor = new PWMSparkMax(kIntakerMotor_CanId);
 
   private static final double kTargetSpeed = 1;
 

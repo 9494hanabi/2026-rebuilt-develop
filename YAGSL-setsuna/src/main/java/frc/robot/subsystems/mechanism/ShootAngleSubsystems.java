@@ -19,6 +19,12 @@ public class ShootAngleSubsystems extends SubsystemBase {
   private static final double kMotorRotAtMinAngle = -0.25;
   private static final double kMotorRotAtMaxAngle = 0.91;
 
+  // 角度変換パラメータ
+  // ギア比 10:10:100 → 総減速比 1:10 → モーター1回転 = 出力36°
+  private static final double kDegreesPerMotorRot = 36.0;
+  // 最下位置(kMotorRotAtMinAngle)での投射角
+  private static final double kLaunchAngleDegAtMinRot = 64.677887;
+
   private static final double kMinTargetRot = Math.min(kMotorRotAtMinAngle, kMotorRotAtMaxAngle);
   private static final double kMaxTargetRot = Math.max(kMotorRotAtMinAngle, kMotorRotAtMaxAngle);
   private static final double kAtTargetToleranceRot = 0.01;
@@ -69,7 +75,11 @@ public class ShootAngleSubsystems extends SubsystemBase {
   }
 
   public void setTargetMotorRot(double requestedMotorRot) {
-    targetMotorRot = MathUtil.clamp(requestedMotorRot, kMinTargetRot, kMaxTargetRot);
+    double clamped = MathUtil.clamp(requestedMotorRot, kMinTargetRot, kMaxTargetRot);
+    if (clamped == targetMotorRot) {
+      return;
+    }
+    targetMotorRot = clamped;
     angleMotor.setControl(positionRequest.withPosition(targetMotorRot));
   }
 
@@ -100,6 +110,40 @@ public class ShootAngleSubsystems extends SubsystemBase {
     return Math.abs(targetMotorRot - getMotorPosRot()) <= kAtTargetToleranceRot;
   }
 
+  // ===== 角度指定 API =====
+
+  /**
+   * 投射角[deg]を指定してアングルを動かす。
+   * 内部でモーター回転に変換する。
+   *
+   * @param launchAngleDeg 投射角 [deg]
+   */
+  public void setTargetLaunchAngleDeg(double launchAngleDeg) {
+    setTargetMotorRot(launchAngleDegToMotorRot(launchAngleDeg));
+  }
+
+  /** 現在の投射角[deg]を取得する。 */
+  public double getLaunchAngleDeg() {
+    return motorRotToLaunchAngleDeg(getMotorPosRot());
+  }
+
+  /** 目標の投射角[deg]を取得する。 */
+  public double getTargetLaunchAngleDeg() {
+    return motorRotToLaunchAngleDeg(targetMotorRot);
+  }
+
+  // ===== 角度変換 =====
+
+  /** 投射角[deg] → モーター回転[rot] */
+  public static double launchAngleDegToMotorRot(double launchAngleDeg) {
+    return (launchAngleDeg - kLaunchAngleDegAtMinRot) / kDegreesPerMotorRot + kMotorRotAtMinAngle;
+  }
+
+  /** モーター回転[rot] → 投射角[deg] */
+  public static double motorRotToLaunchAngleDeg(double motorRot) {
+    return kLaunchAngleDegAtMinRot + (motorRot - kMotorRotAtMinAngle) * kDegreesPerMotorRot;
+  }
+
   // 起動後に現在位置を任意Rotとして再ゼロ化
   public void zeroAtCurrentRotAs(double currentRot) {
     double clamped = MathUtil.clamp(currentRot, kMinTargetRot, kMaxTargetRot);
@@ -117,5 +161,7 @@ public class ShootAngleSubsystems extends SubsystemBase {
     SmartDashboard.putNumber("ShootAngle/ClosedLoopError", angleMotor.getClosedLoopError().getValueAsDouble());
     SmartDashboard.putNumber("ShootAngle/CalibMinRot", kMotorRotAtMinAngle);
     SmartDashboard.putNumber("ShootAngle/CalibMaxRot", kMotorRotAtMaxAngle);
+    SmartDashboard.putNumber("ShootAngle/LaunchAngleDeg", getLaunchAngleDeg());
+    SmartDashboard.putNumber("ShootAngle/TargetLaunchAngleDeg", getTargetLaunchAngleDeg());
   }
 }

@@ -68,8 +68,13 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   // 目標RPSを設定して速度閉ループ開始
+  // 同じ目標値で再呼び出しされた場合はReady判定をリセットしない
   public void setTargetRps(double requestedRps) {
-    targetRps = MathUtil.clamp(requestedRps, 0.0, kMaxTargetRps);
+    double clamped = MathUtil.clamp(requestedRps, 0.0, kMaxTargetRps);
+    if (clamped == targetRps) {
+      return;
+    }
+    targetRps = clamped;
     readyWindowStartSec = Double.NaN;
     atSpeed = false;
     shooterMotor_1.setControl(velocityRequest.withVelocity(-targetRps));

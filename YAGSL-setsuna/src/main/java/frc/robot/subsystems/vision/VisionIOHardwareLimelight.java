@@ -40,6 +40,7 @@ public class VisionIOHardwareLimelight implements VisionIO {
         final double[] cameraPose;
         final double stdDevScale;
         final int pipeline;
+        boolean pendingSettingsRefresh = true;
 
         double lastHeartbeat = Double.NaN;
         double lastHeartbeatChangeSec = Double.NEGATIVE_INFINITY;
@@ -84,7 +85,6 @@ public class VisionIOHardwareLimelight implements VisionIO {
     public VisionIOHardwareLimelight(RobotState robotState) {
         this.robotState = robotState;
         this.cameraHandles = buildCameraHandles();
-        setLLSettings();
     }
 
     private List<CameraHandle> buildCameraHandles() {
@@ -98,18 +98,16 @@ public class VisionIOHardwareLimelight implements VisionIO {
         return handles;
     }
 
-    private void setLLSettings() {
-        for (CameraHandle camera : cameraHandles) {
-            LimelightHelpers.setCameraPose_RobotSpace(
-                    camera.tableName,
-                    camera.cameraPose[0],
-                    camera.cameraPose[1],
-                    camera.cameraPose[2],
-                    camera.cameraPose[3],
-                    camera.cameraPose[4],
-                    camera.cameraPose[5]);
-            camera.table.getEntry("pipeline").setDouble(camera.pipeline);
-        }
+    private void applyCameraSettings(CameraHandle camera) {
+        LimelightHelpers.setCameraPose_RobotSpace(
+                camera.tableName,
+                camera.cameraPose[0],
+                camera.cameraPose[1],
+                camera.cameraPose[2],
+                camera.cameraPose[3],
+                camera.cameraPose[4],
+                camera.cameraPose[5]);
+        LimelightHelpers.setPipelineIndex(camera.tableName, camera.pipeline);
     }
 
     @Override
@@ -119,13 +117,24 @@ public class VisionIOHardwareLimelight implements VisionIO {
         // ビジョン融合済みではなくオドメトリのみのyawを使用してフィードバックループを防ぐ
         var latestOdomPose = robotState.getFieldToRobotOdom(RobotTime.getTimestampSeconds());
         boolean sentRobotOrientation = false;
+        boolean refreshedAnySettings = false;
         for (CameraHandle camera : cameraHandles) {
             VisionIOInputs.CameraInputs cameraInputs = new VisionIOInputs.CameraInputs();
             cameraInputs.name = camera.name;
             cameraInputs.tableName = camera.tableName;
             cameraInputs.robotToCamera = camera.robotToCamera;
 
-            if (latestOdomPose.isPresent()) {
+            cameraInputs.connected = isCameraConnected(camera);
+            if (cameraInputs.connected && camera.pendingSettingsRefresh) {
+                // Limelightの起動が遅い場合でも、接続後にJSON設定を必ず再送する。
+                applyCameraSettings(camera);
+                camera.pendingSettingsRefresh = false;
+                refreshedAnySettings = true;
+            } else if (!cameraInputs.connected) {
+                camera.pendingSettingsRefresh = true;
+            }
+
+            if (cameraInputs.connected && latestOdomPose.isPresent()) {
                 double yawDegrees = latestOdomPose.get().getRotation().getDegrees();
                 LimelightHelpers.SetRobotOrientation_NoFlush(
                         camera.tableName, yawDegrees, 0, 0, 0, 0, 0);
@@ -135,14 +144,13 @@ public class VisionIOHardwareLimelight implements VisionIO {
             readCameraData(camera, cameraInputs);
             inputs.cameras.add(cameraInputs);
         }
-        if (VisionConstants.useMegaTag2 && sentRobotOrientation) {
+        if (refreshedAnySettings || (VisionConstants.useMegaTag2 && sentRobotOrientation)) {
             NetworkTableInstance.getDefault().flush();
         }
         latestInputs.set(inputs);
     }
 
     private void readCameraData(CameraHandle camera, VisionIOInputs.CameraInputs cameraInputs) {
-        cameraInputs.connected = isCameraConnected(camera);
         cameraInputs.seesTarget = false;
         cameraInputs.megatagPoseEstimate = null;
         cameraInputs.megatag2PoseEstimate = null;

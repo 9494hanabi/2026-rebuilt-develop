@@ -37,6 +37,10 @@ public class ShootCommand extends Command {
   @Override
   public void execute() {
     ShootSetpoint setpoint = setpointSupplier.get();
+    if (setpoint == null) {
+      carryer.stop();
+      return;
+    }
 
     shooter.setTargetRps(setpoint.rps());
     shootAngler.setTargetMotorRot(setpoint.angleRot());
@@ -52,5 +56,6 @@ public class ShootCommand extends Command {
   public void end(boolean interrupted) {
     carryer.stop();
     shooter.stop();
+    shootAngler.stop();
   }
 }

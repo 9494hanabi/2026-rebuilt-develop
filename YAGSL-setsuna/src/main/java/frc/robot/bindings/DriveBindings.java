@@ -2,6 +2,8 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
+import frc.robot.commands.debug.odmetry.FaceFieldCenterCommand;
+import frc.robot.commands.debug.odmetry.FaceFieldCenterWhileDriveCommand;
 import frc.robot.commands.debug.odmetry.SetDriveHorizonCommand;
 import frc.robot.commands.debug.odmetry.SetThetaZeroCommand;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
@@ -76,6 +78,16 @@ public class DriveBindings {
 
         controller.x().whileTrue(
             new SetZeroCommand(drivebase, robotState)
+        );
+
+        // フィールド中心を向き続ける（回頭のみ）コマンド
+        controller.rightBumper().whileTrue(
+            new FaceFieldCenterCommand(drivebase, robotState)
+        );
+
+        // フィールド中心を向き続けながらジョイスティック並進を有効にするコマンド
+        controller.rightTrigger().whileTrue(
+            new FaceFieldCenterWhileDriveCommand(drivebase, robotState, driveAngularVelocity::get)
         );
 
         // 強制停止コマンド

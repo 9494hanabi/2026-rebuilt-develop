@@ -17,6 +17,12 @@ public final class ControlConstants {
     public static final double kDeadband = 0.08;
     public static final double kTriggerPressedThreshold = 0.5;
 
+    // バインディング有効/無効切り替え
+    public static final boolean kEnableDriveBindings = false;
+    public static final boolean kEnableAutoBindings = false;
+    public static final boolean kEnableDebugBindings = false;
+    public static final boolean kEnableTrajectoryBindings = true;
+
     // 以下HUB正対制御の定数
     // HUB座標が未確定の間は、フィールド中心を仮の目標点として使う。
     // 実際のHUB座標が分かったら、この定数だけ差し替える。
