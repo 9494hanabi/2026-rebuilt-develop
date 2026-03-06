@@ -15,7 +15,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 //
 
 public class ClearOdometryAndLockStopCommand extends Command {
-    private static final double kDefaultLockSeconds = 5.0;
+    private static final double kDefaultLockSeconds = 2.5;
 
     private final SwerveSubsystem swerve;
     private final Timer timer = new Timer();

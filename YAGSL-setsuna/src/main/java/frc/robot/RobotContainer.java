@@ -4,26 +4,21 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.bindings.AutoBindings;
+import frc.robot.bindings.DebugBindings;
+import frc.robot.bindings.DriverController;
+import frc.robot.bindings.DriveBindings;
+import frc.robot.lib.constants.ControlConstants;
+import frc.robot.lib.limelight.LimelightConfig;
+import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
+import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 import frc.robot.subsystems.vision.PieceVisionSubsystem;
-
-import swervelib.SwerveInputStream;
-
-// 254系
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.shooter.ShootAngleSubsystems;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
-import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
-import frc.robot.controllboard.DriverController;
-import frc.robot.lib.constants.ControlConstants;
-import frc.robot.lib.limelight.LimelightConfig;
-// バインディング
-import frc.robot.bindings.DriveBindings;
-import frc.robot.bindings.DebugBindings;
-import frc.robot.bindings.AutoBindings;
-
+import swervelib.SwerveInputStream;
 
 // === 担当者 ===
 // 共通（このファイルはできるだけ編集しない）
@@ -69,34 +64,47 @@ public class RobotContainer {
     piecevision = new PieceVisionSubsystem();
 
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
-    visionSubsystem = new VisionSubsystem(
-        LimelightConfig.getInstance().isAnyLimelightEnabled()
-            ? new VisionIOHardwareLimelight(robotState)
-            : new VisionIODummy(),
-        robotState);
+    visionSubsystem =
+        new VisionSubsystem(
+            LimelightConfig.getInstance().isAnyLimelightEnabled()
+                ? new VisionIOHardwareLimelight(robotState)
+                : new VisionIODummy(),
+            robotState);
 
     DriverStation.silenceJoystickConnectionWarning(true);
-    driveAngularVelocity = SwerveInputStream.of(
-            drivebase.getSwerveDrive(),
-            () -> m_driverController.getLeftY() * -1,
-            () -> m_driverController.getLeftX() * -1)
-        .withControllerRotationAxis(m_driverController::getRightX)
-        .deadband(ControlConstants.kDeadband)
-        .scaleTranslation(0.8)
-        .allianceRelativeControl(true);
+    driveAngularVelocity =
+        SwerveInputStream.of(
+                drivebase.getSwerveDrive(),
+                () -> m_driverController.getLeftY() * -1,
+                () -> m_driverController.getLeftX() * -1)
+            .withControllerRotationAxis(m_driverController::getRightX)
+            .deadband(ControlConstants.kDeadband)
+            .scaleTranslation(0.8)
+            .allianceRelativeControl(true);
 
-    driveDirectAngle = driveAngularVelocity
-        .copy()
-        .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
-        .headingWhile(true);
+    driveDirectAngle =
+        driveAngularVelocity
+            .copy()
+            .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
+            .headingWhile(true);
 
     driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
     // バインディングクラスの初期化
-    driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
-    autoBindings = new AutoBindings(drivebase, robotState, shooter, shootAngle, piecevision, shooterFeed);
-    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter, shootAngle, shooterFeed);
+    driveBindings =
+        new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
+    autoBindings =
+        new AutoBindings(drivebase, robotState, shooter, shootAngle, piecevision, shooterFeed);
+    debugBindings =
+        new DebugBindings(
+            drivebase,
+            visionSubsystem,
+            robotState,
+            m_driverController,
+            shooter,
+            shootAngle,
+            shooterFeed);
 
     // バインディングの設定
     configureBindings();

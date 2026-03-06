@@ -4,17 +4,18 @@
 
 package frc.robot.commands.auto;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.RobotState;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
+import frc.robot.lib.constants.commandconstants.ShootAngleCommandConstants;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.shooter.ShootAngleSubsystems;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
 import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 
 // === 担当者 ===
@@ -153,7 +154,7 @@ public final class AutoCommand {
         Commands.print("[AUTO shoot] " + profileName + " end"));
   }
 
-    // 以下Auto shooter+feeder連携コマンドのコード
+  // 以下Auto shooter+feeder連携コマンドのコード
   // 角度を合わせたあと、shooterを先に回し、遅延後にfeederで供給する。
   public static Command shootWithAngleAndFeedProfile(
       ShooterSubsystem shooter,
@@ -190,10 +191,10 @@ public final class AutoCommand {
         shooter,
         shootAngle,
         shooterFeed,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotAngleRot,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotRps,
+        ShootAngleCommandConstants.kAutoStartShotAngleRot,
+        ShootAngleCommandConstants.kAutoStartShotRps,
         1.0,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotSec,
+        ShootAngleCommandConstants.kAutoStartShotSec,
         "startshootcommand");
   }
 
@@ -206,13 +207,12 @@ public final class AutoCommand {
         shooter,
         shootAngle,
         shooterFeed,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotAngleRot,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotRps,
+        ShootAngleCommandConstants.kAutoOutpostShotAngleRot,
+        ShootAngleCommandConstants.kAutoOutpostShotRps,
         1.0,
-        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotSec,
+        ShootAngleCommandConstants.kAutoOutpostShotSec,
         "outpostshootcommand");
   }
-
 
   // 以下shooter停止コマンドのコード
   // safeStopAll から使う停止処理だけを残す。

@@ -2,12 +2,7 @@ package frc.robot.bindings;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
-import frc.robot.controllboard.DriverController;
-import frc.robot.lib.constants.FieldConstants;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.lib.constants.ControlConstants;
-import frc.robot.lib.constants.ShootAngleConstants;
+import frc.robot.lib.constants.commandconstants.ShootAngleCommandConstants;
 // === 担当者 ===
 // 誰でも（デバッグ用）
 //  一旦晴太
@@ -15,105 +10,129 @@ import frc.robot.lib.constants.ShootAngleConstants;
 // テスト中のコードやデバッグ用のバインディングはここに書く
 // 本番前に configure() の呼び出しをコメントアウトすればOK
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.shooter.ShootAngleSubsystems;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
-import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.mechanism.ShootAngleSubsystems;
+import frc.robot.subsystems.mechanism.ShooterSubsystem;
 import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class DebugBindings {
-    private final SwerveSubsystem drivebase;
-    private final VisionSubsystem vision;
-    private final RobotState robotState;
-    private final DriverController controller;
-    private final ShooterSubsystem shooter;
-    private final ShooterFeedSubsystem shooterFeed;
-    private static final double kDebugShooterRps = ShooterSubsystem.kNominalShotRps;
+  private final SwerveSubsystem drivebase;
+  private final VisionSubsystem vision;
+  private final RobotState robotState;
+  private final DriverController controller;
+  private final ShooterSubsystem shooter;
+  private final ShooterFeedSubsystem shooterFeed;
+  private static final double kDebugShooterRps = ShooterSubsystem.kNominalShotRps;
 
-    private final ShootAngleSubsystems shootAngle;
-    private int shootAnglePresetIndex = ShootAngleConstants.kDefaultPresetIndex;
+  private final ShootAngleSubsystems shootAngle;
+  private int shootAnglePresetIndex = ShootAngleCommandConstants.kDefaultPresetIndex;
 
-    private final Trigger dpadUp = new Trigger(
-        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 0);
+  public DebugBindings(
+      SwerveSubsystem drivebase,
+      VisionSubsystem vision,
+      RobotState robotState,
+      DriverController controller,
+      ShooterSubsystem shooter,
+      ShootAngleSubsystems shootAngle,
+      ShooterFeedSubsystem shooterFeed) {
+    this.drivebase = drivebase;
+    this.vision = vision;
+    this.robotState = robotState;
+    this.controller = controller;
+    this.shooter = shooter;
+    this.shootAngle = shootAngle;
+    this.shooterFeed = shooterFeed;
+  }
 
-    private final Trigger dpadDown = new Trigger(
-        () -> DriverStation.getStickPOV(ControlConstants.kDriverControllerPort, 0) == 180);
+  /**
+   * デバッグ用のバインディングを設定
+   * 本番前にこのメソッドの呼び出しをコメントアウトすること！
+   */
+  public void configure() {
+    // ===============================================
+    // デバッグ用のバインディングをここに追加
+    // ===============================================
 
+    // ライトバンパー（押し込めるやつの一個前）：クラーケンが回る
+    controller
+        .rightBumper()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  shooter.setTargetRps(kDebugShooterRps);
+                  System.out.printf("[Debug Shooter] START target=%.1f RPS%n", kDebugShooterRps);
+                },
+                shooter));
 
-    public DebugBindings(
-            SwerveSubsystem drivebase,
-            VisionSubsystem vision,
-            RobotState robotState,
-            DriverController controller,
-            ShooterSubsystem shooter,
-            ShootAngleSubsystems shootAngle,
-            ShooterFeedSubsystem shooterFeed) {
-        this.drivebase = drivebase;
-        this.vision = vision;
-        this.robotState = robotState;
-        this.controller = controller;
-        this.shooter = shooter;
-        this.shootAngle = shootAngle;
-        this.shooterFeed = shooterFeed;
-    }
+    // ライトバンパー：離したらクラーケンが止まる
+    controller
+        .rightBumper()
+        .onFalse(
+            Commands.runOnce(
+                () -> {
+                  shooter.stop();
+                  System.out.printf("[Debug Shooter] STOP actual=%.2f RPS%n", shooter.getVelocityRps());
+                },
+                shooter));
 
+    // ライトトリガー：押したら状況を見ることができる
+    controller
+        .rightTrigger()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  System.out.printf(
+                      "[Debug Shooter] STATUS target=%.2f actual=%.2f error=%.2f atSpeed=%b%n",
+                      shooter.getTargetRps(),
+                      shooter.getVelocityRps(),
+                      shooter.getVelocityErrorRps(),
+                      shooter.atSpeed());
+                },
+                shooter));
 
-    /**
-     * デバッグ用のバインディングを設定
-     * 本番前にこのメソッドの呼び出しをコメントアウトすること！
-     */
-    public void configure() {
-        // ===============================================
-        // デバッグ用のバインディングをここに追加
-        // ===============================================
+    // ライトスティック押し込み：NEOモーターが回る
+    controller.rightStick().whileTrue(Commands.startEnd(shooterFeed::feedDefault, shooterFeed::stop, shooterFeed));
 
-        // ライトバンパー（押し込めるやつの一個前）：クラーケンが回る
-        controller.rightBumper().onTrue(Commands.runOnce(() -> {
-            shooter.setTargetRps(kDebugShooterRps);
-            System.out.printf("[Debug Shooter] START target=%.1f RPS%n", kDebugShooterRps);
-        }, shooter));
+    controller
+        .povUp()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  shootAnglePresetIndex =
+                      Math.min(
+                          shootAnglePresetIndex + 1,
+                          ShootAngleCommandConstants.kPresetRot.length - 1);
+                  double targetRot = ShootAngleCommandConstants.kPresetRot[shootAnglePresetIndex];
+                  shootAngle.setTargetMotorRot(targetRot);
+                  System.out.printf(
+                      "[ShootAngle] DPadUp -> L%d (%.6f rot)%n",
+                      shootAnglePresetIndex + 1,
+                      targetRot);
+                },
+                shootAngle));
 
-        // ライトバンパー：離したらクラーケンが止まる
-        controller.rightBumper().onFalse(Commands.runOnce(() -> {
-            shooter.stop();
-            System.out.printf("[Debug Shooter] STOP actual=%.2f RPS%n", shooter.getVelocityRps());
-        }, shooter));
+    controller
+        .povDown()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  shootAnglePresetIndex = Math.max(shootAnglePresetIndex - 1, 0);
+                  double targetRot = ShootAngleCommandConstants.kPresetRot[shootAnglePresetIndex];
+                  shootAngle.setTargetMotorRot(targetRot);
+                  System.out.printf(
+                      "[ShootAngle] DPadDown -> L%d (%.6f rot)%n",
+                      shootAnglePresetIndex + 1,
+                      targetRot);
+                },
+                shootAngle));
 
-        // ライトトリガー：押したら状況を見ることができる
-        controller.rightTrigger().onTrue(Commands.runOnce(() -> {
-            System.out.printf(
-            "[Debug Shooter] STATUS target=%.2f actual=%.2f error=%.2f atSpeed=%b%n",
-            shooter.getTargetRps(),
-            shooter.getVelocityRps(),
-            shooter.getVelocityErrorRps(),
-            shooter.atSpeed());
-        }, shooter));
-
-        // ライトスティック押し込み：NEOモーターが回る
-        controller.rightStick().whileTrue(
-            Commands.startEnd(
-            shooterFeed::feedDefault,
-            shooterFeed::stop,
-            shooterFeed));
-
-
-        dpadUp.onTrue(Commands.runOnce(() -> {
-            shootAnglePresetIndex =
-                Math.min(shootAnglePresetIndex + 1, ShootAngleConstants.kPresetRot.length - 1);
-            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
-            shootAngle.setTargetMotorRot(targetRot);
-            System.out.printf("[ShootAngle] DPadUp -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
-        }, shootAngle));
-
-        dpadDown.onTrue(Commands.runOnce(() -> {
-            shootAnglePresetIndex = Math.max(shootAnglePresetIndex - 1, 0);
-            double targetRot = ShootAngleConstants.kPresetRot[shootAnglePresetIndex];
-            shootAngle.setTargetMotorRot(targetRot);
-            System.out.printf("[ShootAngle] DPadDown -> L%d (%.6f rot)%n", shootAnglePresetIndex + 1, targetRot);
-        }, shootAngle));
-
-        // Backボタン: 現在のポーズを表示
-        controller.back().onTrue(Commands.runOnce(() -> {
-            System.out.println("Debug: Current Pose = " + drivebase.getSwerveDrive().getPose());
-        }));
-    }
+    // Backボタン: 現在のポーズを表示
+    controller
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  System.out.println("Debug: Current Pose = " + drivebase.getSwerveDrive().getPose());
+                }));
+  }
 }

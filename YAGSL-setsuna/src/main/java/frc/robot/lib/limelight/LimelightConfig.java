@@ -67,6 +67,12 @@ public class LimelightConfig {
             System.err.println("Failed to load limelights.json: " + e.getMessage());
             config = new LimelightsJson();
             config.limelights = List.of();
+            return;
+        }
+
+        if (config == null || config.limelights == null) {
+            config = new LimelightsJson();
+            config.limelights = List.of();
         }
     }
 
@@ -83,7 +89,9 @@ public class LimelightConfig {
         if (config == null || config.limelights == null) {
             return List.of();
         }
-        return config.limelights.stream().filter(ll -> ll.enabled).toList();
+        return config.limelights.stream()
+                .filter(ll -> ll != null && ll.enabled)
+                .toList();
     }
 
     /** 全てのLimelight設定を取得 */
@@ -91,6 +99,17 @@ public class LimelightConfig {
         if (config == null || config.limelights == null) {
             return List.of();
         }
-        return config.limelights;
+        return config.limelights.stream()
+                .filter(ll -> ll != null)
+                .toList();
+    }
+
+    /** 有効なLimelightのNetworkTables名を取得 */
+    public String[] getEnabledTableNames() {
+        return getEnabledLimelights().stream()
+                .map(ll -> ll.table)
+                .filter(table -> table != null && !table.isBlank())
+                .distinct()
+                .toArray(String[]::new);
     }
 }

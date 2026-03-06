@@ -6,7 +6,6 @@ import static frc.robot.lib.constants.PIDConstants.*;
 import static frc.robot.lib.constants.LogConstants.*;
 import frc.robot.lib.constants.commandconstants.SetToTagCommandConstants;
 import frc.robot.lib.constants.FieldConstants;
-import frc.robot.lib.constants.VisionConstants;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -458,15 +457,7 @@ public class SetToTagCommand extends Command {
 
     // 有効なLimelightを返すメソッド
     private static String[] getEnabledVisionTables() {
-        var enabled = LimelightConfig.getInstance().getEnabledLimelights().stream()
-                .map(entry -> entry.table)
-                .filter(table -> table != null && !table.isBlank())
-                .distinct()
-                .toList();
-        if (!enabled.isEmpty()) {
-            return enabled.toArray(String[]::new);
-        }
-        return new String[] {VisionConstants.kLimelightATableName, VisionConstants.kLimelightBTableName};
+        return LimelightConfig.getInstance().getEnabledTableNames();
     }
 
     // TagIdを引数として、そのtagに対して目標とするべき座標を返すメソッド
