@@ -17,6 +17,20 @@ public final class ControlConstants {
     public static final double kDeadband = 0.08;
     public static final double kTriggerPressedThreshold = 0.5;
 
+    // 以下HUB正対制御の定数
+    // HUB座標が未確定の間は、フィールド中心を仮の目標点として使う。
+    // 実際のHUB座標が分かったら、この定数だけ差し替える。
+    public static final edu.wpi.first.math.geometry.Pose2d kHubAimFieldPose =
+            new edu.wpi.first.math.geometry.Pose2d(
+                    FieldConstants.fieldLengthMeter / 2.0,
+                    FieldConstants.fieldWidthMeter / 2.0,
+                    new edu.wpi.first.math.geometry.Rotation2d());
+
+    // 左スティック入力がこの値を超えた時だけ、HUBへ向く自動回頭を有効にする。
+    public static final double kHubAimEnableTranslationDeadband = 0.12;
+    // 右スティックで明示的に回したい時は、自動回頭を止めるための上書き閾値。
+    public static final double kHubAimManualOverrideDeadband = 0.10;
+
     // Xbox標準マッピング
     public static final class XboxMapping {
         private XboxMapping() {}
@@ -38,6 +52,7 @@ public final class ControlConstants {
         public static final int kRightTriggerAxis = 3;
         public static final int kLeftBumperButton = 5;
         public static final int kRightBumperButton = 6;
+        public static final int kRightStickButton = 4;
 
     }
 
@@ -62,6 +77,6 @@ public final class ControlConstants {
         public static final int kRightTriggerAxis = 3;
         public static final int kLeftBumperButton = 5;
         public static final int kRightBumperButton = 6;
-
+        public static final int kRightStickButton = 4;
     }
 }

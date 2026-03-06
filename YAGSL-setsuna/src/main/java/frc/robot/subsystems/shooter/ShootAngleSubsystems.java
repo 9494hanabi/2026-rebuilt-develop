@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -17,8 +17,8 @@ public class ShootAngleSubsystems extends SubsystemBase {
   private static final int kAngleMotorCanId = 17;
 
   // キャリブレーション値（Rot）
-  private static final double kMotorRotAtMinAngle = -0.249023;
-  private static final double kMotorRotAtMaxAngle = -0.8;
+  private static final double kMotorRotAtMinAngle = -0.25;
+  private static final double kMotorRotAtMaxAngle = 0.91;
 
   private static final double kMinTargetRot = Math.min(kMotorRotAtMinAngle, kMotorRotAtMaxAngle);
   private static final double kMaxTargetRot = Math.max(kMotorRotAtMinAngle, kMotorRotAtMaxAngle);
@@ -37,9 +37,9 @@ public class ShootAngleSubsystems extends SubsystemBase {
    *    上げる：収まりやすい、オーバーシュート
    *    上げすぎ：動きが鈍い、ビリビリする、ノイズに反応してガタつく
    */
-  private static final double kPositionKp = 1.9;
+  private static final double kPositionKp = 1.2;
   private static final double kPositionKi = 0.0;
-  private static final double kPositionKd = 0.3;
+  private static final double kPositionKd = 0.2;
 
   private final TalonFX angleMotor = new TalonFX(kAngleMotorCanId);
   private final PositionVoltage positionRequest = new PositionVoltage(0.0).withSlot(0);

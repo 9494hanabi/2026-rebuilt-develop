@@ -34,5 +34,5 @@ public final class FieldConstants {
 
     // 初期位置: フィールド中心（WPIBlue座標）
     public static final Pose2d kInitialFieldToRobotPose =
-            new Pose2d(fieldLengthMeter / 2.0, fieldWidthMeter / 2.0, Rotation2d.fromDegrees(180.0));
+            new Pose2d(fieldLengthMeter / 2.0, fieldWidthMeter / 2.0, Rotation2d.fromDegrees(180));
 }

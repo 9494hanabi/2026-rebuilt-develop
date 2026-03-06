@@ -11,33 +11,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "middle"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "visionPieceModeOn"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "visionAcquirePiece"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "return"
+            "name": "startshootcommand"
           }
         }
       ]

@@ -3,15 +3,11 @@ package frc.robot.bindings;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
 import frc.robot.controllboard.DriverController;
-import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.lib.constants.FieldConstants;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.constants.ShootAngleConstants;
-import frc.robot.subsystems.ShootAngleSubsystems;
-
-
 // === 担当者 ===
 // 誰でも（デバッグ用）
 //  一旦晴太
@@ -19,7 +15,10 @@ import frc.robot.subsystems.ShootAngleSubsystems;
 // テスト中のコードやデバッグ用のバインディングはここに書く
 // 本番前に configure() の呼び出しをコメントアウトすればOK
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.shooter.ShootAngleSubsystems;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 
 public class DebugBindings {
     private final SwerveSubsystem drivebase;
@@ -27,6 +26,7 @@ public class DebugBindings {
     private final RobotState robotState;
     private final DriverController controller;
     private final ShooterSubsystem shooter;
+    private final ShooterFeedSubsystem shooterFeed;
     private static final double kDebugShooterRps = ShooterSubsystem.kNominalShotRps;
 
     private final ShootAngleSubsystems shootAngle;
@@ -45,13 +45,15 @@ public class DebugBindings {
             RobotState robotState,
             DriverController controller,
             ShooterSubsystem shooter,
-            ShootAngleSubsystems shootAngle) {
+            ShootAngleSubsystems shootAngle,
+            ShooterFeedSubsystem shooterFeed) {
         this.drivebase = drivebase;
         this.vision = vision;
         this.robotState = robotState;
         this.controller = controller;
         this.shooter = shooter;
         this.shootAngle = shootAngle;
+        this.shooterFeed = shooterFeed;
     }
 
 
@@ -85,6 +87,14 @@ public class DebugBindings {
             shooter.getVelocityErrorRps(),
             shooter.atSpeed());
         }, shooter));
+
+        // ライトスティック押し込み：NEOモーターが回る
+        controller.rightStick().whileTrue(
+            Commands.startEnd(
+            shooterFeed::feedDefault,
+            shooterFeed::stop,
+            shooterFeed));
+
 
         dpadUp.onTrue(Commands.runOnce(() -> {
             shootAnglePresetIndex =

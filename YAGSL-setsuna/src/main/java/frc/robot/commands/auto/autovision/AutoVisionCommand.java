@@ -10,6 +10,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.lib.constants.AutoVisionConstants;
 import frc.robot.lib.constants.commandconstants.SetToTagCommandConstants;
 import frc.robot.commands.auto.AutoTelemetry;
+import frc.robot.subsystems.vision.PieceVisionSubsystem;
 
 
 
@@ -38,7 +39,6 @@ public final class AutoVisionCommand {
     });
   }
 
-
   /**
    * Visionで使う対象タグを固定する。
    * VisionSubsystem側で「このタグを含まない推定を捨てる」ための指定になる。
@@ -62,7 +62,6 @@ public final class AutoVisionCommand {
       System.out.println("[AutoVision] exclusiveTag OFF");
       AutoTelemetry.putExclusiveTag(-1);
     });
-
   }
 
   /**
@@ -101,35 +100,45 @@ public final class AutoVisionCommand {
         .andThen(AutoCommand.stopDrive(drivebase));
   }
 
-  /**
-   * フェルール回収補助をAuto向けにラップ。
-   * AutoIntakeAssistCommand本体にパラメータを渡し、
-   * timeout後に確実に停止させる。
+    /**
+   * piece detector 用 Limelight を detector pipeline に切り替える。
+   * piece 用カメラは pose vision と分離して扱う。
    */
-  public static Command acquirePieceWithTimeout(
+  public static Command enablePieceDetectorMode(PieceVisionSubsystem pieceVisionSubsystem) {
+    return Commands.runOnce(() -> {
+      pieceVisionSubsystem.setDetectorPipeline();
+      AutoTelemetry.putSelectedPipeline(AutoVisionConstants.kPieceDetectorPipelineIndex);
+      AutoTelemetry.putEvent("pieceDetectorModeOn");
+    }, pieceVisionSubsystem);
+  }
+
+    /**
+   * Fuel 回収を行い、見つからない場合は fallback path へ移る。
+   * 「見る」は PieceVisionSubsystem、「動く」は AutoIntakeAssistCommand に分ける。
+   */
+  public static Command acquirePieceOrFallback(
       SwerveSubsystem drivebase,
-      String tableName,
-      int detectorPipeline,
-      int restorePipeline,
-      double forwardMps,
-      double turnKpRadPerSecPerDeg,
-      double maxOmegaRadPerSec,
-      double centerDeadbandDeg,
-      double nearStartAreaThreshold,
-      double collectWindowSec,
-      double timeoutSec) {
-    return new AutoIntakeAssistCommand(
+      PieceVisionSubsystem pieceVisionSubsystem) {
+    AutoIntakeAssistCommand acquirePieceCommand =
+        new AutoIntakeAssistCommand(
             drivebase,
-            tableName,
-            detectorPipeline,
-            restorePipeline,
-            forwardMps,
-            turnKpRadPerSecPerDeg,
-            maxOmegaRadPerSec,
-            centerDeadbandDeg,
-            nearStartAreaThreshold,
-            collectWindowSec)
-        .withTimeout(timeoutSec)
-        .andThen(AutoCommand.stopDrive(drivebase));
+            pieceVisionSubsystem,
+            AutoVisionConstants.kPieceForwardSpeedMps,
+            AutoVisionConstants.kPieceTurnGainRadPerSecPerDeg,
+            AutoVisionConstants.kPieceMaxTurnRateRadPerSec,
+            AutoVisionConstants.kPieceCenteringDeadbandDeg,
+            AutoVisionConstants.kPieceOffCenterForwardScale,
+            AutoVisionConstants.kPieceLostTargetForwardScale,
+            AutoVisionConstants.kPieceLastSeenHoldSec,
+            AutoVisionConstants.kPieceCollectStartAreaThreshold,
+            AutoVisionConstants.kPieceCollectWindowSec,
+            AutoVisionConstants.kPieceNoTargetFallbackDelaySec);
+
+    return Commands.sequence(
+        acquirePieceCommand.withTimeout(AutoVisionConstants.kPieceAcquireTimeoutSec),
+        Commands.either(
+            AutoCommand.followPath(drivebase, AutoVisionConstants.kPieceFallbackPathName),
+            AutoCommand.stopDrive(drivebase),
+            acquirePieceCommand::shouldRunFallback));
   }
 }

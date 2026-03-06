@@ -174,4 +174,12 @@ public class DriverController {
     private static boolean isXbox() {
         return ControlConstants.kDriverControllerType == DriverControllerType.XBOX;
     }
+    public Trigger rightStick() { return hid.button(getRightStickButton()); }
+
+    private static int getRightStickButton() {
+        return isXbox()
+        ? ControlConstants.XboxMapping.kRightStickButton
+        : ControlConstants.LogitechMapping.kRightStickButton;
+}
+
 }

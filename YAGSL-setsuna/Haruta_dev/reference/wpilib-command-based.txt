@@ -1,0 +1,74 @@
+WPILib command-based reference for this project.
+Verified on 2026-03-01 (Asia/Tokyo).
+
+Purpose:
+- AGENT が FRC 公式の command-based 構成を前提として理解するための参照メモ
+- このリポジトリのファイル構成を WPILib 標準構造に読み替えるための補助
+
+Official WPILib baseline:
+- `Robot`
+  - プログラムの制御フロー担当
+  - `robotPeriodic()` で `CommandScheduler.getInstance().run()` が必要
+  - `autonomousInit()` で auto command を schedule
+  - `teleopInit()` で auto command を cancel するのが一般的
+- `RobotContainer`
+  - subsystem と command の配線ハブ
+  - button bindings
+  - autonomous command の受け渡し
+- `Constants`
+  - グローバル定数の置き場
+  - subsystem や mode ごとに分けると短い名前にしやすい
+- `subsystems/`
+  - ハードウェアの抽象化
+  - public method を通じて command から使う
+  - default command を持てる
+- `commands/`
+  - robot の動作単位
+  - `initialize()`, `execute()`, `end()`, `isFinished()` で振る舞いを作る
+- `CommandScheduler`
+  - trigger を監視
+  - command を schedule / interrupt / finish
+  - subsystem の `periodic()` も回す
+  - 同じ subsystem を要求する command の競合を防ぐ
+
+Official organization guidance:
+- 巨大な 1 ファイルに何でも詰め込むのは避ける
+- 逆に、密接に関連するロジックを tiny file に分けすぎるのも避ける
+- 構成は task、team structure、保守性に合わせて決める
+
+How to read this repository with the WPILib lens:
+- `src/main/java/frc/robot/Robot.java`
+  - WPILib 標準の `Robot`
+- `src/main/java/frc/robot/RobotContainer.java`
+  - WPILib 標準の `RobotContainer`
+  - このプロジェクトの全体配線ハブ
+- `src/main/java/frc/robot/lib/constants/`
+  - WPILib 標準の `Constants` を分割した形
+  - 1ファイルに巨大化させず、用途別に分けている
+- `src/main/java/frc/robot/subsystems/`
+  - WPILib 標準の `subsystems`
+- `src/main/java/frc/robot/commands/`
+  - WPILib 標準の `commands`
+- `src/main/java/frc/robot/bindings/`
+  - WPILib テンプレートの `configureBindings()` を役割分割した形
+  - `DriveBindings`, `AutoBindings`, `DebugBindings` に整理されている
+
+How AGENT should reason about command-based code here:
+1. まず `Robot` を見て scheduler と auto lifecycle を確認する
+2. 次に `RobotContainer` を見て subsystem 生成と bindings の入口を確認する
+3. 次に `bindings/` を見て trigger と NamedCommands の接続を確認する
+4. 次に `commands/` を見て実際の動作単位を確認する
+5. 最後に `subsystems/` と `lib/constants/` を見て、command が何を動かしているかを確認する
+
+Common mistakes AGENT should avoid:
+- `Robot.java` に command logic を増やしすぎる
+- subsystem を global 的に直接いじる方向へ寄せる
+- command requirement の競合を見ずに提案する
+- default command と triggered command の関係を見落とす
+- `bindings/` の役割を見落として `RobotContainer` だけ見て終わる
+- tiny file を増やしすぎて WPILib の標準的な追い方を壊す
+
+Read together with:
+- `Haruta_dev/PROJECT_OVERVIEW.md`
+- `Haruta_dev/FILE_MAP.md`
+- `Haruta_dev/reference/official-sources.txt`

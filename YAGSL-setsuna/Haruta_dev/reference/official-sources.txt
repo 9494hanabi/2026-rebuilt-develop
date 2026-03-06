@@ -1,0 +1,31 @@
+Official sources used for research and explanations.
+Verified on 2026-03-01 (Asia/Tokyo).
+
+Priority sources:
+- FIRST FRC official season pages:
+  - https://www.firstinspires.org/robotics/frc/game-and-season
+  - https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system
+  - https://www.firstinspires.org/resource-library/frc/2026-season-materials
+- WPILib official docs:
+  - https://docs.wpilib.org/
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/index.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/structuring-command-based-project.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/subsystems.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/commands.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html
+  - https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html
+- PathPlanner official docs:
+  - https://pathplanner.dev/home.html
+- YAGSL official docs:
+  - https://docs.yagsl.com/
+- Limelight official docs:
+  - https://docs.limelightvision.io/
+
+Research rule:
+- Always prefer the latest official documentation.
+- Do not rely on a single official page when making a decision.
+- Compare multiple official pages, documents, or references before concluding.
+- Check update dates, versions, and target season or library.
+- If the topic is time-sensitive, verify again before answering.
+- Show the sources used in every answer.

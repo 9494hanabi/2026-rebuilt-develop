@@ -1,0 +1,19 @@
+FRC 2026 rules reference summary.
+Verified from FIRST official pages on 2026-03-01 (Asia/Tokyo).
+
+Official source pages:
+- 2026 season materials:
+  - https://www.firstinspires.org/resource-library/frc/2026-season-materials
+- Competition Manual and Q&A system:
+  - https://www.firstinspires.org/resource-library/frc/competition-manual-qa-system
+
+Current summary:
+- The official REBUILT Game Manual is the primary rules source.
+- The season materials page currently exposes the game manual and Team Updates.
+- As of 2026-03-01, the season materials page lists Team Update 14, which means the rules are still treated as living documents and must be checked for updates.
+- Q&A clarifications are also part of the official interpretation flow.
+
+Usage rule:
+- When discussing legality, match flow, field interaction, or scoring logic, check the latest game manual and relevant Team Updates first.
+- If a rule answer depends on interpretation, verify whether Q&A or Team Updates changed it.
+- Do not answer rule questions from memory alone.

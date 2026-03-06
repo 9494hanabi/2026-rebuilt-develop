@@ -12,9 +12,10 @@ import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.RobotState;
 import frc.robot.commands.debug.odmetry.SetZeroCommand;
 import frc.robot.commands.debug.vision.ObservationOKCommand;
-import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ShootAngleSubsystems;
+import frc.robot.subsystems.shooter.ShootAngleSubsystems;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 
 // === 担当者 ===
 // はるた
@@ -118,141 +119,106 @@ public final class AutoCommand {
         .andThen(stopDrive(drivebase));
   }
 
-  // alignAndApproachTag: 「向き合わせ -> タグへ寄る」を1イベントで実行
-  public static Command alignAndApproachTag(
-      SwerveSubsystem drivebase,
-      RobotState state,
-      int tagID,
-      double alignSec,
-      double approachSec) {
-    return Commands.sequence(
-        faceTagFor(drivebase, state, tagID, alignSec),
-        driveOnTagFor(drivebase, state, approachSec),
-        stopDrive(drivebase));
-  }
-
-    // shooterSetTargetRps: 目標RPSをセットしてスピンアップ開始
-  public static Command shooterSetTargetRps(ShooterSubsystem shooter, double targetRps) {
-    return Commands.runOnce(() -> shooter.setTargetRps(targetRps), shooter);
-  }
-
-  // shooterWaitReady: Ready(誤差内150ms維持)になるまで待つ
-  public static Command shooterWaitReady(ShooterSubsystem shooter, double timeoutSec) {
-    return Commands.waitUntil(shooter::atSpeed).withTimeout(timeoutSec);
-  }
-
-  // shooterSpinUpAndWaitReady: スピンアップしてReady成立まで待つ
-  public static Command shooterSpinUpAndWaitReady(
-      ShooterSubsystem shooter,
-      double targetRps,
-      double timeoutSec) {
-    return Commands.sequence(
-        shooterSetTargetRps(shooter, targetRps),
-        shooterWaitReady(shooter, timeoutSec));
-  }
-
-  // shooterRunAtRpsFor: 指定RPSで指定時間だけ回して停止
-  public static Command shooterRunAtRpsFor(
-      ShooterSubsystem shooter,
-      double targetRps,
-      double seconds) {
-    return Commands.sequence(
-        shooterSetTargetRps(shooter, targetRps),
-        Commands.waitSeconds(seconds),
-        shooterStop(shooter));
-  }
-
-  /*
-  * shootAngleSetTargetRotのCommand
-  */
-  // shootAngleSetTargetRot: 目標Rotをセット
-  public static Command shootAngleSetTargetRot(ShootAngleSubsystems shootAngle, double targetRot) {
-    return Commands.runOnce(() -> shootAngle.setTargetMotorRot(targetRot), shootAngle);
-  }
-
-  // shootAngleWaitAtTarget: 目標Rot到達を待つ
-  public static Command shootAngleWaitAtTarget(ShootAngleSubsystems shootAngle, double timeoutSec) {
-    return Commands.waitUntil(shootAngle::atTarget).withTimeout(timeoutSec);
-  }
-
-  // shootAngleSetAndWaitRot: Rotセット -> 到達待ち
-  public static Command shootAngleSetAndWaitRot(
-      ShootAngleSubsystems shootAngle,
-      double targetRot,
-      double timeoutSec) {
-    return Commands.sequence(
-        shootAngleSetTargetRot(shootAngle, targetRot),
-        shootAngleWaitAtTarget(shootAngle, timeoutSec));
-  }
-
-  // shootAngleStop: 角度モーター停止
-  public static Command shootAngleStop(ShootAngleSubsystems shootAngle) {
-    return Commands.runOnce(shootAngle::stop, shootAngle);
-  }
-
-
-  // shooterShootAtRpsForWithLogs:
-  // 1) 目標RPSへスピンアップ
-  // 2) Ready待ち(タイムアウト付き)
-  // 3) シュート窓(秒)だけ保持
-  // 4) 停止
-  // ※ Sim/実機どちらでもターミナル確認できるようにログを出す
-  public static Command shooterShootAtRpsForWithLogs(
-    ShooterSubsystem shooter,
-    double targetRps,
-    double readyTimeoutSec,
-    double shootWindowSec) {
-    return Commands.sequence(
-        Commands.runOnce(() ->
-            System.out.printf("[AUTO shooter] SPINUP target=%.1fRPS timeout=%.2fs%n", targetRps, readyTimeoutSec)),
-       shooterSpinUpAndWaitReady(shooter, targetRps, readyTimeoutSec),
-       Commands.runOnce(() ->
-           System.out.printf(
-                "[AUTO shooter] READY=%b actual=%.2fRPS target=%.2fRPS -> SHOOT %.2fs%n",
-                shooter.atSpeed(),
-                shooter.getVelocityRps(),
-                shooter.getTargetRps(),
-                shootWindowSec)),
-        Commands.waitSeconds(shootWindowSec),
-        shooterStop(shooter),
-        Commands.runOnce(() ->
-            System.out.printf("[AUTO shooter] STOP actual=%.2fRPS%n", shooter.getVelocityRps()))
-   ).finallyDo(interrupted -> {
-     shooter.stop();
-     System.out.printf(
-          "[AUTO shooter] FINAL STOP interrupted=%b actual=%.2fRPS%n",
-          interrupted, shooter.getVelocityRps());
-      });
-  }
-
-
-  // shooterStop: シューター停止
-  public static Command shooterStop(ShooterSubsystem shooter) {
-    return Commands.runOnce(shooter::stop, shooter);
-  }
-
-  // Zoned Event専用: ゾーン中だけ回し、ゾーンを抜けたら必ず停止
-  public static Command shooterZoneSpin(ShooterSubsystem shooter, double targetRps) {
-    return Commands.startEnd(
-        () -> {
-          shooter.setTargetRps(targetRps);
-          System.out.printf("[AUTO shooter] ZONE START target=%.1fRPS%n", targetRps);
-        },
-        () -> {
-          shooter.stop();
-          System.out.printf("[AUTO shooter] ZONE END actual=%.2fRPS%n", shooter.getVelocityRps());
-        },
-        shooter
-    ).finallyDo(interrupted -> shooter.stop());
-  }
-
-
   // logMarker: PathPlannerイベント発火確認ログ
   public static Command logMarker(String markerName) {
     return Commands.print("[AUTO marker] " + markerName);
   }
 
-  
+  // 以下shoot angle開始コマンドのコード
+  // L4start などで使う「角度移動開始」だけを残す。
+  public static Command shootAngleSetTargetRot(ShootAngleSubsystems shootAngle, double targetRot) {
+    return Commands.runOnce(() -> shootAngle.setTargetMotorRot(targetRot), shootAngle);
+  }
+
+  // 以下Auto shoot profile実行コマンドのコード
+  // 角度到達後に指定RPSで指定秒数だけ回して停止する共通処理。
+  public static Command shootWithAngleProfile(
+      ShooterSubsystem shooter,
+      ShootAngleSubsystems shootAngle,
+      double targetAngleRot,
+      double targetRps,
+      double shootSec,
+      String profileName) {
+    final double safeShootSec = Math.max(0.0, shootSec);
+
+    return Commands.sequence(
+        Commands.print("[AUTO shoot] " + profileName + " start"),
+        shootAngleSetTargetRot(shootAngle, targetAngleRot),
+        // 角度到達を待つが、2秒で未到達でも次へ進む
+        Commands.waitUntil(shootAngle::atTarget).withTimeout(2.0),
+        Commands.startEnd(
+            () -> shooter.setTargetRps(targetRps),
+            shooter::stop,
+            shooter).withTimeout(safeShootSec),
+        Commands.print("[AUTO shoot] " + profileName + " end"));
+  }
+
+    // 以下Auto shooter+feeder連携コマンドのコード
+  // 角度を合わせたあと、shooterを先に回し、遅延後にfeederで供給する。
+  public static Command shootWithAngleAndFeedProfile(
+      ShooterSubsystem shooter,
+      ShootAngleSubsystems shootAngle,
+      ShooterFeedSubsystem shooterFeed,
+      double targetAngleRot,
+      double targetRps,
+      double feederDelaySec,
+      double feederRunSec,
+      String profileName) {
+    final double safeFeederDelaySec = Math.max(0.0, feederDelaySec);
+    final double safeFeederRunSec = Math.max(0.0, feederRunSec);
+
+    return Commands.sequence(
+        Commands.print("[AUTO shoot+feed] " + profileName + " start"),
+        shootAngleSetTargetRot(shootAngle, targetAngleRot),
+        Commands.waitUntil(shootAngle::atTarget).withTimeout(2.0),
+        Commands.runOnce(() -> shooter.setTargetRps(targetRps), shooter),
+        Commands.waitSeconds(safeFeederDelaySec),
+        Commands.startEnd(
+            shooterFeed::feedDefault,
+            shooterFeed::stop,
+            shooterFeed).withTimeout(safeFeederRunSec),
+        shooterStop(shooter),
+        Commands.print("[AUTO shoot+feed] " + profileName + " end"));
+  }
+
+  // start用: shooterを先に回してからfeederを回す
+  public static Command startShootWithFeedCommand(
+      ShooterSubsystem shooter,
+      ShootAngleSubsystems shootAngle,
+      ShooterFeedSubsystem shooterFeed) {
+    return shootWithAngleAndFeedProfile(
+        shooter,
+        shootAngle,
+        shooterFeed,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotAngleRot,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotRps,
+        1.0,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoStartShotSec,
+        "startshootcommand");
+  }
+
+  // outpost用: shooterを先に回してからfeederを回す
+  public static Command outpostShootWithFeedCommand(
+      ShooterSubsystem shooter,
+      ShootAngleSubsystems shootAngle,
+      ShooterFeedSubsystem shooterFeed) {
+    return shootWithAngleAndFeedProfile(
+        shooter,
+        shootAngle,
+        shooterFeed,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotAngleRot,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotRps,
+        1.0,
+        frc.robot.lib.constants.ShootAngleConstants.kAutoOutpostShotSec,
+        "outpostshootcommand");
+  }
+
+
+  // 以下shooter停止コマンドのコード
+  // safeStopAll から使う停止処理だけを残す。
+  public static Command shooterStop(ShooterSubsystem shooter) {
+    return Commands.runOnce(shooter::stop, shooter);
+  }
 
   // safeStopAll: Auto終了時の安全停止（ドライブ + シューター）
   public static Command safeStopAll(SwerveSubsystem drivebase, ShooterSubsystem shooter) {

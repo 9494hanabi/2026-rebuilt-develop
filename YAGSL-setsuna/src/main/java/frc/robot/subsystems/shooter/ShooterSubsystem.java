@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // 2) 目標回転数に入ったか(Ready)を判定する
 // 3) Auto/チューニング用のログを出す
 public class ShooterSubsystem extends SubsystemBase {
+  // 以下shooter定数のコード
+  // この塊では、CAN ID・安全上限・基準回転数・Ready判定条件・初期ゲインをまとめている。
   private static final int kShooterMotor_1CanId = 15;
   private static final int kShooterMotor_2CanId = 16;
 
@@ -25,7 +27,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private static final double kMaxTargetRps = 120.0;
 
   // Auto/Teleop共通で使う基準回転数（実機で調整）
-  public static final double kNominalShotRps = 95;
+  public static final double kNominalShotRps = 100; // クラーケン最大RPS "100" 100以上やるとモーターが焼き切れそうだから絶対にやらないでください。
 
   // あなた指定の基準
   private static final double kReadyToleranceRps = 2.0; // ±2 RPS

@@ -1,0 +1,23 @@
+FRC 2026 field reference summary.
+Verified from FIRST official pages on 2026-03-01 (Asia/Tokyo).
+
+Official source pages:
+- Game and season overview:
+  - https://www.firstinspires.org/robotics/frc/game-and-season
+- 2026 season materials:
+  - https://www.firstinspires.org/resource-library/frc/2026-season-materials
+- Official field drawings and CAD are linked from the season materials page.
+
+Current summary:
+- The 2026 FRC game is REBUILT.
+- The game overview page is useful for understanding the field concept and game flow at a high level.
+- Exact field dimensions, landmark geometry, scoring locations, and path-planning relevant coordinates must be taken from the official field drawings and CAD linked from the season materials page.
+- Do not treat the overview page alone as sufficient for implementation decisions.
+
+Usage rule:
+- When discussing coordinates, paths, scoring positions, or robot movement on the field, check in this order:
+  1. Official field drawings
+  2. Official CAD
+  3. Season materials notes
+  4. Game overview page for context
+- Do not rely on memory when exact dimensions matter.

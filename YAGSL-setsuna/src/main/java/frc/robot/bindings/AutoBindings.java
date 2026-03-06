@@ -9,9 +9,11 @@ import frc.robot.lib.constants.AutoVisionConstants;
 import frc.robot.lib.constants.FieldConstants;
 import frc.robot.lib.constants.PathPlannerConstants;
 import frc.robot.lib.constants.ShootAngleConstants;
-import frc.robot.subsystems.ShootAngleSubsystems;
-import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.shooter.ShootAngleSubsystems;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.vision.PieceVisionSubsystem;
+import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 
 // === 担当者 ===
 // ハルタ
@@ -29,23 +31,22 @@ public class AutoBindings {
     private final RobotState robotState;
     private final ShooterSubsystem shooter;
     private final ShootAngleSubsystems shootAngle;
-    // 仮値: 実機完成後に距離別に最適化する
-    private static final double kShooterTestTargetRps = ShooterSubsystem.kNominalShotRps;
-    private static final double kShooterReadyTimeoutSec = 1.0;
-    private static final double kShooterShootWindowSec = 2.0;
-
-    // Angle調整のtimeout
-    private static final double kShootAngleReadyTimeoutSec = 0.5;
+    private final PieceVisionSubsystem pieceVisionSubsystem;
+    private final ShooterFeedSubsystem shooterFeed;
 
     public AutoBindings(
         SwerveSubsystem drivebase,
         RobotState robotState,
         ShooterSubsystem shooter,
-        ShootAngleSubsystems shootAngle) {
+        ShootAngleSubsystems shootAngle,
+        PieceVisionSubsystem piecevision,
+        ShooterFeedSubsystem shooterFeed) {
         this.drivebase = drivebase;
         this.robotState = robotState;
         this.shooter = shooter;
         this.shootAngle = shootAngle;
+        this.pieceVisionSubsystem = piecevision;
+        this.shooterFeed = shooterFeed;
     }
 
     /**
@@ -53,66 +54,6 @@ public class AutoBindings {
      * PathPlannerで使用するコマンドをここに追加
      */
     public void configure() {
-        /*
-         * ==== Shooter 関連マーカー登録 ====
-         */
-        // shooterSetTarget80Rps: 目標80RPSへスピンアップ開始
-        NamedCommands.registerCommand(
-            "shooterSetTarget80Rps",
-            AutoCommand.shooterSetTargetRps(shooter, kShooterTestTargetRps)
-        );
-
-        // shooterWaitReady1p0s: Ready成立まで最大1.0秒待機
-        NamedCommands.registerCommand(
-            "shooterWaitReady1p0s",
-            AutoCommand.shooterWaitReady(shooter, kShooterReadyTimeoutSec)
-        );
-
-        // shooterSpinUpAndWait80Rps: スピンアップ＋Ready待ちを1コマンド化
-        NamedCommands.registerCommand(
-            "shooterSpinUpAndWait80Rps",
-            AutoCommand.shooterSpinUpAndWaitReady(shooter, kShooterTestTargetRps, kShooterReadyTimeoutSec)
-        );
-
-        // shooterStop: シューター停止
-        NamedCommands.registerCommand(
-            "shooterStop",
-            AutoCommand.shooterStop(shooter)
-        );
-
-                // shooterShoot2p0s: スピンアップ→Ready待ち→2.0秒シュート→停止（ログ付き）
-        NamedCommands.registerCommand(
-            "shooterShoot2p0s",
-            AutoCommand.shooterShootAtRpsForWithLogs(
-                shooter,
-                kShooterTestTargetRps,
-                kShooterReadyTimeoutSec,
-                kShooterShootWindowSec)
-        );
-
-        // shooterZoneSpin: PathPlannerのZoned Event中だけシューターを回す
-        NamedCommands.registerCommand(
-            "shooterZoneSpin",
-            AutoCommand.shooterZoneSpin(shooter, kShooterTestTargetRps)
-        );
-
-        NamedCommands.registerCommand(
-            "shootAngleSetTag7",
-            AutoCommand.shootAngleSetTargetRot(shootAngle, ShootAngleConstants.kAutoTag7Rot));
-
-        NamedCommands.registerCommand(
-            "shootAngleWaitReady0p5s",
-            AutoCommand.shootAngleWaitAtTarget(shootAngle, kShootAngleReadyTimeoutSec));
-
-        NamedCommands.registerCommand(
-            "shootAngleSetAndWaitTag7",
-            AutoCommand.shootAngleSetAndWaitRot(
-                shootAngle,
-                ShootAngleConstants.kAutoTag7Rot,
-                kShootAngleReadyTimeoutSec));
-
-
-
         /*
          * ==== PathPlannerイベントマーカー用コマンド登録 ====
          */
@@ -191,32 +132,44 @@ public class AutoBindings {
                 robotState,
                 AutoVisionConstants.kTagAlignTimeoutSec));
 
-        NamedCommands.registerCommand(
-            "visionPieceModeOn",
-            AutoVisionCommand.setPipeline(
-                AutoVisionConstants.kVisionTableName,
-                AutoVisionConstants.kPieceDetectorPipeline));
-
+        // 以下piece intakeのコード
+        // Fuel が見つからない時は fallback path の `back` へ移る。
         NamedCommands.registerCommand(
             "visionAcquirePiece",
-            AutoVisionCommand.acquirePieceWithTimeout(
-                drivebase,
-                AutoVisionConstants.kVisionTableName,
-                AutoVisionConstants.kPieceDetectorPipeline,
-                AutoVisionConstants.kAprilTagPipeline,
-                AutoVisionConstants.kPieceForwardMps,
-                AutoVisionConstants.kPieceTurnKpRadPerSecPerDeg,
-                AutoVisionConstants.kPieceMaxOmegaRadPerSec,
-                AutoVisionConstants.kPieceCenterDeadbandDeg,
-                AutoVisionConstants.kPieceNearStartAreaThreshold,
-                AutoVisionConstants.kPieceCollectWindowSec,
-                AutoVisionConstants.kPieceAcquireTimeoutSec));
+            AutoVisionCommand.acquirePieceOrFallback(drivebase, pieceVisionSubsystem));
 
+        // 以下piece visionのコード
+        // piece 用 LL4 は front-center と分離して subsystem 経由で扱う。
+        NamedCommands.registerCommand(
+            "visionPieceModeOn",
+            AutoVisionCommand.enablePieceDetectorMode(pieceVisionSubsystem));
 
         NamedCommands.registerCommand(
             "visionAprilTagModeOn",
             AutoVisionCommand.setPipeline(
                 AutoVisionConstants.kVisionTableName,
                 AutoVisionConstants.kAprilTagPipeline));
+
+        // 以下L4角度制御のコード
+        // L4start: L4角度へ移動開始（到達待ちはしない）
+        NamedCommands.registerCommand(
+            "shootAngleL4Start",
+            AutoCommand.shootAngleSetTargetRot(shootAngle, ShootAngleConstants.kL4Rot));
+
+        // L4end: L4角度に到達するまで待機（timeoutなし）
+        NamedCommands.registerCommand(
+            "shootAngleL4End",
+            Commands.waitUntil(shootAngle::atTarget));
+
+        // 以下Auto shootマーカー登録のコード
+        // startshootcommand: 開始直後のショットを実行する
+        NamedCommands.registerCommand(
+            "startshootcommand",
+            AutoCommand.startShootWithFeedCommand(shooter, shootAngle, shooterFeed));
+
+        // outpostshootcommand: アウトポスト用ショットを実行する
+        NamedCommands.registerCommand(
+            "outpostshootcommand",
+            AutoCommand.outpostShootWithFeedCommand(shooter, shootAngle, shooterFeed));
     }
 }

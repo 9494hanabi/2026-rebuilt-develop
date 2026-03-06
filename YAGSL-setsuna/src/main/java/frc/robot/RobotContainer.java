@@ -1,12 +1,10 @@
 package frc.robot;
 
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.ShootAngleSubsystems;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.vision.PieceVisionSubsystem;
 
 import swervelib.SwerveInputStream;
 
@@ -14,6 +12,10 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.vision.VisionIOHardwareLimelight;
 import frc.robot.subsystems.vision.VisionIODummy;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.shooter.ShootAngleSubsystems;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.ShooterFeedSubsystem;
 import frc.robot.controllboard.DriverController;
 import frc.robot.lib.constants.ControlConstants;
 import frc.robot.lib.limelight.LimelightConfig;
@@ -35,6 +37,9 @@ public class RobotContainer {
   private final RobotState robotState;
   private final SwerveSubsystem drivebase;
   private final ShooterSubsystem shooter;
+  private final PieceVisionSubsystem piecevision;
+  private final ShooterFeedSubsystem shooterFeed;
+
   private final DriverController m_driverController =
       new DriverController(ControlConstants.kDriverControllerPort);
   private final VisionSubsystem visionSubsystem;
@@ -57,6 +62,11 @@ public class RobotContainer {
     drivebase = new SwerveSubsystem(robotState);
     shooter = new ShooterSubsystem();
     shootAngle = new ShootAngleSubsystems();
+    shooterFeed = new ShooterFeedSubsystem();
+
+    // 以下piece vision subsystemのコード
+    // Auto の Fuel 回収用に、pose vision とは別の detector subsystem を持つ。
+    piecevision = new PieceVisionSubsystem();
 
     robotState.setVisionEstimateConsumer(drivebase::addVisionMeasurement);
     visionSubsystem = new VisionSubsystem(
@@ -85,13 +95,13 @@ public class RobotContainer {
 
     // バインディングクラスの初期化
     driveBindings = new DriveBindings(drivebase, robotState, m_driverController, driveAngularVelocity);
-    autoBindings = new AutoBindings(drivebase, robotState, shooter, shootAngle);
-    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter, shootAngle);
+    autoBindings = new AutoBindings(drivebase, robotState, shooter, shootAngle, piecevision, shooterFeed);
+    debugBindings = new DebugBindings(drivebase, visionSubsystem, robotState, m_driverController, shooter, shootAngle, shooterFeed);
 
     // バインディングの設定
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
-    autoChooser = drivebase.buildAutoChooser("New Auto");
+    autoChooser = drivebase.buildAutoChooser("test");
     SmartDashboard.putData("Auto setting", autoChooser);
   }
 
